@@ -1,9 +1,13 @@
 import express from "express";
+import type { Express } from "express";
+import { createServer } from "node:http";
 
-const app = express();
+const app: Express = express();
 const PORT: number = 3001;
 
-app.listen(PORT, () => {
+const server = createServer(app); // get the underlying server for socketIO -- to get low level access
+
+server.listen(PORT, () => {
     console.log(`Running on port: ${PORT}`);
 })
 
