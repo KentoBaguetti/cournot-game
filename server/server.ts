@@ -16,12 +16,12 @@ const db = await open({
 });
 
 await db.exec(`
-    CREATE TABLE IF NOT EXISTS messages (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    client_offset TEXT UNIQUE,
-    content TEXT
-    );
-    `);
+  CREATE TABLE IF NOT EXISTS messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_offset TEXT UNIQUE,
+      content TEXT
+  );
+`);
 
 const app: Express = express();
 const PORT: number = 3001;
