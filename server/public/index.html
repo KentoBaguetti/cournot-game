@@ -62,7 +62,6 @@
       <input id="input" autocomplete="off" /><button>Send</button>
       <button id="toggle-btn">Disconnect</button>
     </form>
-    <script src="/socket.io/socket.io.js"></script>
     <script>
       const toggleButton = document.getElementById("toggle-btn");
 
@@ -76,7 +75,9 @@
           socket.connect();
         }
       });
-
+    </script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
       const socket = io({
         auth: {
           serverOffset: 0,
