@@ -1,68 +1,151 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap");
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+@import "tailwindcss/preflight";
+@tailwind utilities;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Register the Inter font class so @apply can see it */
+@layer base {
+  .font-inter {
+    font-family: "Inter", sans-serif;
+  }
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
+/* 1. Global Styles - Enhanced gradient */
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  /* Remove any Tailwind bg-gradient classes if present */
+  background: linear-gradient(45deg, #6c88ae, #2c3d59, #4b76b1, #16223a);
+  background-size: 400% 400%;
+  animation: gradientAnimation 12s ease infinite;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out forwards;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+/* 2. Custom Glassmorphism Utility - More pronounced blur & slightly more opaque background */
+.glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 15px;
 }
+
+/* 3. Glass Card Component */
+.card {
+  @apply p-6 rounded-glass shadow-glass transition-transform transform hover:scale-105;
+
+  /* Subtle text shadow for readability */
+  h1,
+  p {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* 4. Glass Button Component */
+.btn-glass {
+  @apply px-6 py-2 rounded-lg text-white font-semibold transition-all;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  /* Hover & Active States for better interaction feedback */
+}
+.btn-glass:hover {
+  @apply scale-105;
+  background: rgba(255, 255, 255, 0.4);
+}
+.btn-glass:active {
+  @apply scale-95;
+}
+
+/* 5. Floating Animation for elements (optional) */
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* 6. Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* 7. Full Screen Background Utility */
+.full-screen-bg {
+  @apply min-h-screen flex items-center justify-center;
+}
+
+/* 8. Icon Hover Effects */
+.icon-hover {
+  @apply transition-transform duration-300;
+}
+.icon-hover:hover {
+  @apply scale-110 text-primary; /* Scale up and change color to primary */
+}
+
+/* 9. Responsive Tweaks for .card */
+@layer base {
+  @screen sm {
+    .card {
+      @apply max-w-sm mx-auto;
+    }
+  }
+  @screen md {
+    .card {
+      @apply max-w-md mx-auto;
+    }
+  }
+  @screen lg {
+    .card {
+      @apply max-w-lg mx-auto;
+    }
+  }
+}
+
+.modal-glass-card:hover {
+  transform: none !important;
+}
+
+/* 10. Custom Cursor Example */
+body,
+button,
+a {
+  cursor: url("custom-cursor.png"), auto;
+}
+
+.cursor-interactive,
+a:hover,
 button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+  cursor: url("custom-cursor-link.png"), pointer;
 }

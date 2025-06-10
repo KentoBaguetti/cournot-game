@@ -1,13 +1,38 @@
 import express from "express";
+import type { Express } from "express";
+import { createServer } from "http";
+import { Server, Socket } from "socket.io";
 
-const app = express();
+//////////////////////////////////////////////////////////////////
+// server vars
+//////////////////////////////////////////////////////////////////
+
+const app: Express = express();
 const PORT: number = 3001;
+const server = createServer(app);
+const io = new Server(server, {
+  connectionStateRecovery: {},
+  cors: {
+    origin: "http://localhost:5173", // frontend port
+    methods: ["GET", "POST"],
+  },
+});
 
-app.listen(PORT, () => {
-    console.log(`Running on port: ${PORT}`);
-})
+///////////////////////////////////////////////////////////////////
+// express routes
+//////////////////////////////////////////////////////////////////
+server.listen(PORT, () => {
+  console.log(`Server running on port: ${PORT}`);
+});
 
 app.get("/", (req, res) => {
-    res.json({"message" : "Hello"});
-    console.log("Root hit");
-}) 
+  res.json({ message: "Root working" });
+  console.log("Root hit");
+});
+
+//////////////////////////////////////////////////////////////////
+// socket.io routes
+//////////////////////////////////////////////////////////////////
+io.on("connection", (socket: Socket) => {
+  console.log(`Socket ID "${socket.id}" connected`);
+});
