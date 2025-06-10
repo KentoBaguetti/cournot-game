@@ -60,7 +60,7 @@ io.on("connection", async (socket) => {
     } catch (e) {
       return;
     }
-    io.emit(
+    socket.broadcast.emit(
       "chat message",
       { msg: msg, nickname: socket.nickname || nickname },
       result.lastID

@@ -137,6 +137,7 @@
             msg: input.value,
             nickname: nn.value || "Guest",
           });
+          addMessage(input.value, nn.value || "Guest");
           input.value = "";
         }
       });
@@ -149,12 +150,16 @@
       });
 
       socket.on("chat message", ({ msg, nickname }, serverOffset) => {
+        addMessage(msg, nickname);
+        socket.auth.serverOffset = serverOffset;
+      });
+
+      const addMessage = (msg, nickname) => {
         const item = document.createElement("li");
         item.textContent = `${nickname}: ${msg}`;
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
-        socket.auth.serverOffset = serverOffset;
-      });
+      };
     </script>
   </body>
 </html>
