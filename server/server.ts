@@ -3,11 +3,18 @@ import type { Express } from "express";
 import { createServer } from "http";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 
 // database imports
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
+
+// Extend Socket type to include 'nickname'
+declare module "socket.io" {
+  interface Socket {
+    nickname?: string;
+  }
+}
 
 // open database file
 const db = await open({
@@ -37,16 +44,32 @@ server.listen(PORT, "0.0.0.0", () => {
   console.log(`Running on port: ${PORT}`);
 });
 
+let lastID: number = 0;
+
 // test socket.io connection
 io.on("connection", async (socket) => {
-  socket.on("chat message", async (msg) => {
+  io.emit("chat message", {
+    msg: "has connected!",
+    nickname: socket.nickname || "Guest",
+  });
+
+  socket.on("chat message", async ({ msg, nickname }) => {
     let result;
     try {
       result = await db.run("INSERT INTO messages (content) VALUES (?)", msg);
     } catch (e) {
       return;
     }
-    io.emit("chat message", msg, result.lastID);
+    io.emit(
+      "chat message",
+      { msg: msg, nickname: socket.nickname || nickname },
+      result.lastID
+    );
+    lastID = result.lastID || 0;
+  });
+
+  socket.on("set nickname", (nickname) => {
+    socket.nickname = nickname;
   });
 
   if (!socket.recovered) {
@@ -62,6 +85,17 @@ io.on("connection", async (socket) => {
       // something went wrong
     }
   }
+
+  socket.on("disconnect", async () => {
+    io.emit(
+      "chat message",
+      {
+        msg: "has disconnected",
+        nickname: socket.nickname || "Guest",
+      },
+      lastID
+    );
+  });
 });
 
 app.get("/", (req, res) => {

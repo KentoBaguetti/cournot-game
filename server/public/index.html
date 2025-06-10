@@ -6,16 +6,16 @@
     <style>
       body {
         margin: 0;
-        padding-bottom: 3rem;
+        padding-bottom: 6rem;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           Helvetica, Arial, sans-serif;
       }
 
-      #form {
+      #form,
+      #nickname-form {
         background: rgba(0, 0, 0, 0.15);
         padding: 0.25rem;
         position: fixed;
-        bottom: 0;
         left: 0;
         right: 0;
         display: flex;
@@ -23,17 +23,31 @@
         box-sizing: border-box;
         backdrop-filter: blur(10px);
       }
-      #input {
+
+      #form {
+        bottom: 3rem;
+      }
+
+      #nickname-form {
+        bottom: 0;
+      }
+
+      #input,
+      #nickname {
         border: none;
         padding: 0 1rem;
         flex-grow: 1;
         border-radius: 2rem;
         margin: 0.25rem;
       }
-      #input:focus {
+
+      #input:focus,
+      #nickname:focus {
         outline: none;
       }
-      #form > button {
+
+      #form > button,
+      #nickname-form > button {
         background: #333;
         border: none;
         padding: 0 1rem;
@@ -41,16 +55,35 @@
         border-radius: 3px;
         outline: none;
         color: #fff;
+        cursor: pointer;
+      }
+
+      #toggle-btn {
+        background: #666;
+        border: none;
+        padding: 0.5rem 1rem;
+        margin: 0.5rem;
+        border-radius: 3px;
+        outline: none;
+        color: #fff;
+        cursor: pointer;
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
       }
 
       #messages {
         list-style-type: none;
         margin: 0;
         padding: 0;
+        padding-bottom: 6rem;
       }
+
       #messages > li {
         padding: 0.5rem 1rem;
       }
+
       #messages > li:nth-child(odd) {
         background: #efefef;
       }
@@ -58,9 +91,16 @@
   </head>
   <body>
     <ul id="messages"></ul>
+    <button id="toggle-btn">Disconnect</button>
+
     <form id="form" action="">
-      <input id="input" autocomplete="off" /><button>Send</button>
-      <button id="toggle-btn">Disconnect</button>
+      <input id="input" autocomplete="off" placeholder="Type a message..." />
+      <button type="submit">Send</button>
+    </form>
+
+    <form id="nickname-form" action="">
+      <input id="nickname" autocomplete="off" placeholder="Enter nickname..." />
+      <button type="submit">Set Nickname</button>
     </form>
     <script>
       const toggleButton = document.getElementById("toggle-btn");
@@ -85,20 +125,32 @@
       });
 
       const form = document.getElementById("form");
+      const nnForm = document.getElementById("nickname-form");
       const input = document.getElementById("input");
       const messages = document.getElementById("messages");
+      const nn = document.getElementById("nickname");
 
       form.addEventListener("submit", (e) => {
         e.preventDefault();
         if (input.value) {
-          socket.emit("chat message", input.value);
+          socket.emit("chat message", {
+            msg: input.value,
+            nickname: nn.value || "Guest",
+          });
           input.value = "";
         }
       });
 
-      socket.on("chat message", (msg, serverOffset) => {
+      nnForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (nn.value) {
+          socket.emit("set nickname", nn.value);
+        }
+      });
+
+      socket.on("chat message", ({ msg, nickname }, serverOffset) => {
         const item = document.createElement("li");
-        item.textContent = msg;
+        item.textContent = `${nickname}: ${msg}`;
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
         socket.auth.serverOffset = serverOffset;
