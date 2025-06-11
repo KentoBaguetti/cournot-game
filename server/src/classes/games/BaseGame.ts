@@ -3,7 +3,7 @@ import { Socket, Server } from "socket.io";
 
 export abstract class BaseGame {
   // instance variables
-  public players: Map<string, Socket> = new Map();
+  public abstract players: Map<string, Socket>;
 
   // constructor
   constructor(public roomId: string, protected io: Server) {}

@@ -1,7 +1,16 @@
+//////////////////////////////////////////////////////////////////
+// import libraries (not made by me)
+//////////////////////////////////////////////////////////////////
 import express from "express";
 import type { Express } from "express";
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
+
+//////////////////////////////////////////////////////////////////
+// imported modules (not libraries)
+//////////////////////////////////////////////////////////////////
+import { GameFactory } from "./src/classes/GameFactory";
+import { GameManager } from "./src/classes/GameManager";
 
 //////////////////////////////////////////////////////////////////
 // server vars
@@ -13,10 +22,15 @@ const server = createServer(app); // low level access server to allow for websoc
 const io = new Server(server, {
   connectionStateRecovery: {},
   cors: {
-    origin: "http://localhost:5173", // frontend port
+    origin: "http://localhost:5173", // frontend port (vite)
     methods: ["GET", "POST"],
   },
 });
+
+//////////////////////////////////////////////////////////////////
+// Game Vars
+//////////////////////////////////////////////////////////////////
+const gameManager = new GameManager();
 
 ///////////////////////////////////////////////////////////////////
 // express routes
@@ -35,6 +49,15 @@ app.get("/", (req, res) => {
 //////////////////////////////////////////////////////////////////
 io.on("connection", (socket: Socket) => {
   console.log(`Socket ID "${socket.id}" connected`);
+
+  socket.on(
+    "createGame",
+    ({ roomId, gameType }: { roomId: string; gameType: string }) => {
+      const game = GameFactory.createGame(gameType, roomId, io);
+      gameManager.addGame(roomId, game);
+      game.onPlayerJoin(socket);
+    }
+  );
 
   socket.on("client-message", (msg) => {
     io.emit("server-response", msg);
