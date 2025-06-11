@@ -1,2 +1,25 @@
-server/node_modules
-server/package-lock.json
+# Dependencies
+node_modules/
+**/node_modules/
+**/package-lock.json
+**/yarn.lock
+**/pnpm-lock.yaml
+
+# Build outputs
+**/dist/
+**/build/
+
+# Environment variables
+**/.env
+**/.env.*
+!**/.env.example
+
+# Editor directories
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.sublime-*
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -9,7 +9,7 @@ import { Server, Socket } from "socket.io";
 
 const app: Express = express();
 const PORT: number = 3001;
-const server = createServer(app);
+const server = createServer(app); // low level access server to allow for websocket connections
 const io = new Server(server, {
   connectionStateRecovery: {},
   cors: {
