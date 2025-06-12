@@ -1,7 +1,8 @@
-import { BaseGame } from "./games/BaseGame";
+import { BaseGame } from "./games/BaseGame.ts";
 
 export class GameManager {
-  private games: Map<string, BaseGame> = new Map(); // store as gameName+someNumber : game
+  // instance variables
+  public games: Map<string, BaseGame> = new Map(); // store as gameName+someNumber : game
 
   addGame(roomId: string, game: BaseGame): void {
     this.games.set(roomId, game);

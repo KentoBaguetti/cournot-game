@@ -1,6 +1,6 @@
 import { Socket } from "socket.io";
 
-export class Instructor {
+export class Student {
   userId: string;
 
   constructor(protected socket: Socket) {

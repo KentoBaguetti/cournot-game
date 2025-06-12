@@ -1,15 +1,16 @@
 import { Socket } from "socket.io";
-import { BaseGame } from "./BaseGame";
+import { BaseGame } from "./BaseGame.ts";
 
 // simple game for testing purposes
 
 export class TestGame extends BaseGame {
-  // instance variables
-  players: Map<string, Socket> = new Map();
-  playerCount: number = 0;
+  public gameSettings: { gameDuration: number; maxPlayers: number } = {
+    gameDuration: 3600,
+    maxPlayers: 2,
+  };
 
   onPlayerJoin(socket: Socket): void {
-    if (this.playerCount >= 2) {
+    if (this.playerCount >= this.gameSettings.maxPlayers) {
       console.log("room is full");
       return;
     }
@@ -18,17 +19,7 @@ export class TestGame extends BaseGame {
       .to(this.roomId)
       .emit("player:connect", `Player with ID: "${socket.id}" has joined`);
     this.playerCount++;
-  }
-
-  onPlayerDisconnect(socket: Socket): void {
-    this.players.delete(socket.id);
-    this.io
-      .to(this.roomId)
-      .emit(
-        "player:disconnect",
-        `Player with ID: "${socket.id}" has disconnected`
-      );
-    this.playerCount--;
+    console.log(`Player "${socket.id}" has connected to room: ${this.roomId}`);
   }
 
   onPlayerMove(socket: Socket): void {

@@ -9,8 +9,9 @@ import { Server, Socket } from "socket.io";
 //////////////////////////////////////////////////////////////////
 // imported modules (not libraries)
 //////////////////////////////////////////////////////////////////
-import { GameFactory } from "./src/classes/GameFactory";
-import { GameManager } from "./src/classes/GameManager";
+import { GameFactory } from "./src/classes/GameFactory.ts";
+import { GameManager } from "./src/classes/GameManager.ts";
+import { BaseGame } from "./src/classes/games/BaseGame.ts";
 
 //////////////////////////////////////////////////////////////////
 // server vars
@@ -51,15 +52,32 @@ io.on("connection", (socket: Socket) => {
   console.log(`Socket ID "${socket.id}" connected`);
 
   socket.on(
-    "createGame",
+    "game:create",
     ({ roomId, gameType }: { roomId: string; gameType: string }) => {
-      const game = GameFactory.createGame(gameType, roomId, io);
+      const game: BaseGame | undefined = GameFactory.createGame(
+        gameType,
+        roomId,
+        io
+      );
       gameManager.addGame(roomId, game);
-      game.onPlayerJoin(socket);
     }
   );
 
+  socket.on("game:join", ({ roomId }: { roomId: string }) => {
+    const game: BaseGame | undefined = gameManager.getGame(roomId);
+    if (game) {
+      game.onPlayerJoin(socket);
+    }
+  });
+
   socket.on("client-message", (msg) => {
     io.emit("server-response", msg);
+  });
+
+  socket.on("disconnect", () => {
+    gameManager.games.forEach((game) => {
+      game.onPlayerDisconnect(socket);
+    });
+    console.log(`Socket "${socket.id}" disconnected`);
   });
 });

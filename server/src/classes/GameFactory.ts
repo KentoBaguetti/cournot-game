@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
-import { BaseGame } from "./games/BaseGame";
-import { CournotGame } from "./games/CournotGame";
-import { TestGame } from "./games/TestGame";
+import { BaseGame } from "./games/BaseGame.ts";
+import { CournotGame } from "./games/CournotGame.ts";
+import { TestGame } from "./games/TestGame.ts";
 
 // factory class for games
 

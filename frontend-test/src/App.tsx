@@ -22,6 +22,13 @@ function App() {
     setInputValue("");
   };
 
+  const joinGame = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    socket.emit("game:create", { roomId: "testgame1", gameType: "testgame" });
+    socket.emit("game:join", { roomId: "testgame1" });
+  };
+
   return (
     <div className="flex flex-col justify-center items-center">
       <p className="">Test page</p>
@@ -33,6 +40,14 @@ function App() {
           onChange={(e) => setInputValue(e.target.value)}
         />
         <button type="submit">Submit</button>
+      </form>
+      <form onSubmit={joinGame}>
+        <p>Create a Test game</p>
+        <button type="submit">Create Test game and join the game</button>
+      </form>
+      <form onSubmit={joinGame}>
+        <p>Create a Test game</p>
+        <button type="submit">Create Test game and join the game</button>
       </form>
     </div>
   );
