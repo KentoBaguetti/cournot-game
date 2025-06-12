@@ -6,4 +6,8 @@ export class Instructor {
   constructor(protected socket: Socket) {
     this.userId = socket.id;
   }
+
+  public getUserId(): string {
+    return this.userId;
+  }
 }
