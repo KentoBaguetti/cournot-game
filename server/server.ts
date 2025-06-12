@@ -6,12 +6,21 @@ import type { Express } from "express";
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 
+// Extend the Socket interface to include userId
+declare module "socket.io" {
+  interface Socket {
+    userId?: string;
+  }
+}
+
 //////////////////////////////////////////////////////////////////
 // imported modules (not libraries)
 //////////////////////////////////////////////////////////////////
 import { GameFactory } from "./src/classes/GameFactory.ts";
 import { GameManager } from "./src/classes/GameManager.ts";
 import { BaseGame } from "./src/classes/games/BaseGame.ts";
+import { UserData } from "./src/types/types.ts";
+import { generateUniqueId } from "./src/utils/auth.ts";
 
 //////////////////////////////////////////////////////////////////
 // server vars
@@ -33,6 +42,8 @@ const io = new Server(server, {
 //////////////////////////////////////////////////////////////////
 const gameManager = new GameManager();
 
+const userStore: Map<string, UserData> = new Map(); // userId : {name, lastRoom} userId comes from localstorage
+
 ///////////////////////////////////////////////////////////////////
 // express routes
 //////////////////////////////////////////////////////////////////
@@ -50,6 +61,16 @@ app.get("/", (req, res) => {
 //////////////////////////////////////////////////////////////////
 io.on("connection", (socket: Socket) => {
   console.log(`Socket ID "${socket.id}" connected`);
+  console.log("socket.handshake.auth:", socket.handshake.auth);
+
+  const userId = socket.handshake.auth.userId || generateUniqueId();
+  const userData = userStore.get(userId) || { nickname: "Guest" };
+  socket.userId = userId;
+  userStore.set(userId, userData);
+  console.log(`///////////// ${userId}`);
+  if (userData.lastRoom) {
+    socket.join(userData.lastRoom);
+  }
 
   socket.on(
     "game:create",
@@ -80,8 +101,16 @@ io.on("connection", (socket: Socket) => {
 
   socket.on("game:expandSize", ({ roomId, setting, size }) => {
     const game: BaseGame | undefined = gameManager.getGame(roomId);
-    game?.modifyGameSetting(setting, size);
-    console.log(`Modified game size to be ${size}`);
+    try {
+      game?.modifyGameSetting(socket, setting, size);
+      console.log(`Game room capacity expanded to: ${size}`);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.log(err.message);
+      } else {
+        console.log("An unknown error occurred");
+      }
+    }
   });
 
   socket.on("client-message", (msg) => {
