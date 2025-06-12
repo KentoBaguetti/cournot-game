@@ -22,11 +22,30 @@ function App() {
     setInputValue("");
   };
 
-  const joinGame = (e: React.FormEvent<HTMLFormElement>) => {
+  const createAndJoinGame = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     socket.emit("game:create", { roomId: "testgame1", gameType: "testgame" });
-    socket.emit("game:join", { roomId: "testgame1" });
+  };
+
+  const joinGame = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    socket.emit("game:join", { roomId: "testgame1", host: false });
+  };
+
+  const handleCheckUsers = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    socket.emit("game:checkRoles", { roomId: "testgame1" });
+  };
+
+  const expandGameSize = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    socket.emit("game:expandSize", {
+      roomId: "testgame1",
+      setting: "maxPlayers",
+      size: 3,
+    });
   };
 
   return (
@@ -41,13 +60,20 @@ function App() {
         />
         <button type="submit">Submit</button>
       </form>
-      <form onSubmit={joinGame}>
+      <form onSubmit={createAndJoinGame}>
         <p>Create a Test game</p>
         <button type="submit">Create Test game and join the game</button>
       </form>
       <form onSubmit={joinGame}>
-        <p>Create a Test game</p>
-        <button type="submit">Create Test game and join the game</button>
+        <p>join game</p>
+        <button type="submit">join the game</button>
+      </form>
+      <form onSubmit={handleCheckUsers}>
+        <p>Check users</p>
+        <button type="submit">Check users</button>
+      </form>
+      <form onSubmit={expandGameSize}>
+        <button type="submit">expand game size</button>
       </form>
     </div>
   );
