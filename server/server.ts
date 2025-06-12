@@ -1,6 +1,8 @@
 //////////////////////////////////////////////////////////////////
 // import libraries (not made by me)
 //////////////////////////////////////////////////////////////////
+import * as dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import type { Express } from "express";
 import { createServer } from "http";
