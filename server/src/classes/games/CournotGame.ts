@@ -2,8 +2,6 @@ import { BaseGame } from "./BaseGame.ts";
 import { Socket } from "socket.io";
 
 export class CournotGame extends BaseGame {
-  public gameSettings: object = {};
-
   onPlayerJoin(socket: Socket): void {
     this.players.set(socket.id, socket);
     socket.join(this.roomId);

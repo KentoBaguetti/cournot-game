@@ -7,7 +7,7 @@ export abstract class BaseGame {
   public playerCount: number = 0;
 
   // abstract instance variables
-  public abstract gameSettings: object;
+  public gameSettings: { [key: string]: number | string } = {};
 
   // constructor
   constructor(public roomId: string, protected io: Server) {}
@@ -35,5 +35,9 @@ export abstract class BaseGame {
     for (const [key, value] of this.players) {
       console.log(key);
     }
+  }
+
+  modifyGameSetting(settingName: string, value: number | string) {
+    this.gameSettings[settingName] = value;
   }
 }
