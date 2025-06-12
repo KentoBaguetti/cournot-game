@@ -1,29 +1,54 @@
 import { Socket } from "socket.io";
 import { BaseGame } from "./BaseGame.ts";
+import { Instructor } from "../users/Instructor.ts";
+import { Student } from "../users/Student.ts";
 
 // simple game for testing purposes
+// higher or lower game, one person guesses higher or lower to win
 
 export class TestGame extends BaseGame {
-  public gameSettings: { gameDuration: number; maxPlayers: number } = {
+  public gameSettings: {
+    gameDuration: number;
+    maxPlayers: number;
+  } = {
     gameDuration: 3600,
     maxPlayers: 2,
   };
 
-  onPlayerJoin(socket: Socket): void {
+  onPlayerJoin(socket: Socket, host: boolean): void {
     if (this.playerCount >= this.gameSettings.maxPlayers) {
       console.log("room is full");
       return;
     }
-    this.players.set(socket.id, socket);
+    this.players.set(
+      socket.id,
+      host ? new Instructor(socket) : new Student(socket)
+    );
     this.io
       .to(this.roomId)
-      .emit("player:connect", `Player with ID: "${socket.id}" has joined`);
+      .emit(
+        "player:connect",
+        `Player with ID: "${socket.id}" has joined: ${
+          host ? "Instructor" : "Student"
+        }`
+      );
     this.playerCount++;
-    console.log(`Player "${socket.id}" has connected to room: ${this.roomId}`);
+    console.log(
+      `Player "${socket.id}" has connected to room: ${this.roomId}: ${
+        host ? "Instructor" : "Student"
+      }`
+    );
   }
 
   onPlayerMove(socket: Socket): void {
     this.io.to(this.roomId).emit("server-response", `Hello ${socket.id}`);
     console.log(`onPlayerMove() hit with socket: ${socket.id}`);
+  }
+
+  modifyGameSetting(
+    settingName: keyof typeof this.gameSettings,
+    value: number
+  ) {
+    this.gameSettings[settingName] = value;
   }
 }

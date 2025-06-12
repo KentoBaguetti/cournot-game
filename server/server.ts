@@ -60,14 +60,28 @@ io.on("connection", (socket: Socket) => {
         io
       );
       gameManager.addGame(roomId, game);
+      game.onPlayerJoin(socket, true);
     }
   );
 
   socket.on("game:join", ({ roomId }: { roomId: string }) => {
     const game: BaseGame | undefined = gameManager.getGame(roomId);
     if (game) {
-      game.onPlayerJoin(socket);
+      game.onPlayerJoin(socket, false);
+    } else {
+      console.log(`Game with room id "${roomId}" does not exist`);
     }
+  });
+
+  socket.on("game:checkRoles", ({ roomId }: { roomId: string }) => {
+    const game: BaseGame | undefined = gameManager.getGame(roomId);
+    game?.getPlayers();
+  });
+
+  socket.on("game:expandSize", ({ roomId, setting, size }) => {
+    const game: BaseGame | undefined = gameManager.getGame(roomId);
+    game?.modifyGameSetting(setting, size);
+    console.log(`Modified game size to be ${size}`);
   });
 
   socket.on("client-message", (msg) => {
