@@ -5,7 +5,7 @@ import { Instructor } from "../users/Instructor.ts";
 
 export abstract class BaseGame {
   // instance variables
-  public players: Map<string, Student | Instructor> = new Map();
+  public players: Map<string, Student | Instructor> = new Map(); // socketId : user-type
   public playerCount: number = 0;
 
   // abstract instance variables
@@ -48,7 +48,11 @@ export abstract class BaseGame {
     return "";
   }
 
-  modifyGameSetting(settingName: string, value: number | string) {
+  modifyGameSetting(
+    socket: Socket,
+    settingName: string,
+    value: number | string | any[]
+  ) {
     this.gameSettings[settingName] = value;
   }
 }

@@ -46,9 +46,17 @@ export class TestGame extends BaseGame {
   }
 
   modifyGameSetting(
+    socket: Socket,
     settingName: keyof typeof this.gameSettings,
     value: number
   ) {
-    this.gameSettings[settingName] = value;
+    const player = this.players.get(socket.id);
+    if (player instanceof Instructor) {
+      this.gameSettings[settingName] = value;
+    } else {
+      throw new Error(
+        `${socket.id} does not have permissiosn to change settings`
+      );
+    }
   }
 }
