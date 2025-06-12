@@ -1,56 +1,67 @@
 import "./App.css";
-import { useState, useEffect } from "react";
-import socket from "./socket";
+import { Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import StudentJoin from "./pages/StudentJoin";
+import InstructorJoin from "./pages/InstructorJoin";
+import InstructorDashboard from "./pages/InstructorDashboard";
+import StudentGamePage from "./pages/StudentGamePage";
 
 function App() {
-  const [message, setMessage] = useState("");
-  const [inputValue, setInputValue] = useState("");
+  // const [message, setMessage] = useState("");
+  // const [inputValue, setInputValue] = useState("");
 
-  useEffect(() => {
-    socket.on("server-response", (data) => {
-      setMessage(data);
-    });
+  // useEffect(() => {
+  //   socket.on("server-response", (data) => {
+  //     setMessage(data);
+  //   });
 
-    return () => {
-      socket.off("server-response");
-    };
-  }, []);
+  //   return () => {
+  //     socket.off("server-response");
+  //   };
+  // }, []);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    socket.emit("client-message", inputValue);
-    setInputValue("");
-  };
+  // const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   socket.emit("client-message", inputValue);
+  //   setInputValue("");
+  // };
 
-  const createAndJoinGame = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  // const createAndJoinGame = (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
 
-    socket.emit("game:create", { roomId: "testgame1", gameType: "testgame" });
-  };
+  //   socket.emit("game:create", { roomId: "testgame1", gameType: "testgame" });
+  // };
 
-  const joinGame = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  // const joinGame = (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
 
-    socket.emit("game:join", { roomId: "testgame1", host: false });
-  };
+  //   socket.emit("game:join", { roomId: "testgame1", host: false });
+  // };
 
-  const handleCheckUsers = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    socket.emit("game:checkRoles", { roomId: "testgame1" });
-  };
+  // const handleCheckUsers = (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   socket.emit("game:checkRoles", { roomId: "testgame1" });
+  // };
 
-  const expandGameSize = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    socket.emit("game:expandSize", {
-      roomId: "testgame1",
-      setting: "maxPlayers",
-      size: 3,
-    });
-  };
+  // const expandGameSize = (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   socket.emit("game:expandSize", {
+  //     roomId: "testgame1",
+  //     setting: "maxPlayers",
+  //     size: 3,
+  //   });
+  // };
 
   return (
-    <div className="flex flex-col justify-center items-center">
-      <p className="">Test page</p>
+    <div className="">
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/student" element={<StudentJoin />} />
+        <Route path="/instructor" element={<InstructorJoin />} />
+        <Route path="/instructorDashboard" element={<InstructorDashboard />} />
+        <Route path="/studentGame" element={<StudentGamePage />} />
+      </Routes>
+      {/* <p className="">Test page</p>
       <p>{message}</p>
       <form onSubmit={handleSubmit}>
         <input
@@ -74,7 +85,7 @@ function App() {
       </form>
       <form onSubmit={expandGameSize}>
         <button type="submit">expand game size</button>
-      </form>
+      </form> */}
     </div>
   );
 }

@@ -116,7 +116,7 @@ io.on("connection", (socket: Socket) => {
   });
 
   socket.on("client-message", (msg) => {
-    io.emit("server-response", msg);
+    console.log(`########### client response: ${msg}`);
   });
 
   socket.on("disconnect", () => {
