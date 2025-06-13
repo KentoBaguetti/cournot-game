@@ -83,18 +83,18 @@ app.post("/setToken", (req, res) => {
 //////////////////////////////////////////////////////////////////
 io.on("connection", (socket: Socket) => {
   console.log(`Socket ID "${socket.id}" connected`);
-  console.log("socket.handshake.auth:", socket.handshake.auth);
+  console.log("socket.handshake.auth:", socket.handshake.auth); // pritns out the entire auth shii so { token: jwt string }
 
-  // const jwtToken = socket.handshake.auth.token;
-  // const decodedToken = decodeJwtToken(jwtToken);
-  // console.dir(decodedToken, { depth: null });
-  // const userData = userStore.get(userId) || { nickname: "Guest" };
-  // socket.userId = userId;
-  // userStore.set(userId, userData);
-  // console.log(`///////////// ${userId}`);
-  // if (userData.lastRoom) {
-  //   socket.join(userData.lastRoom);
-  // }
+  // the shit below is to add a user to the user map
+  const jwtToken = socket.handshake.auth.token;
+  const decodedToken = decodeJwtToken(jwtToken) as {
+    username: string;
+    lastRoom?: string;
+  };
+  const { username } = decodedToken;
+
+  userStore.set(username, { nickname: username });
+  console.log(userStore);
 
   socket.on(
     "game:create",
@@ -145,6 +145,7 @@ io.on("connection", (socket: Socket) => {
     gameManager.games.forEach((game) => {
       game.onPlayerDisconnect(socket);
     });
+    userStore.delete(username); // remove the user from the map
     console.log(`Socket "${socket.id}" disconnected`);
   });
 });
