@@ -1,10 +1,7 @@
-## Things i need to implement for the backend
+## My todo list so i remember where i left off
 
-1. allow users to connect - split based on student or instructor
-2. sort them into rooms
-3. instructor sets cofigs then starts the game
-4. users can pick their Q, need response data for the player
-5. Display round end stats + history
+- create user mappings on the server side to map users to their respective game room
+- keep adding maps -- users, gameRooms, activeGames, type shii
 
 ### What tools are being used:
 
