@@ -6,6 +6,7 @@ import StudentJoin from "./pages/StudentJoin";
 import InstructorJoin from "./pages/InstructorJoin";
 import InstructorDashboard from "./pages/InstructorDashboard";
 import StudentGamePage from "./pages/StudentGamePage";
+import InstructorLogin from "./pages/InstructorLogin";
 
 function App() {
   // const [message, setMessage] = useState("");
@@ -58,7 +59,16 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/student" element={<StudentJoin />} />
-        <Route path="/instructor" element={<InstructorJoin />} />
+        <Route path="/login" element={<InstructorLogin />} />
+
+        <Route
+          path="/instructor"
+          element={
+            <SocketProvider>
+              <InstructorJoin />
+            </SocketProvider>
+          }
+        />
 
         <Route
           path="/instructorDashboard"
@@ -67,9 +77,7 @@ function App() {
               <InstructorDashboard />
             </SocketProvider>
           }
-        >
-          <Route path="test" />
-        </Route>
+        />
 
         <Route
           path="/studentGame"
@@ -78,9 +86,7 @@ function App() {
               <StudentGamePage />
             </SocketProvider>
           }
-        >
-          <Route path="test" />
-        </Route>
+        />
       </Routes>
       {/* <p className="">Test page</p>
       <p>{message}</p>

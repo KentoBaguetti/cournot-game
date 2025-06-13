@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { generateJoinCode } from "../utils";
 import { useSocket } from "../socket";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function InstructorJoin() {
   const socket = useSocket();
@@ -17,9 +18,23 @@ export default function InstructorJoin() {
     setJoinCode(generateJoinCode());
   };
 
-  const handleCreateGame = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateGame = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    let token = localStorage.getItem("jwt") || null;
+
+    if (!token) {
+      const response = await axios.post("http://localhost:3001/setToken", {
+        userId: socket?.id,
+        username: "TempInstructor",
+        room: joinCode,
+      });
+
+      token = response.data.token;
+    }
+
+    localStorage.setItem("jwt", token ?? "");
+    console.log(joinCode);
     socket?.emit("game:create", { roomId: joinCode, gameType: "testgame" });
 
     navigate("/instructorDashboard");

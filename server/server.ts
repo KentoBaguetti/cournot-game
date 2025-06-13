@@ -71,9 +71,9 @@ app.get("/", (req, res) => {
 });
 
 app.post("/setToken", (req, res) => {
-  const { userId, username, room } = req.body;
+  const { username } = req.body;
 
-  const token = generateJwtToken(userId, username, room);
+  const token = generateJwtToken(username);
 
   res.json({ token });
 });

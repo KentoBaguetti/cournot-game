@@ -15,7 +15,7 @@ export default function Home() {
 
   const instructorSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    navigate("/instructor");
+    navigate("/login");
   };
 
   return (

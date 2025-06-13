@@ -28,9 +28,7 @@ export default function StudentJoin() {
 
     if (!token) {
       const response = await axios.post("http://localhost:3001/setToken", {
-        userId: socket?.id,
         username: usernameValue,
-        room: codeValue,
       });
 
       token = response.data.token;
