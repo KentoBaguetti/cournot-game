@@ -1,5 +1,6 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
+import { SocketProvider } from "./socket";
 import Home from "./pages/Home";
 import StudentJoin from "./pages/StudentJoin";
 import InstructorJoin from "./pages/InstructorJoin";
@@ -58,8 +59,28 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/student" element={<StudentJoin />} />
         <Route path="/instructor" element={<InstructorJoin />} />
-        <Route path="/instructorDashboard" element={<InstructorDashboard />} />
-        <Route path="/studentGame" element={<StudentGamePage />} />
+
+        <Route
+          path="/instructorDashboard"
+          element={
+            <SocketProvider>
+              <InstructorDashboard />
+            </SocketProvider>
+          }
+        >
+          <Route path="test" />
+        </Route>
+
+        <Route
+          path="/studentGame"
+          element={
+            <SocketProvider>
+              <StudentGamePage />
+            </SocketProvider>
+          }
+        >
+          <Route path="test" />
+        </Route>
       </Routes>
       {/* <p className="">Test page</p>
       <p>{message}</p>
