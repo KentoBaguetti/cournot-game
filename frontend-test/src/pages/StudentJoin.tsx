@@ -24,7 +24,7 @@ export default function StudentJoin() {
     setUsername(usernameValue);
     console.log(usernameValue);
 
-    let token = localStorage.get("jwt") || null;
+    let token = localStorage.getItem("jwt") || null;
 
     if (!token) {
       const response = await axios.post("http://localhost:3001/setToken", {
@@ -36,7 +36,7 @@ export default function StudentJoin() {
       token = response.data.token;
     }
 
-    localStorage.setItem("jwt", token);
+    localStorage.setItem("jwt", token ?? "");
 
     socket?.emit("game:join", { roomId: codeValue, gameType: "testgame" });
 

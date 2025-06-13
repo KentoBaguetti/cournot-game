@@ -7,6 +7,7 @@ import express from "express";
 import type { Express } from "express";
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
+import cors from "cors";
 
 // Extend the Socket interface to include userId
 declare module "socket.io" {
@@ -21,14 +22,23 @@ declare module "socket.io" {
 import { GameFactory } from "./src/classes/GameFactory.ts";
 import { GameManager } from "./src/classes/GameManager.ts";
 import { BaseGame } from "./src/classes/games/BaseGame.ts";
-import { UserData } from "./src/types/types.ts";
-import { generateUniqueId } from "./src/utils/auth.ts";
+import { UserData, RoomData } from "./src/types/types.ts";
+import { generateJwtToken, decodeJwtToken } from "./src/utils/auth.ts";
 
 //////////////////////////////////////////////////////////////////
 // server vars
 //////////////////////////////////////////////////////////////////
 
 const app: Express = express();
+app.use(
+  // express cors
+  cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
+app.use(express.json());
 const PORT: number = 3001;
 const server = createServer(app); // low level access server to allow for websocket connections
 const io = new Server(server, {
@@ -46,6 +56,8 @@ const gameManager = new GameManager();
 
 const userStore: Map<string, UserData> = new Map(); // userId : {name, lastRoom} userId comes from localstorage
 
+const roomStore: Map<string, RoomData> = new Map(); // rooms : set of all players
+
 ///////////////////////////////////////////////////////////////////
 // express routes
 //////////////////////////////////////////////////////////////////
@@ -58,6 +70,14 @@ app.get("/", (req, res) => {
   console.log("Root hit");
 });
 
+app.post("/setToken", (req, res) => {
+  const { userId, username, room } = req.body;
+
+  const token = generateJwtToken(userId, username, room);
+
+  res.json({ token });
+});
+
 //////////////////////////////////////////////////////////////////
 // socket.io routes
 //////////////////////////////////////////////////////////////////
@@ -65,14 +85,16 @@ io.on("connection", (socket: Socket) => {
   console.log(`Socket ID "${socket.id}" connected`);
   console.log("socket.handshake.auth:", socket.handshake.auth);
 
-  const userId = socket.handshake.auth.userId || generateUniqueId();
-  const userData = userStore.get(userId) || { nickname: "Guest" };
-  socket.userId = userId;
-  userStore.set(userId, userData);
-  console.log(`///////////// ${userId}`);
-  if (userData.lastRoom) {
-    socket.join(userData.lastRoom);
-  }
+  // const jwtToken = socket.handshake.auth.token;
+  // const decodedToken = decodeJwtToken(jwtToken);
+  // console.dir(decodedToken, { depth: null });
+  // const userData = userStore.get(userId) || { nickname: "Guest" };
+  // socket.userId = userId;
+  // userStore.set(userId, userData);
+  // console.log(`///////////// ${userId}`);
+  // if (userData.lastRoom) {
+  //   socket.join(userData.lastRoom);
+  // }
 
   socket.on(
     "game:create",
