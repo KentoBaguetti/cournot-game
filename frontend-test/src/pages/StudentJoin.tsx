@@ -1,30 +1,66 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useSocket } from "../socket";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function StudentJoin() {
   const [code, setCode] = useState<string>("");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [username, setUsername] = useState("");
+  const codeRef = useRef<HTMLInputElement>(null);
+  const usernameRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const socket = useSocket();
 
-  const handleJoin = (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {}, []);
+
+  const handleJoin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const inputValue = inputRef.current ? inputRef.current.value : "";
-    setCode(inputValue);
-    console.log(inputValue);
-    socket?.emit("game:join", { roomId: inputValue, gameType: "testgame" });
+
+    const codeValue = codeRef.current ? codeRef.current.value : "";
+    setCode(codeValue);
+    console.log(codeValue);
+
+    const usernameValue = usernameRef.current ? usernameRef.current.value : "";
+    setUsername(usernameValue);
+    console.log(usernameValue);
+
+    let token = localStorage.get("jwt") || null;
+
+    if (!token) {
+      const response = await axios.post("http://localhost:3001/setToken", {
+        userId: socket?.id,
+        username: usernameValue,
+        room: codeValue,
+      });
+
+      token = response.data.token;
+    }
+
+    localStorage.setItem("jwt", token);
+
+    socket?.emit("game:join", { roomId: codeValue, gameType: "testgame" });
+
     navigate("/studentGame");
   };
 
   return (
     <div className="flex flex-col justify-center items-center">
       <h1>Student Join Page</h1>
+
       <form onSubmit={handleJoin}>
-        <input type="text" placeholder="Enter Game join code" ref={inputRef} />
+        <input
+          type="text"
+          placeholder="Username"
+          required={true}
+          ref={usernameRef}
+        />
+        <input type="text" placeholder="Enter Game join code" ref={codeRef} />
         <button type="submit">Submit Code</button>
       </form>
-      <div>Submitted Code: {code}</div>
+      <div>
+        <p>Submitted username: {username}</p>
+        <p>Submitted Code: {code}</p>
+      </div>
     </div>
   );
 }
