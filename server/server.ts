@@ -56,7 +56,7 @@ const gameManager = new GameManager();
 
 const userStore: Map<string, UserData> = new Map(); // userId : {name, lastRoom} userId comes from localstorage
 
-const roomStore: Map<string, RoomData> = new Map(); // rooms : set of all players
+const roomStore: Map<string, RoomData> = new Map(); // rooms : set of all players || roomId : {set of players}
 
 ///////////////////////////////////////////////////////////////////
 // express routes
@@ -104,8 +104,10 @@ io.on("connection", (socket: Socket) => {
         roomId,
         io
       );
+      roomStore.set(roomId, { gameType: gameType, players: new Set<string>() });
       gameManager.addGame(roomId, game);
       game.onPlayerJoin(socket, true);
+      console.log(roomStore);
     }
   );
 
@@ -113,6 +115,13 @@ io.on("connection", (socket: Socket) => {
     const game: BaseGame | undefined = gameManager.getGame(roomId);
     if (game) {
       game.onPlayerJoin(socket, false);
+      const room = roomStore.get(roomId);
+      room?.players.add(username);
+      const playerData: UserData | undefined = userStore.get(username);
+      if (playerData) {
+        playerData.lastRoom = roomId;
+      }
+      console.log(roomStore);
     } else {
       console.log(`Game with room id "${roomId}" does not exist`);
     }
@@ -146,6 +155,7 @@ io.on("connection", (socket: Socket) => {
       game.onPlayerDisconnect(socket);
     });
     userStore.delete(username); // remove the user from the map
+    // const room = roomStore.get(roomId);
     console.log(`Socket "${socket.id}" disconnected`);
   });
 });

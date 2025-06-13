@@ -4,5 +4,6 @@ export interface UserData {
 }
 
 export interface RoomData {
+  gameType: string;
   players: Set<string>;
 }
