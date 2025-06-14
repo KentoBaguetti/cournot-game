@@ -13,6 +13,7 @@ export default function StudentGamePage() {
     e.preventDefault();
 
     socket?.emit("client-message", "waddup");
+    socket?.emit("game:checkRoles");
   };
 
   return (

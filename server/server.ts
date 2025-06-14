@@ -24,6 +24,7 @@ import { GameManager } from "./src/classes/GameManager.ts";
 import { BaseGame } from "./src/classes/games/BaseGame.ts";
 import { UserData, RoomData } from "./src/types/types.ts";
 import { generateJwtToken, decodeJwtToken } from "./src/utils/auth.ts";
+import { lstat } from "fs";
 
 //////////////////////////////////////////////////////////////////
 // server vars
@@ -127,9 +128,22 @@ io.on("connection", (socket: Socket) => {
     }
   });
 
-  socket.on("game:checkRoles", ({ roomId }: { roomId: string }) => {
-    const game: BaseGame | undefined = gameManager.getGame(roomId);
-    game?.getPlayers();
+  // socket.on("game:checkRoles", ({ roomId }: { roomId: string }) => {
+  //   const game: BaseGame | undefined = gameManager.getGame(roomId);
+  //   game?.getPlayers();
+  // });
+
+  socket.on("game:checkRoles", () => {
+    console.log("game:checkroles is being hit");
+    const currentUserData: UserData | undefined = userStore.get(username);
+    const currentUserRoom: string | undefined = currentUserData?.lastRoom;
+
+    if (currentUserRoom) {
+      const game: BaseGame | undefined = gameManager.getGame(currentUserRoom);
+      game?.getPlayers();
+    } else {
+      console.error("room DNE");
+    }
   });
 
   socket.on("game:expandSize", ({ roomId, setting, size }) => {
@@ -154,7 +168,15 @@ io.on("connection", (socket: Socket) => {
     gameManager.games.forEach((game) => {
       game.onPlayerDisconnect(socket);
     });
+
+    const currentUser = userStore.get(username); // find the user in the db
+    const currentUserPrevRoom: string | undefined = currentUser?.lastRoom; // find the users last joined room
+    const theRoom = roomStore.get(currentUserPrevRoom || ""); // get the game room data
+    theRoom?.players.delete(username); // remove the user from the game\
+    console.log(roomStore);
+
     userStore.delete(username); // remove the user from the map
+    console.log(userStore);
     // const room = roomStore.get(roomId);
     console.log(`Socket "${socket.id}" disconnected`);
   });
