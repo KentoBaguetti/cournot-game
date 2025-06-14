@@ -58,8 +58,9 @@ function App() {
     <div className="">
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/student" element={<StudentJoin />} />
         <Route path="/login" element={<InstructorLogin />} />
+
+        <Route path="/student" element={<StudentJoin />} />
 
         <Route
           path="/instructor"

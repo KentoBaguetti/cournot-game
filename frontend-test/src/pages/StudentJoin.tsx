@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect } from "react";
-import { useSocket } from "../socket";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -9,7 +8,6 @@ export default function StudentJoin() {
   const codeRef = useRef<HTMLInputElement>(null);
   const usernameRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
-  const socket = useSocket();
 
   useEffect(() => {}, []);
 
@@ -35,8 +33,7 @@ export default function StudentJoin() {
     }
 
     localStorage.setItem("jwt", token ?? "");
-
-    socket?.emit("game:join", { roomId: codeValue, gameType: "testgame" });
+    localStorage.setItem("gameRoomCode", codeValue);
 
     navigate("/studentGame");
   };
