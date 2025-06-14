@@ -15,26 +15,27 @@ export class TestGame extends BaseGame {
     maxPlayers: 2,
   };
 
-  onPlayerJoin(socket: Socket, host: boolean): void {
+  onPlayerJoin(socket: Socket, username: string, host: boolean): void {
     if (this.playerCount >= this.gameSettings.maxPlayers) {
       console.log("room is full");
       return;
     }
+    socket.join(this.roomId); // acc join the room
     this.players.set(
-      socket.id,
+      username,
       host ? new Instructor(socket) : new Student(socket)
     );
     this.io
       .to(this.roomId)
       .emit(
         "player:connect",
-        `Player with ID: "${socket.id}" has joined: ${
+        `Player with ID: "${username}" has joined: ${
           host ? "Instructor" : "Student"
         }`
       );
     this.playerCount++;
     console.log(
-      `Player "${socket.id}" has connected to room: ${this.roomId}: ${
+      `Player "${username}" has connected to room: ${this.roomId}: ${
         host ? "Instructor" : "Student"
       }`
     );

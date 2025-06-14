@@ -24,7 +24,6 @@ import { GameManager } from "./src/classes/GameManager.ts";
 import { BaseGame } from "./src/classes/games/BaseGame.ts";
 import { UserData, RoomData } from "./src/types/types.ts";
 import { generateJwtToken, decodeJwtToken } from "./src/utils/auth.ts";
-import { lstat } from "fs";
 
 //////////////////////////////////////////////////////////////////
 // server vars
@@ -54,6 +53,8 @@ const io = new Server(server, {
 // Game Vars
 //////////////////////////////////////////////////////////////////
 const gameManager = new GameManager();
+
+const connections: Map<string, string> = new Map(); // socket.id : userId
 
 const userStore: Map<string, UserData> = new Map(); // userId : {name, lastRoom} userId comes from localstorage
 
@@ -95,6 +96,7 @@ io.on("connection", (socket: Socket) => {
   const { username } = decodedToken;
 
   userStore.set(username, { nickname: username });
+  connections.set(socket.id, username); // on connection set the socket id with the username
   console.log(userStore);
 
   socket.on(
@@ -107,7 +109,7 @@ io.on("connection", (socket: Socket) => {
       );
       roomStore.set(roomId, { gameType: gameType, players: new Set<string>() });
       gameManager.addGame(roomId, game);
-      game.onPlayerJoin(socket, true);
+      game.onPlayerJoin(socket, username, true);
       console.log(roomStore);
     }
   );
@@ -115,7 +117,7 @@ io.on("connection", (socket: Socket) => {
   socket.on("game:join", ({ roomId }: { roomId: string }) => {
     const game: BaseGame | undefined = gameManager.getGame(roomId);
     if (game) {
-      game.onPlayerJoin(socket, false);
+      game.onPlayerJoin(socket, username, false);
       const room = roomStore.get(roomId);
       room?.players.add(username);
       const playerData: UserData | undefined = userStore.get(username);
@@ -127,6 +129,20 @@ io.on("connection", (socket: Socket) => {
       console.log(`Game with room id "${roomId}" does not exist`);
     }
   });
+
+  socket.on(
+    "game:leave",
+    ({ socket, roomId }: { socket: Socket; roomId: string }) => {
+      const game: BaseGame | undefined = gameManager.getGame(roomId);
+      if (game) {
+        game.onPlayerDisconnect(socket, username);
+        const room = roomStore.get(roomId);
+        room?.players.delete(username);
+      } else {
+        console.log(`Game with room id "${roomId}" does not exist`);
+      }
+    }
+  );
 
   // socket.on("game:checkRoles", ({ roomId }: { roomId: string }) => {
   //   const game: BaseGame | undefined = gameManager.getGame(roomId);
@@ -165,17 +181,20 @@ io.on("connection", (socket: Socket) => {
   });
 
   socket.on("disconnect", () => {
-    gameManager.games.forEach((game) => {
-      game.onPlayerDisconnect(socket);
-    });
+    // players disconnecting is different from their socket disconnecting
+    // gameManager.games.forEach((game) => {
+    //   game.onPlayerDisconnect(socket, username);
+    // });
 
-    const currentUser = userStore.get(username); // find the user in the db
-    const currentUserPrevRoom: string | undefined = currentUser?.lastRoom; // find the users last joined room
-    const theRoom = roomStore.get(currentUserPrevRoom || ""); // get the game room data
-    theRoom?.players.delete(username); // remove the user from the game\
+    // should not remove the user from their game if they disconnect
+    // const currentUser = userStore.get(username); // find the user in the db
+    // const currentUserPrevRoom: string | undefined = currentUser?.lastRoom; // find the users last joined room
+    // const theRoom = roomStore.get(currentUserPrevRoom || ""); // get the game room data
+    // theRoom?.players.delete(username); // remove the user from the game\
     console.log(roomStore);
 
     userStore.delete(username); // remove the user from the map
+    connections.delete(socket.id);
     console.log(userStore);
     // const room = roomStore.get(roomId);
     console.log(`Socket "${socket.id}" disconnected`);

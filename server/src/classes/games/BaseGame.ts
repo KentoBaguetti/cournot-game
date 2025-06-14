@@ -18,30 +18,41 @@ export abstract class BaseGame {
   abstract onPlayerMove(socket: Socket): void;
 
   // concrete methods
-  onPlayerJoin(socket: Socket, host: boolean): void {
+  onPlayerJoin(socket: Socket, username: string, host: boolean): void {
     this.players.set(
-      socket.id,
+      username,
       host ? new Instructor(socket) : new Student(socket)
     );
+    socket.join(this.roomId);
     this.playerCount++;
     this.io
       .to(this.roomId)
-      .emit("player:connect", `Player "${socket.id}" has connected`);
+      .emit("player:connect", `Player "${username}" has connected`);
   }
 
-  onPlayerDisconnect(socket: Socket): void {
-    this.players.delete(socket.id);
+  onPlayerDisconnect(socket: Socket, username: string): void {
+    socket.leave(this.roomId);
+    this.players.delete(username);
     this.playerCount--;
     this.io.to(this.roomId).emit("player:disconnect");
     this.io
       .to(this.roomId)
-      .emit("player:connect", `Player "${socket.id}" has disconnected`);
+      .emit("player:connect", `Player "${username}" has disconnected`);
   }
 
   getPlayers(): void {
     for (const [key, value] of this.players) {
       console.log(key, value.constructor.name);
     }
+    console.log("");
+    this.io
+      .in(this.roomId)
+      .fetchSockets()
+      .then((sockets) => {
+        sockets.forEach((socket) => {
+          console.log(`User in ${this.roomId}: ${socket.id}, username: ${123}`);
+        });
+      });
   }
 
   checkRole(socket: Socket): string {
