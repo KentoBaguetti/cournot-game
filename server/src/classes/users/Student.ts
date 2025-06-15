@@ -2,13 +2,13 @@ import { nextTick } from "process";
 import { Socket } from "socket.io";
 
 export class Student {
-  userId: string;
-  nickname: string;
+  protected disconnected: boolean = false;
 
-  constructor(protected socket: Socket, nickname?: string) {
-    this.userId = socket.id;
-    this.nickname = nickname ?? "Guest";
-  }
+  constructor(
+    protected socket: Socket,
+    public userId: string,
+    protected nickname: string = "Guest"
+  ) {}
 
   public setNickName(nickname: string): void {
     this.nickname = nickname;
@@ -20,5 +20,21 @@ export class Student {
 
   public getUserId(): string {
     return this.userId;
+  }
+
+  public updateSocket(socket: Socket): void {
+    this.socket = socket;
+  }
+
+  public getSocket(): Socket {
+    return this.socket;
+  }
+
+  public setDisconnected(status: boolean): void {
+    this.disconnected = status;
+  }
+
+  public isDisconnected(): boolean {
+    return this.disconnected;
   }
 }

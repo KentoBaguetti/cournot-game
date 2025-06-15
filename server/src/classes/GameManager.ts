@@ -1,4 +1,4 @@
-import { BaseGame } from "./games/BaseGame.ts";
+import { BaseGame } from "./games/BaseGame";
 
 export class GameManager {
   // instance variables

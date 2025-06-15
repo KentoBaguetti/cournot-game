@@ -4,10 +4,12 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 import express from "express";
-import type { Express } from "express";
+import type { Express, Request, Response, RequestHandler } from "express";
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+import { v4 as uuidv4 } from "uuid";
 
 // Extend the Socket interface to include userId
 declare module "socket.io" {
@@ -19,11 +21,18 @@ declare module "socket.io" {
 //////////////////////////////////////////////////////////////////
 // imported modules (not libraries)
 //////////////////////////////////////////////////////////////////
-import { GameFactory } from "./src/classes/GameFactory.ts";
-import { GameManager } from "./src/classes/GameManager.ts";
-import { BaseGame } from "./src/classes/games/BaseGame.ts";
-import { UserData, RoomData } from "./src/types/types.ts";
-import { generateJwtToken, decodeJwtToken } from "./src/utils/auth.ts";
+import { GameFactory } from "./src/classes/GameFactory";
+import { GameManager } from "./src/classes/GameManager";
+import { BaseGame } from "./src/classes/games/BaseGame";
+import { UserData, RoomData } from "./src/types/types";
+import {
+  generateJwtToken,
+  verifyJwtToken,
+  setTokenCookie,
+  clearTokenCookie,
+  UserTokenData,
+} from "./src/utils/auth";
+import { SocketManager } from "./src/classes/SocketManager";
 
 //////////////////////////////////////////////////////////////////
 // server vars
@@ -39,6 +48,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(cookieParser()); // Add cookie parser middleware
 const PORT: number = 3001;
 const server = createServer(app); // low level access server to allow for websocket connections
 const io = new Server(server, {
@@ -46,6 +56,7 @@ const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173", // frontend port (vite)
     methods: ["GET", "POST"],
+    credentials: true, // Important for cookies
   },
 });
 
@@ -53,11 +64,9 @@ const io = new Server(server, {
 // Game Vars
 //////////////////////////////////////////////////////////////////
 const gameManager = new GameManager();
+const socketManager = new SocketManager(io, gameManager);
 
-const connections: Map<string, string> = new Map(); // socket.id : userId
-
-const userStore: Map<string, UserData> = new Map(); // userId : {name, lastRoom} userId comes from localstorage
-
+// Keep these maps for backward compatibility during transition
 const roomStore: Map<string, RoomData> = new Map(); // rooms : set of all players || roomId : {set of players}
 
 ///////////////////////////////////////////////////////////////////
@@ -67,98 +76,215 @@ server.listen(PORT, () => {
   console.log(`Server running on port: ${PORT}`);
 });
 
+// Root endpoint
 app.get("/", (req, res) => {
   res.json({ message: "Root working" });
   console.log("Root hit");
 });
 
-app.post("/setToken", (req, res) => {
+// Update the token endpoint to use HTTP-only cookies
+app.post("/auth/login", (req, res) => {
   const { username } = req.body;
 
-  const token = generateJwtToken(username);
+  if (!username) {
+    return res.status(400).json({ error: "Username is required" });
+  }
 
-  res.json({ token });
+  // Generate a unique user ID if this is a new user
+  const userId = uuidv4();
+
+  // Create user data for the token
+  const userData: UserTokenData = {
+    userId,
+    username,
+  };
+
+  // Set the token as an HTTP-only cookie
+  const token = setTokenCookie(res, userData);
+
+  // Return user info (but not the token directly)
+  res.json({
+    success: true,
+    user: {
+      userId,
+      username,
+    },
+  });
+});
+
+// Add a logout endpoint
+app.post("/auth/logout", (req, res) => {
+  clearTokenCookie(res);
+  res.json({ success: true });
+});
+
+// Add an endpoint to check authentication status
+app.get("/auth/me", (req, res) => {
+  const token = req.cookies.auth_token;
+
+  if (!token) {
+    return res.status(401).json({ authenticated: false });
+  }
+
+  const userData = verifyJwtToken(token);
+
+  if (!userData) {
+    clearTokenCookie(res);
+    return res.status(401).json({ authenticated: false });
+  }
+
+  res.json({
+    authenticated: true,
+    user: {
+      userId: userData.userId,
+      username: userData.username,
+    },
+  });
 });
 
 //////////////////////////////////////////////////////////////////
 // socket.io routes
 //////////////////////////////////////////////////////////////////
 io.on("connection", (socket: Socket) => {
-  console.log(`Socket ID "${socket.id}" connected`);
-  console.log("socket.handshake.auth:", socket.handshake.auth); // pritns out the entire auth shii so { token: jwt string }
-
-  // the shit below is to add a user to the user map
-  const jwtToken = socket.handshake.auth.token;
-  const decodedToken = decodeJwtToken(jwtToken) as {
-    username: string;
-    lastRoom?: string;
-  };
-  const { username } = decodedToken;
-
-  userStore.set(username, { nickname: username });
-  connections.set(socket.id, username); // on connection set the socket id with the username
-  console.log(userStore);
+  // Handle socket connection using the SocketManager
+  socketManager.handleConnection(socket);
 
   socket.on(
     "game:create",
     ({ roomId, gameType }: { roomId: string; gameType: string }) => {
+      const userId = socket.userId;
+      if (!userId) {
+        console.error("No userId found for socket");
+        return;
+      }
+
+      const userData = socketManager.getUserData(userId);
+      if (!userData) {
+        console.error("No user data found for userId", userId);
+        return;
+      }
+
+      const username = userData.nickname;
+
       const game: BaseGame | undefined = GameFactory.createGame(
         gameType,
         roomId,
         io
       );
+
+      // Set the SocketManager on the game
+      game.setSocketManager(socketManager);
+
       roomStore.set(roomId, { gameType: gameType, players: new Set<string>() });
       gameManager.addGame(roomId, game);
-      game.onPlayerJoin(socket, username, true);
-      console.log(roomStore);
+
+      // Join as host
+      game.onPlayerJoin(socket, userId, username, true);
+
+      // Update room data
+      const room = roomStore.get(roomId);
+      room?.players.add(userId);
+
+      // Update user's last room
+      socketManager.updateUserRoom(userId, roomId);
+
+      console.log(
+        `Game created: ${gameType}, Room: ${roomId}, Host: ${username}`
+      );
     }
   );
 
   socket.on("game:join", ({ roomId }: { roomId: string }) => {
+    const userId = socket.userId;
+    if (!userId) {
+      console.error("No userId found for socket");
+      return;
+    }
+
+    const userData = socketManager.getUserData(userId);
+    if (!userData) {
+      console.error("No user data found for userId", userId);
+      return;
+    }
+
+    const username = userData.nickname;
+
     const game: BaseGame | undefined = gameManager.getGame(roomId);
     if (game) {
-      game.onPlayerJoin(socket, username, false);
-      const room = roomStore.get(roomId);
-      room?.players.add(username);
-      const playerData: UserData | undefined = userStore.get(username);
-      if (playerData) {
-        playerData.lastRoom = roomId;
+      // Set the SocketManager on the game if not already set
+      if (!game.socketManager) {
+        game.setSocketManager(socketManager);
       }
-      console.log(roomStore);
+
+      // Check if player is already in the game (might be reconnecting)
+      if (game.players.has(userId)) {
+        game.onPlayerReconnect(socket, userId, username);
+      } else {
+        game.onPlayerJoin(socket, userId, username, false);
+      }
+
+      // Update room data
+      const room = roomStore.get(roomId);
+      room?.players.add(userId);
+
+      // Update user's last room
+      socketManager.updateUserRoom(userId, roomId);
+
+      console.log(`User ${username} joined game in room ${roomId}`);
+    } else {
+      console.log(`Game with room id "${roomId}" does not exist`);
+      socket.emit("game:error", { message: "Game room does not exist" });
+    }
+  });
+
+  socket.on("game:leave", ({ roomId }: { roomId: string }) => {
+    const userId = socket.userId;
+    if (!userId) {
+      console.error("No userId found for socket");
+      return;
+    }
+
+    const userData = socketManager.getUserData(userId);
+    if (!userData) {
+      console.error("No user data found for userId", userId);
+      return;
+    }
+
+    const game: BaseGame | undefined = gameManager.getGame(roomId);
+    if (game) {
+      game.onPlayerDisconnect(socket, userId);
+
+      // Update room data
+      const room = roomStore.get(roomId);
+      room?.players.delete(userId);
+
+      console.log(`User ${userData.nickname} left game in room ${roomId}`);
     } else {
       console.log(`Game with room id "${roomId}" does not exist`);
     }
   });
 
-  socket.on(
-    "game:leave",
-    ({ socket, roomId }: { socket: Socket; roomId: string }) => {
-      const game: BaseGame | undefined = gameManager.getGame(roomId);
-      if (game) {
-        game.onPlayerDisconnect(socket, username);
-        const room = roomStore.get(roomId);
-        room?.players.delete(username);
-      } else {
-        console.log(`Game with room id "${roomId}" does not exist`);
-      }
-    }
-  );
-
-  // socket.on("game:checkRoles", ({ roomId }: { roomId: string }) => {
-  //   const game: BaseGame | undefined = gameManager.getGame(roomId);
-  //   game?.getPlayers();
-  // });
-
   socket.on("game:checkRoles", () => {
     console.log("game:checkroles is being hit");
-    const currentUserData: UserData | undefined = userStore.get(username);
-    const currentUserRoom: string | undefined = currentUserData?.lastRoom;
+    const userId = socket.userId;
+    if (!userId) {
+      console.error("No userId found for socket");
+      return;
+    }
+
+    const userData = socketManager.getUserData(userId);
+    if (!userData) {
+      console.error("No user data found for userId", userId);
+      return;
+    }
+
+    const currentUserRoom = userData.lastRoom;
 
     if (currentUserRoom) {
       const game: BaseGame | undefined = gameManager.getGame(currentUserRoom);
       game?.getPlayers();
     } else {
-      console.error("room DNE");
+      console.error("User is not in any room");
     }
   });
 
@@ -181,22 +307,7 @@ io.on("connection", (socket: Socket) => {
   });
 
   socket.on("disconnect", () => {
-    // players disconnecting is different from their socket disconnecting
-    // gameManager.games.forEach((game) => {
-    //   game.onPlayerDisconnect(socket, username);
-    // });
-
-    // should not remove the user from their game if they disconnect
-    // const currentUser = userStore.get(username); // find the user in the db
-    // const currentUserPrevRoom: string | undefined = currentUser?.lastRoom; // find the users last joined room
-    // const theRoom = roomStore.get(currentUserPrevRoom || ""); // get the game room data
-    // theRoom?.players.delete(username); // remove the user from the game\
-    console.log(roomStore);
-
-    userStore.delete(username); // remove the user from the map
-    connections.delete(socket.id);
-    console.log(userStore);
-    // const room = roomStore.get(roomId);
-    console.log(`Socket "${socket.id}" disconnected`);
+    // Handle socket disconnection using the SocketManager
+    socketManager.handleDisconnection(socket);
   });
 });
