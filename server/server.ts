@@ -12,11 +12,11 @@ import cookieParser from "cookie-parser";
 import { v4 as uuidv4 } from "uuid";
 
 // Extend the Socket interface to include userId
-declare module "socket.io" {
-  interface Socket {
-    userId?: string;
-  }
-}
+// declare module "socket.io" {
+//   interface Socket {
+//     userId?: string;
+//   }
+// }
 
 //////////////////////////////////////////////////////////////////
 // imported modules (not libraries)
@@ -26,7 +26,6 @@ import { GameManager } from "./src/classes/GameManager";
 import { BaseGame } from "./src/classes/games/BaseGame";
 import { UserData, RoomData } from "./src/types/types";
 import {
-  generateJwtToken,
   verifyJwtToken,
   setTokenCookie,
   clearTokenCookie,
@@ -47,9 +46,9 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
+app.use(express.json()); // express middleware for jsons
 app.use(cookieParser()); // Add cookie parser middleware
-const PORT: number = 3001;
+const PORT: number = 3001; // TODO: add an env variable
 const server = createServer(app); // low level access server to allow for websocket connections
 const io = new Server(server, {
   connectionStateRecovery: {},

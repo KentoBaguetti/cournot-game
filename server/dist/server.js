@@ -47,6 +47,12 @@ const socket_io_1 = require("socket.io");
 const cors_1 = __importDefault(require("cors"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const uuid_1 = require("uuid");
+// Extend the Socket interface to include userId
+// declare module "socket.io" {
+//   interface Socket {
+//     userId?: string;
+//   }
+// }
 //////////////////////////////////////////////////////////////////
 // imported modules (not libraries)
 //////////////////////////////////////////////////////////////////
@@ -65,9 +71,9 @@ app.use(
     methods: ["GET", "POST"],
     credentials: true,
 }));
-app.use(express_1.default.json());
+app.use(express_1.default.json()); // express middleware for jsons
 app.use((0, cookie_parser_1.default)()); // Add cookie parser middleware
-const PORT = 3001;
+const PORT = 3001; // TODO: add an env variable
 const server = (0, http_1.createServer)(app); // low level access server to allow for websocket connections
 const io = new socket_io_1.Server(server, {
     connectionStateRecovery: {},

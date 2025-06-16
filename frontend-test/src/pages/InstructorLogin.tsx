@@ -18,16 +18,9 @@ export default function InstructorLogin() {
     setUsername(usernameValue);
     setPassword(passwordValue);
 
-    let token = localStorage.getItem("jwt") || null;
-
-    if (!token) {
-      const response = await axios.post("http://localhost:3001/setToken", {
-        username: usernameValue,
-      });
-      token = response.data.token;
-    }
-
-    localStorage.setItem("jwt", token ?? "");
+    const response = await axios.post("http://localhost:3001/auth/login", {
+      username: usernameValue,
+    });
 
     navigate("/instructor");
   };
