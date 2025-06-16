@@ -83,6 +83,7 @@ app.get("/", (req, res) => {
 
 // Update the token endpoint to use HTTP-only cookies
 app.post("/auth/login", (req, res) => {
+  console.log("Login hit");
   const { username } = req.body;
 
   if (!username) {
@@ -139,6 +140,18 @@ app.get("/auth/me", (req, res) => {
       username: userData.username,
     },
   });
+});
+
+// expose the jwt token to the frontend
+app.get("/auth/token", (req, res) => {
+  const token = req.cookies.auth_token;
+
+  if (!token) {
+    return res.status(401).json({ success: false, error: "No token provided" });
+  }
+
+  console.log(`Token successfully sent to the frontend`);
+  res.json({ success: true, token });
 });
 
 //////////////////////////////////////////////////////////////////
