@@ -99,7 +99,12 @@ export abstract class BaseGame {
       .then((sockets) => {
         sockets.forEach((socket) => {
           // RemoteSocket doesn't have userId property directly, so we can only log the socket ID
-          console.log(`User in ${this.roomId}: ${socket.id}`);
+          const id = this.socketManager?.connections.get(socket.id) || "";
+          const playerNickname =
+            this.socketManager?.userStore.get(id)?.nickname || "None";
+          console.log(
+            `User in ${this.roomId}: uuid: ${id} ### nickname: ${playerNickname}`
+          );
         });
       });
   }

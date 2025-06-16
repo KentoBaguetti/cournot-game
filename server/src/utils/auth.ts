@@ -7,7 +7,7 @@ import { Response } from "express";
 interface UserTokenData {
   userId: string;
   username: string;
-  lastRoom?: string;
+  roomId?: string;
 }
 
 // Default JWT secret to use if not provided in environment variables
@@ -31,12 +31,15 @@ const decodeJwtToken = (token: string): UserTokenData | null => {
   }
 };
 
-const verifyJwtToken = (token: string): UserTokenData | null => {
+const verifyJwtToken = (token: string): UserTokenData | Error | null => {
   const jwtSecret = process.env.JWT_SECRET || DEFAULT_JWT_SECRET;
 
   try {
     return jwt.verify(token, jwtSecret) as UserTokenData;
   } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      return error;
+    }
     console.error("Error verifying JWT token:", error);
     return null;
   }

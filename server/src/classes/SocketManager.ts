@@ -4,8 +4,8 @@ import { verifyJwtToken, UserTokenData } from "../utils/auth";
 import { GameManager } from "./GameManager";
 
 export class SocketManager {
-  private connections: Map<string, string> = new Map(); // socket.id : userId
-  private userStore: Map<string, UserData> = new Map(); // userId : UserData
+  public connections: Map<string, string> = new Map(); // socket.id : userId
+  public userStore: Map<string, UserData> = new Map(); // userId : UserData
 
   constructor(private io: Server, private gameManager: GameManager) {}
 
@@ -15,33 +15,26 @@ export class SocketManager {
   handleConnection(socket: Socket): void {
     console.log(`Socket ID "${socket.id}" connected`);
 
-    // Get token from cookie (sent by client in handshake)
-    const token = socket.handshake.auth.token;
-    if (!token) {
-      console.error("No token provided for socket connection");
+    // these fields are set by the middleware
+    const { userId, username, roomId } = socket;
+
+    if (!userId || !username || !roomId) {
+      console.error(
+        "Missing userId, username, or roomId for socket connection"
+      );
       socket.disconnect();
       return;
     }
-
-    // Verify and decode the token
-    const userData = verifyJwtToken(token);
-    if (!userData) {
-      console.error("Invalid token provided for socket connection");
-      socket.disconnect();
-      return;
-    }
-
-    const { userId, username, lastRoom } = userData;
 
     // Store user data and connection
-    this.registerUser(socket.id, userId, username, lastRoom);
+    this.registerUser(socket.id, userId, username, roomId);
 
     // Attach userId to socket for easy access
     socket.userId = userId;
 
     // If user has a lastRoom, try to reconnect them to their game
-    if (lastRoom) {
-      this.reconnectToGame(socket, userId, username, lastRoom);
+    if (roomId) {
+      this.reconnectToGame(socket, userId, username, roomId);
     }
 
     console.log(

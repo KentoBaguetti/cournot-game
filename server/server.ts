@@ -84,7 +84,7 @@ app.get("/", (req, res) => {
 // Update the token endpoint to use HTTP-only cookies
 app.post("/auth/login", (req, res) => {
   console.log("Login hit");
-  const { username } = req.body;
+  const { username, roomId } = req.body;
 
   if (!username) {
     return res.status(400).json({ error: "Username is required" });
@@ -97,6 +97,7 @@ app.post("/auth/login", (req, res) => {
   const userData: UserTokenData = {
     userId,
     username,
+    roomId,
   };
 
   // Set the token as an HTTP-only cookie
@@ -108,6 +109,7 @@ app.post("/auth/login", (req, res) => {
     user: {
       userId,
       username,
+      roomId,
     },
   });
 });
@@ -128,7 +130,7 @@ app.get("/auth/me", (req, res) => {
 
   const userData = verifyJwtToken(token);
 
-  if (!userData) {
+  if (!userData || userData instanceof Error) {
     clearTokenCookie(res);
     return res.status(401).json({ authenticated: false });
   }
@@ -138,6 +140,7 @@ app.get("/auth/me", (req, res) => {
     user: {
       userId: userData.userId,
       username: userData.username,
+      roomId: userData.roomId,
     },
   });
 });
@@ -150,13 +153,36 @@ app.get("/auth/token", (req, res) => {
     return res.status(401).json({ success: false, error: "No token provided" });
   }
 
-  console.log(`Token successfully sent to the frontend`);
   res.json({ success: true, token });
 });
 
 //////////////////////////////////////////////////////////////////
-// socket.io routes
+// socket.io routes + middleware
 //////////////////////////////////////////////////////////////////
+
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+
+  if (!token) {
+    console.error("No token provided for socket connection");
+    return next(new Error("No token provided for socket connection"));
+  }
+  const userData = verifyJwtToken(token);
+
+  if (userData instanceof Error || !userData) {
+    console.error("Invalid token provided for socket connection");
+    return next(
+      new Error("Invalid or Expiredtoken provided for socket connection")
+    );
+  }
+
+  socket.userId = userData.userId;
+  socket.username = userData.username;
+  socket.roomId = userData.roomId;
+
+  next();
+});
+
 io.on("connection", (socket: Socket) => {
   // Handle socket connection using the SocketManager
   socketManager.handleConnection(socket);
@@ -280,13 +306,13 @@ io.on("connection", (socket: Socket) => {
     console.log("game:checkroles is being hit");
     const userId = socket.userId;
     if (!userId) {
-      console.error("No userId found for socket");
+      console.log("No userId found for socket");
       return;
     }
 
     const userData = socketManager.getUserData(userId);
     if (!userData) {
-      console.error("No user data found for userId", userId);
+      console.log("No user data found for userId", userId);
       return;
     }
 
@@ -296,7 +322,7 @@ io.on("connection", (socket: Socket) => {
       const game: BaseGame | undefined = gameManager.getGame(currentUserRoom);
       game?.getPlayers();
     } else {
-      console.error("User is not in any room");
+      console.log("User is not in any room");
     }
   });
 
