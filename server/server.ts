@@ -360,6 +360,20 @@ io.on("connection", (socket: Socket) => {
     }
   });
 
+  /**
+   *  already have access to socket.roomId, so no need to pass any parameters yet? maybe rewrite later?
+   *  test endpoint for now
+   */
+  socket.on("game:listUsers", () => {
+    const game: BaseGame | undefined = gameManager.getGame(socket.roomId);
+    if (game) {
+      const users = game.getPlayers();
+      socket.emit("game:listUsers", users); // target only the socket the requested this data
+    } else {
+      console.log(`Game with room id "${socket.roomId}" does not exist`);
+    }
+  });
+
   socket.on("test:emitToRoom", ({ msg }: { msg: string }) => {
     if (socket.roomId) {
       io.to(socket.roomId).emit("server-message", msg);

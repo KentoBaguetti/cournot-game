@@ -78,7 +78,8 @@ export abstract class BaseGame {
     }
   }
 
-  getPlayers(): void {
+  getPlayers(): string[] {
+    const res: string[] = [];
     for (const [userId, player] of this.players) {
       console.log(
         userId,
@@ -86,6 +87,7 @@ export abstract class BaseGame {
         player.getNickname(),
         player.isDisconnected() ? "(Disconnected)" : ""
       );
+      res.push(player.getNickname());
     }
     console.log("");
     this.io
@@ -102,6 +104,7 @@ export abstract class BaseGame {
           );
         });
       });
+    return res;
   }
 
   checkRole(socket: Socket): string {
