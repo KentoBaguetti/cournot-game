@@ -18,10 +18,8 @@ export class SocketManager {
     // these fields are set by the middleware
     const { userId, username, roomId } = socket;
 
-    if (!userId || !username || !roomId) {
-      console.error(
-        "Missing userId, username, or roomId for socket connection"
-      );
+    if (!userId || !username) {
+      console.error("Missing userId or username for socket connection");
       socket.disconnect();
       return;
     }

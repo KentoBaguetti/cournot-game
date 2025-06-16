@@ -83,7 +83,6 @@ app.get("/", (req, res) => {
 
 // Update the token endpoint to use HTTP-only cookies
 app.post("/auth/login", (req, res) => {
-  console.log("Login hit");
   const { username, roomId } = req.body;
 
   if (!username) {
@@ -116,6 +115,24 @@ app.post("/auth/login", (req, res) => {
 
 // Add a logout endpoint
 app.post("/auth/logout", (req, res) => {
+  const token = req.cookies.auth_token;
+
+  if (!token) {
+    return res.status(401).json({ success: false, error: "No token provided" });
+  }
+
+  const userData = verifyJwtToken(token);
+
+  if (!userData || userData instanceof Error) {
+    return res.status(401).json({ success: false, error: "Invalid token" });
+  }
+
+  const socketManager = new SocketManager(io, gameManager);
+  const socketIds = socketManager.getSocketIds(userData.userId);
+  socketIds.forEach((socketId) => {
+    io.sockets.sockets.get(socketId)?.disconnect();
+  });
+
   clearTokenCookie(res);
   res.json({ success: true });
 });
@@ -160,6 +177,7 @@ app.get("/auth/token", (req, res) => {
 // socket.io routes + middleware
 //////////////////////////////////////////////////////////////////
 
+// authentication middleware for socket.io connections
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
 

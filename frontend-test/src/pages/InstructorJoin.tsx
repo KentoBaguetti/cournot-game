@@ -20,24 +20,6 @@ export default function InstructorJoin() {
   const handleCreateGame = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // let token = localStorage.getItem("jwt") || null;
-
-    // if (!token) {
-    //   const response = await axios.post("http://localhost:3001/setToken", {
-    //     userId: socket?.id,
-    //     username: "TempInstructor",
-    //     room: joinCode,
-    //   });
-
-    //   token = response.data.token;
-    // }
-
-    // localStorage.setItem("jwt", token ?? "");
-    // console.log(joinCode);
-
-    // const response = await axios.get("http://localhost:3001/auth/me");
-    // const { userId, username } = response.data.user;
-
     socket?.emit("game:create", { roomId: joinCode, gameType: "testgame" });
 
     navigate("/instructorDashboard");
