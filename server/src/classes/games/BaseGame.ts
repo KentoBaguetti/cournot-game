@@ -5,26 +5,43 @@ import { Instructor } from "../users/Instructor";
 import { SocketManager } from "../SocketManager";
 
 export abstract class BaseGame {
+  //////////////////////////////////////////////////////////////
   // instance variables
+  //////////////////////////////////////////////////////////////
   public players: Map<string, Student | Instructor> = new Map(); // userId : user-type
   public playerCount: number = 0;
   public socketManager?: SocketManager;
+  public roomId: string;
+
+  /** using array for now to take advantage of socket.rooms api.
+   * may change later for more flexibility
+   * the array will just hold all the different room ids
+   */
+  public breakoutRoomIds: string[] = [];
+  public breakoutRoomCount: number = 0;
 
   // abstract instance variables
   public gameSettings: { [key: string]: number | string | any[] } = {};
 
+  //////////////////////////////////////////////////////////////
   // constructor
-  constructor(public roomId: string, protected io: Server) {}
+  //////////////////////////////////////////////////////////////
+  constructor(roomId: string, protected io: Server) {
+    this.roomId = roomId;
+  }
 
   // Set the socket manager reference
   setSocketManager(socketManager: SocketManager): void {
     this.socketManager = socketManager;
   }
-
+  //////////////////////////////////////////////////////////////
   // basic abstract methods for every game
+  //////////////////////////////////////////////////////////////
   abstract onPlayerMove(socket: Socket): void;
 
+  //////////////////////////////////////////////////////////////
   // concrete methods
+  //////////////////////////////////////////////////////////////
   onPlayerJoin(
     socket: Socket,
     userId: string,
@@ -117,5 +134,10 @@ export abstract class BaseGame {
     value: number | string | any[]
   ) {
     this.gameSettings[settingName] = value;
+  }
+
+  async countSocketsInRoom(roomId: string): Promise<number> {
+    const sockets = await this.io.in(roomId).fetchSockets();
+    return sockets.length;
   }
 }

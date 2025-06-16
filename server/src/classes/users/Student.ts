@@ -7,7 +7,8 @@ export class Student {
   constructor(
     protected socket: Socket,
     public userId: string,
-    protected nickname: string = "Guest"
+    protected nickname: string = "Guest",
+    public breakoutRoomId: string = ""
   ) {}
 
   public setNickName(nickname: string): void {
