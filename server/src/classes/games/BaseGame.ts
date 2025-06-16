@@ -12,6 +12,7 @@ export abstract class BaseGame {
   public playerCount: number = 0;
   public socketManager?: SocketManager;
   public roomId: string;
+  public hostId: string;
 
   /** using array for now to take advantage of socket.rooms api.
    * may change later for more flexibility
@@ -26,8 +27,9 @@ export abstract class BaseGame {
   //////////////////////////////////////////////////////////////
   // constructor
   //////////////////////////////////////////////////////////////
-  constructor(roomId: string, protected io: Server) {
+  constructor(roomId: string, protected io: Server, hostId: string) {
     this.roomId = roomId;
+    this.hostId = hostId;
   }
 
   // Set the socket manager reference
@@ -116,8 +118,13 @@ export abstract class BaseGame {
           const id = this.socketManager?.connections.get(socket.id) || "";
           const playerNickname =
             this.socketManager?.userStore.get(id)?.nickname || "None";
+          const player = this.players.get(id);
           console.log(
-            `User in ${this.roomId}: uuid: ${id} ### nickname: ${playerNickname}`
+            `User in ${
+              this.roomId
+            }: uuid: ${id} ### nickname: ${playerNickname} ### Role: ${
+              player instanceof Instructor ? "Instructor" : "Student"
+            }`
           );
         });
       });

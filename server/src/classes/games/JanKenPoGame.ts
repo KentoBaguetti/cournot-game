@@ -32,6 +32,10 @@ export class JanKenPoGame extends BaseGame {
     this.players.set(userId, new Student(socket, userId, username, tempRoomId));
     this.playerCount++;
     this.breakoutRoomIds.push(tempRoomId);
+
+    this.io
+      .to(tempRoomId)
+      .emit("player:connect", `Player "${username}" has connected`);
   }
 
   onPlayerMove(socket: Socket): void {}

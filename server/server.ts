@@ -218,7 +218,8 @@ io.on("connection", (socket: Socket) => {
       const game: BaseGame | undefined = GameFactory.createGame(
         gameType,
         roomId,
-        io
+        io,
+        userId
       );
 
       // Set the SocketManager on the game
