@@ -17,7 +17,7 @@ The server uses JWT tokens stored in HTTP-only cookies for secure authentication
 - `POST /auth/login` - Log in with a username
 
   - Request body: `{ "username": "string" }`
-  - Response: `{ "success": true, "user": { "userId": "string", "username": "string" } }`
+  - Response: `{ "success": true, "user": { "userId": "string", "username": "string", "roomId" : "string" } }`
   - Sets an HTTP-only cookie with the JWT token
 
 - `POST /auth/logout` - Log out the current user
@@ -26,8 +26,13 @@ The server uses JWT tokens stored in HTTP-only cookies for secure authentication
   - Clears the authentication cookie
 
 - `GET /auth/me` - Check authentication status and get current user info
+
   - Response if authenticated: `{ "authenticated": true, "user": { "userId": "string", "username": "string" } }`
   - Response if not authenticated: `{ "authenticated": false }`
+
+  - `GET /auth/token` - expose JWT token
+  - Response if successful: `{ "success": true, "token": "string" }`
+  - Response if not authenticated: `{ "success": false, "error": "string" }`
 
 ## Socket.IO Connection
 
