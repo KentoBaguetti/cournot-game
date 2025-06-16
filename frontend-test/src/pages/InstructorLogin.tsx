@@ -23,6 +23,7 @@ export default function InstructorLogin() {
       "http://localhost:3001/auth/login",
       {
         username: usernameValue,
+        roomId: "", // roomId is empty when the user logs in
       },
       {
         withCredentials: true,

@@ -4,12 +4,6 @@ import { Student } from "../users/Student";
 import { Instructor } from "../users/Instructor";
 import { SocketManager } from "../SocketManager";
 
-declare module "socket.io" {
-  interface Socket {
-    userId?: string;
-  }
-}
-
 export abstract class BaseGame {
   // instance variables
   public players: Map<string, Student | Instructor> = new Map(); // userId : user-type
@@ -51,6 +45,7 @@ export abstract class BaseGame {
 
   onPlayerDisconnect(socket: Socket, userId: string): void {
     socket.leave(this.roomId);
+    socket.roomId = "";
     // We don't delete the player from the map to allow for reconnection
     // Instead, mark the player as disconnected
     const player = this.players.get(userId);

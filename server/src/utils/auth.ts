@@ -7,7 +7,7 @@ import { Response } from "express";
 interface UserTokenData {
   userId: string;
   username: string;
-  roomId?: string;
+  roomId: string;
 }
 
 // Default JWT secret to use if not provided in environment variables

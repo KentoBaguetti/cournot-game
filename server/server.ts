@@ -11,13 +11,6 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { v4 as uuidv4 } from "uuid";
 
-// Extend the Socket interface to include userId
-// declare module "socket.io" {
-//   interface Socket {
-//     userId?: string;
-//   }
-// }
-
 //////////////////////////////////////////////////////////////////
 // imported modules (not libraries)
 //////////////////////////////////////////////////////////////////
@@ -241,8 +234,11 @@ io.on("connection", (socket: Socket) => {
       const room = roomStore.get(roomId);
       room?.players.add(userId);
 
-      // Update user's last room
+      // Update user's last room (in userData)
       socketManager.updateUserRoom(userId, roomId);
+
+      // update the socket instance
+      socket.roomId = roomId;
 
       console.log(
         `Game created: ${gameType}, Room: ${roomId}, Host: ${username}`
@@ -283,8 +279,11 @@ io.on("connection", (socket: Socket) => {
       const room = roomStore.get(roomId);
       room?.players.add(userId);
 
-      // Update user's last room
+      // Update user's last room (in userData)
       socketManager.updateUserRoom(userId, roomId);
+
+      // update the socket instance
+      socket.roomId = roomId;
 
       console.log(`User ${username} joined game in room ${roomId}`);
     } else {
@@ -313,6 +312,9 @@ io.on("connection", (socket: Socket) => {
       // Update room data
       const room = roomStore.get(roomId);
       room?.players.delete(userId);
+
+      // update the socket instance
+      socket.roomId = "";
 
       console.log(`User ${userData.nickname} left game in room ${roomId}`);
     } else {
@@ -355,6 +357,13 @@ io.on("connection", (socket: Socket) => {
       } else {
         console.log("An unknown error occurred");
       }
+    }
+  });
+
+  socket.on("test:emitToRoom", ({ msg }: { msg: string }) => {
+    if (socket.roomId) {
+      io.to(socket.roomId).emit("server-message", msg);
+      console.log(`Emitting to room ${socket.roomId}`);
     }
   });
 
