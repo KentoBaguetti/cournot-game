@@ -18,9 +18,20 @@ export default function InstructorLogin() {
     setUsername(usernameValue);
     setPassword(passwordValue);
 
-    const response = await axios.post("http://localhost:3001/auth/login", {
-      username: usernameValue,
-    });
+    // const response = await axios.post("http://localhost:3001/auth/login", {
+    //   username: usernameValue,
+    // });
+
+    // sets the token as a cookie, no response needed so far
+    await axios.post(
+      "http://localhost:3001/auth/login",
+      {
+        username: usernameValue,
+      },
+      {
+        withCredentials: true,
+      }
+    );
 
     navigate("/instructor");
   };
