@@ -19,6 +19,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchTokenData = async () => {
       const response = await axios.get("http://localhost:3001/auth/token", {
         withCredentials: true,
@@ -30,6 +32,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     const initializeSocket = async () => {
       try {
         const token = await fetchTokenData();
+        if (!isMounted) return;
         console.log(`Token: ${token}`);
 
         const socket = io("http://localhost:3001", {
@@ -74,6 +77,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     //     socket.disconnect();
     //   };
     initializeSocket();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return React.createElement(
