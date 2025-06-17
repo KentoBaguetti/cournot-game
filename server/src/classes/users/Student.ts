@@ -3,6 +3,7 @@ import { Socket } from "socket.io";
 
 export class Student {
   protected disconnected: boolean = false;
+  protected userMove: string = "";
 
   constructor(
     protected socket: Socket,
@@ -37,5 +38,13 @@ export class Student {
 
   public isDisconnected(): boolean {
     return this.disconnected;
+  }
+
+  public setUserMove(move: string): void {
+    this.userMove = move;
+  }
+
+  public getUserMove(): string {
+    return this.userMove;
   }
 }

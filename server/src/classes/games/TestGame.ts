@@ -88,6 +88,8 @@ export class TestGame extends BaseGame {
     console.log(`onPlayerMove() hit with socket: ${socket.id}`);
   }
 
+  sendOpponentMove(socket: Socket): void {}
+
   modifyGameSetting(
     socket: Socket,
     settingName: keyof typeof this.gameSettings,

@@ -83,15 +83,59 @@ export class JanKenPoGame extends BaseGame {
       }
       res.set(currentRoomId, players);
     }
-    console.log();
+    console.log("Rooms : Players");
     console.log(res);
-    console.log();
+    console.log("Room Map");
     console.log(this.roomMap);
     console.log();
     return res;
   }
 
   onPlayerMove(socket: Socket, action: string): void {
+    const player = this.players.get(socket.userId);
+    if (!player) {
+      console.error("Player not found");
+      return;
+    }
+    if (player instanceof Instructor) {
+      console.error("Instructor cannot move");
+      return;
+    }
+    player.setUserMove(action);
     console.log(`Player ${socket.id} moved with action: ${action}`);
+  }
+
+  // go through the breakout room, find the opponent, check for move, send the move to the socket
+  sendOpponentMove(socket: Socket): void {
+    const player = this.players.get(socket.userId);
+    if (!player) {
+      console.error("Player not found");
+      return;
+    }
+    if (player instanceof Instructor) {
+      console.error("Instructor cannot move and should not recieve a move");
+      return;
+    }
+
+    const roomId = socket.roomId;
+    if (!roomId) {
+      console.error("Room id not found");
+      return;
+    }
+
+    const roomData = this.roomMap.get(roomId);
+    if (!roomData) {
+      console.error("Room data not found");
+      return;
+    }
+
+    const roomUsers = roomData.users;
+    const opponent = roomUsers.find((user) => user.userId !== socket.userId);
+    const opponentMove = opponent?.getUserMove();
+    if (!opponentMove) {
+      console.error("Opponent move not found");
+      return;
+    }
+    socket.emit("game:checkMove", { move: opponentMove });
   }
 }

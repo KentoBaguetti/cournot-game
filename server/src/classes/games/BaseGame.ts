@@ -50,6 +50,7 @@ export abstract class BaseGame {
   // basic abstract methods for every game
   //////////////////////////////////////////////////////////////
   abstract onPlayerMove(socket: Socket, action: string): void;
+  abstract sendOpponentMove(socket: Socket): void;
 
   //////////////////////////////////////////////////////////////
   // concrete methods

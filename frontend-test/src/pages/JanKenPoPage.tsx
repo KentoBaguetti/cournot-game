@@ -8,14 +8,14 @@ export default function JanKenPoPage() {
 
   useEffect(() => {
     socket?.emit("player:move", { action: userAction });
-    socket?.emit("game:checkMove", { msg: "Hello" });
+    socket?.emit("game:checkMove");
   }, [socket, userAction]);
 
   useEffect(() => {
     if (!socket) return;
 
-    const handleCheckMove = ({ msg }: { msg: string }) => {
-      setOpponentAction(msg);
+    const handleCheckMove = ({ move }: { move: string }) => {
+      setOpponentAction(move);
     };
 
     socket.on("game:checkMove", handleCheckMove);

@@ -54,4 +54,5 @@ export class CournotGame extends BaseGame {
   }
 
   onPlayerMove(socket: Socket): void {}
+  sendOpponentMove(socket: Socket): void {}
 }
