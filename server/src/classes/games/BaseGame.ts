@@ -2,7 +2,7 @@
 import { Server, Socket } from "socket.io";
 import { Student } from "../users/Student";
 import { Instructor } from "../users/Instructor";
-import { SocketManager } from "../SocketManager";
+import { SocketManager } from "../../socket/SocketManager";
 
 export abstract class BaseGame {
   //////////////////////////////////////////////////////////////

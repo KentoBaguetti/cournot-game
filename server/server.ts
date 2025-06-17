@@ -24,7 +24,7 @@ import {
   clearTokenCookie,
   UserTokenData,
 } from "./src/utils/auth";
-import { SocketManager } from "./src/classes/SocketManager";
+import { SocketManager } from "./src/socket/SocketManager";
 
 //////////////////////////////////////////////////////////////////
 // server vars

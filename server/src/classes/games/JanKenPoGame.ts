@@ -51,20 +51,6 @@ export class JanKenPoGame extends BaseGame {
         .to(tempRoomId)
         .emit("player:connect", `Player "${username}" has connected`);
     }
-
-    // add to players map
-    // const player = host
-    //   ? new Instructor(socket, userId, username, this.roomId) // instructor is in the main room
-    //   : new Student(socket, userId, username, tempRoomId);
-    // this.players.set(userId, player);
-    // this.playerCount++;
-    // this.breakoutRoomIds.push(tempRoomId);
-
-    // socket.roomId = tempRoomId; // make sure to update the socket instance as well
-
-    // this.io
-    //   .to(tempRoomId)
-    //   .emit("player:connect", `Player "${username}" has connected`);
   }
 
   async listRoomsAndPlayers(): Promise<Map<string, string[]>> {

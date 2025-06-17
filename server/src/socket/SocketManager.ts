@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 import { UserData } from "../types/types";
 import { verifyJwtToken, UserTokenData } from "../utils/auth";
-import { GameManager } from "./GameManager";
+import { GameManager } from "../classes/GameManager";
 
 export class SocketManager {
   public connections: Map<string, string> = new Map(); // socket.id : userId
