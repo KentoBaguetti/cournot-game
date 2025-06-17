@@ -262,7 +262,10 @@ io.on("connection", (socket: Socket) => {
 
     const username = userData.nickname;
 
-    const game: BaseGame | undefined = gameManager.getGame(roomId);
+    const mainRoomId =
+      socket.roomId.length > 6 ? socket.roomId.split("_")[0] : socket.roomId;
+
+    const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
     if (game) {
       // Set the SocketManager on the game if not already set
       if (!game.socketManager) {
@@ -277,13 +280,13 @@ io.on("connection", (socket: Socket) => {
       }
 
       // Update room data
-      const room = roomStore.get(roomId);
+      const room = roomStore.get(mainRoomId);
       room?.players.add(userId);
 
       // Update user's last room (in userData)
-      socketManager.updateUserRoom(userId, roomId);
+      socketManager.updateUserRoom(userId, mainRoomId);
 
-      // update the socket instance
+      // update the socket instance # connects to the breakout room immediately if it exists
       socket.roomId = roomId;
 
       console.log(`User ${username} joined game in room ${roomId}`);
@@ -401,10 +404,25 @@ io.on("connection", (socket: Socket) => {
   ////////////////////////////////////////////////
   socket.on("player:move", ({ action }: { action: string }) => {
     console.log("Player:move endpoint hit");
+    const mainRoomId =
+      socket.roomId.length > 6 ? socket.roomId.split("_")[0] : socket.roomId;
+    const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
+    if (game) {
+      game.onPlayerMove(socket, action);
+    } else {
+      console.log(`Game with room id "${mainRoomId}" does not exist`);
+    }
   });
-  socket.on("game:checkMove", ({ msg }) => {
-    console.log(`Check move endpoint hit: ${msg}`);
-    socket.emit("game:checkMove", { msg: "Hello" });
+
+  socket.on("game:checkMove", () => {
+    const mainRoomId =
+      socket.roomId.length > 6 ? socket.roomId.split("_")[0] : socket.roomId;
+    const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
+    if (game) {
+      game.sendOpponentMove(socket);
+    } else {
+      console.log(`Game with room id "${mainRoomId}" does not exist`);
+    }
   });
 
   socket.on("disconnect", () => {
