@@ -3,7 +3,7 @@
 - create user mappings on the server side to map users to their respective game room DONE
 - keep adding maps -- users, gameRooms, activeGames, type shii DONE maybe too many maps, its too complicated now
 - migrate away from using socket.id's to using the jwt tokens -- should probably move them to cookies ehh kinda done?
-- handle reconnections DONE
+- handle reconnections semi done
 
 ## breakout room flow
 
