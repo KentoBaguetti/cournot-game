@@ -2,6 +2,7 @@ import { BaseGame } from "./BaseGame";
 import { Socket } from "socket.io";
 import { Instructor } from "../users/Instructor";
 import { Student } from "../users/Student";
+import { BreakoutRoomData } from "../../types/types";
 
 export class JanKenPoGame extends BaseGame {
   gameSettings: {
@@ -43,9 +44,24 @@ export class JanKenPoGame extends BaseGame {
       }
 
       const player = new Student(socket, userId, username, tempRoomId);
+
+      // set the room map
+      if (!this.roomMap.has(tempRoomId)) {
+        this.roomMap.set(tempRoomId, {
+          users: [player],
+          roundNo: 0,
+        });
+      } else {
+        this.roomMap.get(tempRoomId)?.users.push(player);
+      }
+
+      // set the players map
       this.players.set(userId, player);
       this.playerCount++;
+
+      // set the breakout room ids
       this.breakoutRoomIds.push(tempRoomId);
+
       socket.roomId = tempRoomId;
       this.io
         .to(tempRoomId)
@@ -70,8 +86,12 @@ export class JanKenPoGame extends BaseGame {
     console.log();
     console.log(res);
     console.log();
+    console.log(this.roomMap);
+    console.log();
     return res;
   }
 
-  onPlayerMove(socket: Socket): void {}
+  onPlayerMove(socket: Socket, action: string): void {
+    console.log(`Player ${socket.id} moved with action: ${action}`);
+  }
 }

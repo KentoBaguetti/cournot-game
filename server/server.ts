@@ -396,6 +396,17 @@ io.on("connection", (socket: Socket) => {
     console.log(`########### client response: ${msg}`);
   });
 
+  ////////////////////////////////////////////////
+  // socket endpoints for the jankenpo game
+  ////////////////////////////////////////////////
+  socket.on("player:move", ({ action }: { action: string }) => {
+    console.log("Player:move endpoint hit");
+  });
+  socket.on("game:checkMove", ({ msg }) => {
+    console.log(`Check move endpoint hit: ${msg}`);
+    socket.emit("game:checkMove", { msg: "Hello" });
+  });
+
   socket.on("disconnect", () => {
     // Handle socket disconnection using the SocketManager
     socketManager.handleDisconnection(socket);

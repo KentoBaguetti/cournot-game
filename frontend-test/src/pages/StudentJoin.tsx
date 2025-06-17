@@ -22,19 +22,6 @@ export default function StudentJoin() {
     setUsername(usernameValue);
     console.log(usernameValue);
 
-    // let token = localStorage.getItem("jwt") || null;
-
-    // if (!token) {
-    //   const response = await axios.post("http://localhost:3001/setToken", {
-    //     username: usernameValue,
-    //   });
-
-    //   token = response.data.token;
-    // }
-
-    // localStorage.setItem("jwt", token ?? "");
-    // localStorage.setItem("gameRoomCode", codeValue);
-
     await axios.post(
       "http://localhost:3001/auth/login",
       {
@@ -44,7 +31,7 @@ export default function StudentJoin() {
       { withCredentials: true }
     );
 
-    navigate("/studentGame");
+    navigate("/janKenPo");
   };
 
   return (

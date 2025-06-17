@@ -83,7 +83,7 @@ export class TestGame extends BaseGame {
     }
   }
 
-  onPlayerMove(socket: Socket): void {
+  onPlayerMove(socket: Socket, action: string): void {
     this.io.to(this.roomId).emit("server-response", `Hello ${socket.id}`);
     console.log(`onPlayerMove() hit with socket: ${socket.id}`);
   }
@@ -97,7 +97,6 @@ export class TestGame extends BaseGame {
     const userId = socket.userId;
     if (!userId) {
       throw new Error("No userId found for socket");
-      return;
     }
 
     // Get the player by userId

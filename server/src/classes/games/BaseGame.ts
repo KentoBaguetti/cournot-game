@@ -3,23 +3,33 @@ import { Server, Socket } from "socket.io";
 import { Student } from "../users/Student";
 import { Instructor } from "../users/Instructor";
 import { SocketManager } from "../../socket/SocketManager";
+import { BreakoutRoomData } from "../../types/types";
+
+/**
+ *
+ * This abstract class contains very basic implementations of certain methods that will be overrided
+ * during the implementation of the more specific sublcass games.
+ *
+ */
 
 export abstract class BaseGame {
   //////////////////////////////////////////////////////////////
   // instance variables
   //////////////////////////////////////////////////////////////
   public players: Map<string, Student | Instructor> = new Map(); // userId : user-type
-  public playerCount: number = 0;
   public socketManager?: SocketManager;
+  public playerCount: number = 0;
   public roomId: string;
   public hostId: string;
 
-  /** using array for now to take advantage of socket.rooms api.
+  /**
+   * using array for now to take advantage of socket.rooms api.
    * may change later for more flexibility
    * the array will just hold all the different room ids
    */
   public breakoutRoomIds: string[] = [];
   public breakoutRoomCount: number = 0;
+  public roomMap: Map<string, BreakoutRoomData> = new Map();
 
   // abstract instance variables
   public gameSettings: { [key: string]: number | string | any[] } = {};
@@ -39,11 +49,12 @@ export abstract class BaseGame {
   //////////////////////////////////////////////////////////////
   // basic abstract methods for every game
   //////////////////////////////////////////////////////////////
-  abstract onPlayerMove(socket: Socket): void;
+  abstract onPlayerMove(socket: Socket, action: string): void;
 
   //////////////////////////////////////////////////////////////
   // concrete methods
   //////////////////////////////////////////////////////////////
+  // very basic implementation for now, the more specific sublcass games will override this
   onPlayerJoin(
     socket: Socket,
     userId: string,
@@ -97,6 +108,7 @@ export abstract class BaseGame {
     }
   }
 
+  // TODO: fix this so it gets the users that are in breakout rooms
   getPlayers(): string[] {
     const res: string[] = [];
     for (const [userId, player] of this.players) {

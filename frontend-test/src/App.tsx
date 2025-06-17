@@ -7,6 +7,7 @@ import InstructorJoin from "./pages/InstructorJoin";
 import InstructorDashboard from "./pages/InstructorDashboard";
 import StudentGamePage from "./pages/StudentGamePage";
 import InstructorLogin from "./pages/InstructorLogin";
+import JanKenPoPage from "./pages/JanKenPoPage";
 
 function App() {
   // const [message, setMessage] = useState("");
@@ -85,6 +86,14 @@ function App() {
           element={
             <SocketProvider>
               <StudentGamePage />
+            </SocketProvider>
+          }
+        />
+        <Route
+          path="/janKenPo"
+          element={
+            <SocketProvider>
+              <JanKenPoPage />
             </SocketProvider>
           }
         />
