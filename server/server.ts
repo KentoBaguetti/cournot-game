@@ -375,6 +375,16 @@ io.on("connection", (socket: Socket) => {
     }
   });
 
+  socket.on("game:listRoomsAndPlayers", async () => {
+    const game: BaseGame | undefined = gameManager.getGame(socket.roomId);
+    if (game) {
+      const res: Map<string, string[]> = await game.listRoomsAndPlayers();
+      socket.emit("game:listRoomsAndPlayers", res);
+    } else {
+      console.log("Error returning rooms and players");
+    }
+  });
+
   socket.on("test:emitToRoom", ({ msg }: { msg: string }) => {
     if (socket.roomId) {
       io.to(socket.roomId).emit("server-message", msg);

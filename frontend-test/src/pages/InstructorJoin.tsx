@@ -20,7 +20,7 @@ export default function InstructorJoin() {
   const handleCreateGame = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    socket?.emit("game:create", { roomId: joinCode, gameType: "testgame" });
+    socket?.emit("game:create", { roomId: joinCode, gameType: "jankenpo" });
 
     navigate("/instructorDashboard");
   };

@@ -3,13 +3,16 @@ import { Socket } from "socket.io";
 export class Instructor {
   protected disconnected: boolean = false;
   protected nickname: string;
+  public roomId: string;
 
   constructor(
     protected socket: Socket,
     public userId: string,
-    nickname: string = "Instructor"
+    nickname: string = "Instructor",
+    roomId: string = ""
   ) {
     this.nickname = nickname;
+    this.roomId = roomId;
   }
 
   public getUserId(): string {

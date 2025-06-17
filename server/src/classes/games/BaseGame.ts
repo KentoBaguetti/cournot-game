@@ -135,6 +135,27 @@ export abstract class BaseGame {
     return "";
   }
 
+  // temp function to list all the rooms and players
+  async listRoomsAndPlayers(): Promise<Map<string, string[]>> {
+    const res: Map<string, string[]> = new Map();
+
+    for (const currentRoomId of this.breakoutRoomIds) {
+      const sockets = await this.io.in(currentRoomId).fetchSockets();
+      const players: string[] = [];
+      for (const socket of sockets) {
+        const userId = this.socketManager?.connections.get(socket.id) || "";
+        const currentPlayerNickname: string =
+          this.socketManager?.userStore.get(userId)?.nickname || "None";
+        players.push(currentPlayerNickname);
+      }
+      res.set(currentRoomId, players);
+    }
+    console.log();
+    console.log(res);
+    console.log();
+    return res;
+  }
+
   modifyGameSetting(
     socket: Socket,
     settingName: string,
