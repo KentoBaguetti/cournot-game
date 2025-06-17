@@ -57,25 +57,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     };
 
-    //   const token = fetchTokenData();
-
-    //   const socket = io("http://localhost:3001", {
-    //     auth: {
-    //       token: token,
-    //     },
-    //     autoConnect: true,
-    //     reconnection: true,
-    //     reconnectionAttempts: Infinity,
-    //     reconnectionDelay: 1000,
-    //     reconnectionDelayMax: 5000,
-    //   });
-
-    //   socketRef.current = socket;
-    //   setSocketInstance(socket);
-
-    //   return () => {
-    //     socket.disconnect();
-    //   };
     initializeSocket();
 
     return () => {
