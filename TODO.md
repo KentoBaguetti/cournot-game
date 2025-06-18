@@ -4,6 +4,7 @@
 - keep adding maps -- users, gameRooms, activeGames, type shii DONE maybe too many maps, its too complicated now
 - migrate away from using socket.id's to using the jwt tokens -- should probably move them to cookies ehh kinda done?
 - handle reconnections semi done
+- switch room creation flow to be create game --> get join code --> view join code --> instructor has choice to go to other pages such as dashboards
 
 ## breakout room flow
 
