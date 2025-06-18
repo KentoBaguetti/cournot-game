@@ -25,6 +25,7 @@ import {
   UserTokenData,
 } from "./src/utils/auth";
 import { SocketManager } from "./src/socket/SocketManager";
+import { parseRoomId } from "./src/utils/utils";
 
 //////////////////////////////////////////////////////////////////
 // server vars
@@ -404,8 +405,7 @@ io.on("connection", (socket: Socket) => {
   ////////////////////////////////////////////////
   socket.on("player:move", ({ action }: { action: string }) => {
     console.log("Player:move endpoint hit");
-    const mainRoomId =
-      socket.roomId.length > 6 ? socket.roomId.split("_")[0] : socket.roomId;
+    const mainRoomId = parseRoomId(socket.roomId);
     const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
     if (game) {
       game.onPlayerMove(socket, action);
@@ -415,8 +415,7 @@ io.on("connection", (socket: Socket) => {
   });
 
   socket.on("game:checkMove", () => {
-    const mainRoomId =
-      socket.roomId.length > 6 ? socket.roomId.split("_")[0] : socket.roomId;
+    const mainRoomId = parseRoomId(socket.roomId);
     const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
     if (game) {
       game.sendOpponentMove(socket);
