@@ -1,27 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { generateJoinCode } from "../utils";
+import React, { useEffect, useState } from "react";
 import { useSocket } from "../socket";
 import { useNavigate } from "react-router-dom";
 
 export default function InstructorJoin() {
   const socket = useSocket();
   const navigate = useNavigate();
-  const [joinCode, setJoinCode] = useState("");
+  const [roomId, setRoomId] = useState("");
 
   useEffect(() => {
-    setJoinCode(generateJoinCode());
-  }, []);
-
-  const handleNewJoinCode = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setJoinCode(generateJoinCode());
-  };
+    socket?.on("game:gameCreated", ({ roomId }: { roomId: string }) => {
+      setRoomId(roomId);
+    });
+  }, [socket]);
 
   const handleCreateGame = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    socket?.emit("game:create", { roomId: joinCode, gameType: "jankenpo" });
+    socket?.emit("host:createGame", { gameType: "jankenpo" });
 
+    //navigate("/instructorDashboard");
+  };
+
+  const navigateToDashboard = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     navigate("/instructorDashboard");
   };
 
@@ -29,12 +30,14 @@ export default function InstructorJoin() {
     <div className="flex flex-col justify-center items-center">
       <h1>Instructor Join Page</h1>
       <div>
-        <h2>Join Code: {joinCode}</h2>
-        <form onSubmit={handleNewJoinCode}>
-          <button type="submit">Generate new join code</button>
-        </form>
+        <h2>Room ID: {roomId}</h2>
         <form onSubmit={handleCreateGame}>
           <button type="submit">Create Game</button>
+        </form>
+        <form>
+          <button type="button" onClick={navigateToDashboard}>
+            Navigate to Dashboard
+          </button>
         </form>
       </div>
     </div>

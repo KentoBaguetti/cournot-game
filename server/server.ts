@@ -25,7 +25,7 @@ import {
   UserTokenData,
 } from "./src/utils/auth";
 import { SocketManager } from "./src/socket/SocketManager";
-import { parseRoomId } from "./src/utils/utils";
+import { parseRoomId, generateJoinCode } from "./src/utils/utils";
 
 //////////////////////////////////////////////////////////////////
 // server vars
@@ -199,54 +199,58 @@ io.on("connection", (socket: Socket) => {
   // Handle socket connection using the SocketManager
   socketManager.handleConnection(socket);
 
-  socket.on(
-    "game:create",
-    ({ roomId, gameType }: { roomId: string; gameType: string }) => {
-      const userId = socket.userId;
-      if (!userId) {
-        console.error("No userId found for socket");
-        return;
-      }
-
-      const userData = socketManager.getUserData(userId);
-      if (!userData) {
-        console.error("No user data found for userId", userId);
-        return;
-      }
-
-      const username = userData.nickname;
-
-      const game: BaseGame | undefined = GameFactory.createGame(
-        gameType,
-        roomId,
-        io,
-        userId
-      );
-
-      // Set the SocketManager on the game
-      game.setSocketManager(socketManager);
-
-      roomStore.set(roomId, { gameType: gameType, players: new Set<string>() });
-      gameManager.addGame(roomId, game);
-
-      // Join as host
-      game.onPlayerJoin(socket, userId, username, true);
-
-      // Update room data
-      const room = roomStore.get(roomId);
-      room?.players.add(userId);
-
-      // Update user's last room (in userData)
-      socketManager.updateUserRoom(userId, roomId);
-
-      // update the socket instance
-      socket.roomId = roomId;
-
-      console.log(
-        `Game created: ${gameType}, Room: ${roomId}, Host: ${username}`
-      );
+  socket.on("host:createGame", ({ gameType }: { gameType: string }) => {
+    const userId = socket.userId;
+    if (!userId) {
+      console.error("No userId found for socket");
     }
-  );
+
+    const userData = socketManager.getUserData(userId);
+    if (!userData) {
+      console.error("No user data found for userId", userId);
+      return;
+    }
+
+    const username = userData.nickname;
+
+    // generate the main room id, and this is what will be returned to the client/host
+    const mainRoomId = generateJoinCode();
+
+    const game: BaseGame | undefined = GameFactory.createGame(
+      gameType,
+      mainRoomId,
+      io,
+      userId
+    );
+
+    // apply the server socket manaager to the game
+    game.setSocketManager(socketManager);
+
+    roomStore.set(mainRoomId, {
+      gameType: gameType,
+      players: new Set<string>(),
+    });
+    gameManager.addGame(mainRoomId, game);
+
+    // join as host
+    game.onPlayerJoin(socket, userId, username, true);
+
+    // Update room data
+    const room = roomStore.get(mainRoomId);
+    room?.players.add(userId);
+
+    // update the users last room (in userData)
+    socketManager.updateUserRoom(userId, mainRoomId);
+    socket.roomId = mainRoomId;
+
+    console.log(
+      `Game created: ${gameType}, Room: ${mainRoomId}, Host: ${username}`
+    );
+
+    // emit back to the room host the gameRoom id - this way we keep all the logic on the backend, don't want to have the code be generated on the frontend
+    socket.emit("game:gameCreated", { roomId: mainRoomId });
+    console.log("Emitted back to the host");
+  });
 
   socket.on("game:join", ({ roomId }: { roomId: string }) => {
     const userId = socket.userId;
@@ -425,10 +429,10 @@ io.on("connection", (socket: Socket) => {
   });
 
   // big test endpoint, will need a lot of rewriting if I want to use this later as an acc endpoint
-  socket.on("game:emitToCurrentRoom", ({msg}: {msg: string}) => {
+  socket.on("game:emitToCurrentRoom", ({ msg }: { msg: string }) => {
     const currentRoomId = socket.roomId;
     if (currentRoomId) {
-      io.to(currentRoomId).emit("game:emitToCurrentRoom", {msg});
+      io.to(currentRoomId).emit("game:emitToCurrentRoom", { msg });
       console.log(`Emitting to room ${currentRoomId}`);
     } else {
       console.log("No room found for socket");

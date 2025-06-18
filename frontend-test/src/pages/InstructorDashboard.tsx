@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useSocket } from "../socket";
+import { useNavigate } from "react-router-dom";
 
 export default function InstructorDashboard() {
   const socket = useSocket();
+  const navigate = useNavigate();
   const [players, setPlayers] = useState([]);
   const [roomsAndPlayers, setRoomsAndPlayers] = useState(null); // Map<string, string[]>
 
@@ -25,9 +27,19 @@ export default function InstructorDashboard() {
     socket?.emit("game:listRoomsAndPlayers");
   };
 
+  const navigateToJoin = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    navigate("/instructor");
+  };
+
   return (
     <div className="flex flex-col justify-center items-center">
       <h1>Instructor Dashboard</h1>
+      <form action="">
+        <button type="button" onClick={navigateToJoin}>
+          Go back a page
+        </button>
+      </form>
       <div>
         <h3>View active players</h3>
         <p>{players.join(", ")}</p>
