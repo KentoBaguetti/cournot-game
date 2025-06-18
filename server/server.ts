@@ -425,6 +425,17 @@ io.on("connection", (socket: Socket) => {
     }
   });
 
+  // big test endpoint, will need a lot of rewriting if I want to use this later as an acc endpoint
+  socket.on("game:emitToCurrentRoom", ({msg}: {msg: string}) => {
+    const currentRoomId = socket.roomId;
+    if (currentRoomId) {
+      io.to(currentRoomId).emit("game:emitToCurrentRoom", {msg});
+      console.log(`Emitting to room ${currentRoomId}`);
+    } else {
+      console.log("No room found for socket");
+    }
+  });
+
   socket.on("disconnect", () => {
     // Handle socket disconnection using the SocketManager
     socketManager.handleDisconnection(socket);
