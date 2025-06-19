@@ -209,6 +209,10 @@ io.on("connection", (socket: Socket) => {
   // Handle socket connection using the SocketManager
   socketManager.handleConnection(socket);
 
+  socket.on("test", ({ data }: { data: any }) => {
+    console.log("test endpoint hit", data);
+  });
+
   socket.on("host:createGame", ({ gameType }: { gameType: string }) => {
     const userId = socket.userId;
     if (!userId) {

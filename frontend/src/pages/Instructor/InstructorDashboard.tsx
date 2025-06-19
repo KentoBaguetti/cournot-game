@@ -32,7 +32,7 @@ export default function InstructorDashboard() {
   }, []);
 
   const handleGameSelect = (gameId: string) => {
-    navigate(`/instructor/createGame/${gameId}`);
+    navigate(`/instructor/create/${gameId}`);
   };
 
   return (

@@ -12,6 +12,7 @@ import JanKenPoPage from "./pages/JanKenPoPage";
 // non test shit
 import InstructorDashboard from "./pages/Instructor/InstructorDashboard";
 import CreateGamePage from "./pages/Instructor/CreateGamePage";
+import CreateJankenpoGamePage from "./pages/Instructor/CreateJankenpoGamePage";
 
 function App() {
   // const [message, setMessage] = useState("");
@@ -90,6 +91,15 @@ function App() {
           element={
             <SocketProvider>
               <CreateGamePage />
+            </SocketProvider>
+          }
+        />
+
+        <Route
+          path="/instructor/create/jankenpo"
+          element={
+            <SocketProvider>
+              <CreateJankenpoGamePage />
             </SocketProvider>
           }
         />

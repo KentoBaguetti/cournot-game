@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import type { Game } from "../../types";
+import type { Game } from "../../types"; // so we dont need to individually import every type
 
 export default function CreateGamePage() {
   const [games, setGames] = useState<Record<string, Game> | null>(null);
