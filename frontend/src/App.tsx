@@ -4,10 +4,14 @@ import { SocketProvider } from "./socket";
 import Home from "./pages/Home";
 import StudentJoin from "./pages/StudentJoin";
 import InstructorJoin from "./pages/InstructorJoin";
-import InstructorDashboard from "./pages/InstructorDashboard";
+// import InstructorDashboard from "./pages/InstructorDashboard";
 import StudentGamePage from "./pages/StudentGamePage";
-import InstructorLogin from "./pages/InstructorLogin";
+import InstructorLogin from "./pages/Instructor/InstructorLogin";
 import JanKenPoPage from "./pages/JanKenPoPage";
+
+// non test shit
+import InstructorDashboard from "./pages/Instructor/InstructorDashboard";
+import CreateGamePage from "./pages/Instructor/CreateGamePage";
 
 function App() {
   // const [message, setMessage] = useState("");
@@ -77,6 +81,15 @@ function App() {
           element={
             <SocketProvider>
               <InstructorDashboard />
+            </SocketProvider>
+          }
+        />
+
+        <Route
+          path="/instructor/createGame/:gameId"
+          element={
+            <SocketProvider>
+              <CreateGamePage />
             </SocketProvider>
           }
         />
