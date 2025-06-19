@@ -2,7 +2,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import jwt from "jsonwebtoken";
 import { jwtDecode } from "jwt-decode";
-import { Response } from "express";
+import { Response, Request, NextFunction } from "express";
 
 interface UserTokenData {
   userId: string;
@@ -69,6 +69,19 @@ const clearTokenCookie = (res: Response) => {
   });
 };
 
+// express middleware to check if the user is authenticated
+const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
+  const token = req.cookies.auth_token;
+  if (!token) {
+    return res.status(401).json({ error: "No token found" });
+  }
+  const decodedToken = verifyJwtToken(token);
+  if (!decodedToken) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+  next();
+};
+
 export {
   generateJwtToken,
   decodeJwtToken,
@@ -76,4 +89,5 @@ export {
   setTokenCookie,
   clearTokenCookie,
   UserTokenData,
+  isAuthenticated,
 };
