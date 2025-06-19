@@ -23,6 +23,7 @@ import {
   setTokenCookie,
   clearTokenCookie,
   UserTokenData,
+  isAuthenticated,
 } from "./src/utils/auth";
 import { SocketManager } from "./src/socket/SocketManager";
 import { parseRoomId, generateJoinCode } from "./src/utils/utils";
@@ -132,7 +133,7 @@ app.post("/auth/logout", (req, res) => {
 });
 
 // Add an endpoint to check authentication status
-app.get("/auth/me", (req, res) => {
+app.get("/auth/me", isAuthenticated, (req, res) => {
   const token = req.cookies.auth_token;
 
   if (!token) {
@@ -165,6 +166,15 @@ app.get("/auth/token", (req, res) => {
   }
 
   res.json({ success: true, token });
+});
+
+// send the different games to the frontend (just the names for now, those will be used to create the games)
+app.get("/game/getGames", isAuthenticated, (req, res) => {
+  const games = {
+    testgame: ["testGame", "Test Game"],
+    jankenpo: ["jankenpo", "JanKenPo"],
+  };
+  res.json({ games });
 });
 
 //////////////////////////////////////////////////////////////////
