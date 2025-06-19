@@ -21,6 +21,11 @@ students should be placed into breakout rooms as soon as they join the game, thi
 
 - How to handle maintenence?
 
+## creating a game
+
+- hardcode the game page configs for each game for faster building
+- down the line switch to schema-driven pages
+
 ### What tools are being used:
 
 - socket.io
