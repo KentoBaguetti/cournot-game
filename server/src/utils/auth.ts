@@ -7,7 +7,7 @@ import { Response, Request, NextFunction } from "express";
 interface UserTokenData {
   userId: string;
   username: string;
-  roomId: string;
+  roomId?: string;
 }
 
 // Default JWT secret to use if not provided in environment variables
@@ -60,6 +60,34 @@ const setTokenCookie = (res: Response, userData: UserTokenData) => {
   return token;
 };
 
+/**
+ * Update the room information in the JWT token
+ */
+const updateTokenRoom = (
+  req: Request,
+  res: Response,
+  roomId: string | undefined
+) => {
+  const token = req.cookies.auth_token;
+  if (!token) {
+    return null;
+  }
+
+  const userData = verifyJwtToken(token);
+  if (!userData || userData instanceof Error) {
+    return null;
+  }
+
+  // Update the room information
+  const updatedUserData: UserTokenData = {
+    ...userData,
+    roomId,
+  };
+
+  // Set the updated token as a cookie
+  return setTokenCookie(res, updatedUserData);
+};
+
 const clearTokenCookie = (res: Response) => {
   res.clearCookie("auth_token", {
     httpOnly: true,
@@ -76,7 +104,7 @@ const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
     return res.status(401).json({ error: "No token found" });
   }
   const decodedToken = verifyJwtToken(token);
-  if (!decodedToken) {
+  if (!decodedToken || decodedToken instanceof Error) {
     return res.status(401).json({ error: "Invalid token" });
   }
   next();
@@ -87,6 +115,7 @@ export {
   decodeJwtToken,
   verifyJwtToken,
   setTokenCookie,
+  updateTokenRoom,
   clearTokenCookie,
   UserTokenData,
   isAuthenticated,

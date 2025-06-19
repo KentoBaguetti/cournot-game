@@ -24,6 +24,7 @@ import {
   clearTokenCookie,
   UserTokenData,
   isAuthenticated,
+  updateTokenRoom,
 } from "./src/utils/auth";
 import { SocketManager } from "./src/socket/SocketManager";
 import { parseRoomId, generateJoinCode } from "./src/utils/utils";
@@ -194,13 +195,38 @@ io.use((socket, next) => {
   if (userData instanceof Error || !userData) {
     console.error("Invalid token provided for socket connection");
     return next(
-      new Error("Invalid or Expiredtoken provided for socket connection")
+      new Error("Invalid or Expired token provided for socket connection")
     );
   }
 
-  socket.userId = userData.userId;
-  socket.username = userData.username;
-  socket.roomId = userData.roomId;
+  // Extract user information from token
+  const { userId, username, roomId: tokenRoomId } = userData;
+
+  // Set basic user information on socket
+  socket.userId = userId;
+  socket.username = username;
+
+  // Check for room information in this order:
+  // 1. Room stored in SocketManager (most up-to-date)
+  // 2. Room from token (might be outdated)
+  const persistedRoomId = socketManager.getUserRoom(userId);
+
+  if (persistedRoomId) {
+    // Use the persisted room ID (most up-to-date)
+    socket.roomId = persistedRoomId;
+    console.log(`Using persisted roomId for ${username}: ${persistedRoomId}`);
+  } else if (tokenRoomId) {
+    // Use the room ID from token as fallback
+    socket.roomId = tokenRoomId;
+    console.log(`Using token roomId for ${username}: ${tokenRoomId}`);
+
+    // Store this room ID for future reconnections
+    socketManager.userRooms.set(userId, tokenRoomId);
+  } else {
+    // No room information available
+    socket.roomId = "";
+    console.log(`No room information available for ${username}`);
+  }
 
   next();
 });
@@ -257,6 +283,32 @@ io.on("connection", (socket: Socket) => {
     socketManager.updateUserRoom(userId, mainRoomId);
     socket.roomId = mainRoomId;
 
+    // Update the JWT token with room information
+    if (socket.handshake.headers.cookie) {
+      const cookies = socket.handshake.headers.cookie
+        .split(";")
+        .reduce((acc, cookie) => {
+          const [key, value] = cookie.trim().split("=");
+          acc[key] = value;
+          return acc;
+        }, {} as Record<string, string>);
+
+      if (cookies.auth_token) {
+        // Create a mock request and response to update the token
+        const mockReq = {
+          cookies: { auth_token: cookies.auth_token },
+        } as unknown as Request;
+        const mockRes = {
+          cookie: (name: string, value: string, options: any) => {
+            socket.emit("auth:cookie_update", { name, value, options });
+          },
+          clearCookie: () => {},
+        } as unknown as Response;
+
+        updateTokenRoom(mockReq, mockRes, mainRoomId);
+      }
+    }
+
     console.log(
       `Game created: ${gameType}, Room: ${mainRoomId}, Host: ${username}`
     );
@@ -281,8 +333,7 @@ io.on("connection", (socket: Socket) => {
 
     const username = userData.nickname;
 
-    const mainRoomId =
-      socket.roomId.length > 6 ? socket.roomId.split("_")[0] : socket.roomId;
+    const mainRoomId = roomId.length > 6 ? roomId.split("_")[0] : roomId;
 
     const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
     if (game) {
@@ -303,10 +354,36 @@ io.on("connection", (socket: Socket) => {
       room?.players.add(userId);
 
       // Update user's last room (in userData)
-      socketManager.updateUserRoom(userId, mainRoomId);
+      socketManager.updateUserRoom(userId, roomId);
 
       // update the socket instance # connects to the breakout room immediately if it exists
       socket.roomId = roomId;
+
+      // Update the JWT token with room information
+      if (socket.handshake.headers.cookie) {
+        const cookies = socket.handshake.headers.cookie
+          .split(";")
+          .reduce((acc, cookie) => {
+            const [key, value] = cookie.trim().split("=");
+            acc[key] = value;
+            return acc;
+          }, {} as Record<string, string>);
+
+        if (cookies.auth_token) {
+          // Create a mock request and response to update the token
+          const mockReq = {
+            cookies: { auth_token: cookies.auth_token },
+          } as unknown as Request;
+          const mockRes = {
+            cookie: (name: string, value: string, options: any) => {
+              socket.emit("auth:cookie_update", { name, value, options });
+            },
+            clearCookie: () => {},
+          } as unknown as Response;
+
+          updateTokenRoom(mockReq, mockRes, roomId);
+        }
+      }
 
       console.log(`User ${username} joined game in room ${roomId}`);
     } else {

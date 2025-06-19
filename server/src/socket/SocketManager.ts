@@ -6,6 +6,7 @@ import { GameManager } from "../classes/GameManager";
 export class SocketManager {
   public connections: Map<string, string> = new Map(); // socket.id : userId
   public userStore: Map<string, UserData> = new Map(); // userId : UserData
+  public userRooms: Map<string, string> = new Map(); // userId : roomId (persists between reconnections)
 
   constructor(private io: Server, private gameManager: GameManager) {}
 
@@ -27,12 +28,13 @@ export class SocketManager {
     // Store user data and connection
     this.registerUser(socket.id, userId, username, roomId);
 
-    // Attach userId to socket for easy access
-    socket.userId = userId;
-
     // If user has a lastRoom, try to reconnect them to their game
-    if (roomId) {
-      this.reconnectToGame(socket, userId, username, roomId);
+    const persistedRoomId = this.userRooms.get(userId) || roomId;
+
+    if (persistedRoomId) {
+      console.log(`User ${username} has a persisted room: ${persistedRoomId}`);
+      socket.roomId = persistedRoomId;
+      this.reconnectToGame(socket, userId, username, persistedRoomId);
     }
 
     console.log(
@@ -64,6 +66,7 @@ export class SocketManager {
             `User ${userId} did not reconnect, cleaning up user data`
           );
           this.userStore.delete(userId);
+          this.userRooms.delete(userId);
         }
       }, 5 * 60 * 1000); // 5 min timeout callback func
     } else {
@@ -78,7 +81,7 @@ export class SocketManager {
     socketId: string,
     userId: string,
     username: string,
-    lastRoom?: string
+    roomId?: string
   ): void {
     // Store connection
     this.connections.set(socketId, userId);
@@ -90,7 +93,7 @@ export class SocketManager {
       // New user
       userData = {
         nickname: username,
-        lastRoom,
+        lastRoom: roomId,
       };
     } else {
       // Existing user, update nickname if needed
@@ -99,16 +102,34 @@ export class SocketManager {
 
     // Update user store
     this.userStore.set(userId, userData);
+
+    // If roomId is provided, update the persisted room
+    if (roomId) {
+      this.userRooms.set(userId, roomId);
+    }
   }
 
   /**
    * Update user's last room
    */
   updateUserRoom(userId: string, roomId: string): void {
+    // Update in userData
     const userData = this.userStore.get(userId);
     if (userData) {
       userData.lastRoom = roomId;
       this.userStore.set(userId, userData);
+    }
+
+    // Update in persisted rooms
+    this.userRooms.set(userId, roomId);
+
+    // Update all active sockets for this user
+    const socketIds = this.getSocketIds(userId);
+    for (const socketId of socketIds) {
+      const socket = this.io.sockets.sockets.get(socketId);
+      if (socket) {
+        socket.roomId = roomId;
+      }
     }
   }
 
@@ -121,7 +142,9 @@ export class SocketManager {
     username: string,
     roomId: string
   ): void {
-    const game = this.gameManager.getGame(roomId);
+    // Handle main room vs breakout room
+    const mainRoomId = roomId.includes("_") ? roomId.split("_")[0] : roomId;
+    const game = this.gameManager.getGame(mainRoomId);
 
     if (game) {
       // Check if user was already in the game
@@ -130,14 +153,61 @@ export class SocketManager {
       if (wasInGame) {
         console.log(`Reconnecting user ${username} to game in room ${roomId}`);
         game.onPlayerReconnect(socket, userId, username);
+
+        // If this is a breakout room, join that specific room
+        if (roomId !== mainRoomId) {
+          socket.join(roomId);
+        }
+
+        // Emit a reconnection event to the client
+        socket.emit("game:reconnected", {
+          roomId: roomId,
+          gameType: game.constructor.name,
+          isHost: game.hostId === userId,
+        });
       } else {
         console.log(`User ${username} joining game in room ${roomId}`);
-        // Determine if they should be host (unlikely in reconnection scenario)
-        const isHost = false;
+        // Determine if they should be host
+        const isHost = game.hostId === userId;
         game.onPlayerJoin(socket, userId, username, isHost);
+
+        // If this is a breakout room, join that specific room
+        if (roomId !== mainRoomId) {
+          socket.join(roomId);
+        }
       }
+
+      // Update the socket's roomId
+      socket.roomId = roomId;
     } else {
       console.log(`Game with room id "${roomId}" no longer exists`);
+      // Clear the room information since it's no longer valid
+      this.clearUserRoom(userId);
+      socket.emit("game:error", { message: "Game room no longer exists" });
+    }
+  }
+
+  /**
+   * Clear user's room information
+   */
+  clearUserRoom(userId: string): void {
+    // Clear in userData
+    const userData = this.userStore.get(userId);
+    if (userData) {
+      userData.lastRoom = undefined;
+      this.userStore.set(userId, userData);
+    }
+
+    // Clear in persisted rooms
+    this.userRooms.delete(userId);
+
+    // Clear in all active sockets for this user
+    const socketIds = this.getSocketIds(userId);
+    for (const socketId of socketIds) {
+      const socket = this.io.sockets.sockets.get(socketId);
+      if (socket) {
+        socket.roomId = "";
+      }
     }
   }
 
@@ -153,6 +223,13 @@ export class SocketManager {
    */
   getUserId(socketId: string): string | undefined {
     return this.connections.get(socketId);
+  }
+
+  /**
+   * Get user's current room
+   */
+  getUserRoom(userId: string): string | undefined {
+    return this.userRooms.get(userId);
   }
 
   /**
