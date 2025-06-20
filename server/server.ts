@@ -442,44 +442,6 @@ io.on("connection", (socket: Socket) => {
     }
   });
 
-  socket.on("game:checkRoles", () => {
-    console.log("game:checkroles is being hit");
-    const userId = socket.userId;
-    if (!userId) {
-      console.log("No userId found for socket");
-      return;
-    }
-
-    const userData = socketManager.getUserData(userId);
-    if (!userData) {
-      console.log("No user data found for userId", userId);
-      return;
-    }
-
-    const currentUserRoom = userData.lastRoom;
-
-    if (currentUserRoom) {
-      const game: BaseGame | undefined = gameManager.getGame(currentUserRoom);
-      game?.getPlayers();
-    } else {
-      console.log("User is not in any room");
-    }
-  });
-
-  socket.on("game:expandSize", ({ roomId, setting, size }) => {
-    const game: BaseGame | undefined = gameManager.getGame(roomId);
-    try {
-      game?.modifyGameSetting(socket, setting, size);
-      console.log(`Game room capacity expanded to: ${size}`);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.log(err.message);
-      } else {
-        console.log("An unknown error occurred");
-      }
-    }
-  });
-
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   // Game Lobby Socket Endpoints
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
