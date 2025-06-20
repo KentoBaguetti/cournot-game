@@ -12,7 +12,17 @@ export default function GameDashboard() {
   const [hostName, setHostName] = useState("");
   const [playersArr, setPlayersArr] = useState<string[]>([]);
   const [startGame, setStartGame] = useState(false);
+  const [roomCode, setRoomCode] = useState("");
+  const [roomsAndPlayers, setRoomsAndPlayers] = useState<
+    Record<string, string[]>
+  >({});
 
+  const handleGameStart = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setStartGame(true);
+  };
+
+  // initial mounts
   useEffect(() => {
     const getBasicGameInfo = async () => {
       const authmeRes = await axios.get("http://localhost:3001/auth/me", {
@@ -22,14 +32,27 @@ export default function GameDashboard() {
     };
 
     getBasicGameInfo();
-  }, []);
+  });
 
+  // socket listeners
   useEffect(() => {
     if (!socket) return;
 
-    socket.emit("player:listUsers");
+    // emits
+    socket.emit("get:users", { includeHost: false });
+    socket.emit("game:getInfo");
+    socket.emit("get:listRoomsAndPlayers");
+
+    // listeners
     socket.on("server:listUsers", (data) => {
       setPlayersArr(data);
+    });
+    socket.on("game:info", (data) => {
+      setRoomCode(data.roomId);
+    });
+    socket.on("server:listRoomsAndPlayers", (data) => {
+      console.log(`Type: ${typeof data}`);
+      setRoomsAndPlayers(data);
     });
 
     if (startGame) {
@@ -38,6 +61,8 @@ export default function GameDashboard() {
 
     return () => {
       socket.off("server:listUsers");
+      socket.off("game:info");
+      socket.off("server:listRoomsAndPlayers");
     };
   }, [socket, startGame]);
 
@@ -46,12 +71,21 @@ export default function GameDashboard() {
       <h1>Game Dashboard</h1>
       <h2>Hello, {hostName}</h2>
       <div>
+        <h3>Room Code: {roomCode}</h3>
         <h3>Player List:</h3>
         {playersArr.map((player) => (
           <div key={player}>{player}</div>
         ))}
       </div>
-      <button onClick={() => setStartGame(true)}>Start Game</button>
+      <div>
+        <h3>Breakout Rooms Info:</h3>
+        {Object.entries(roomsAndPlayers).map(([roomId, players]) => (
+          <div key={roomId}>
+            {roomId}: {players.join(", ")}
+          </div>
+        ))}
+      </div>
+      <button onClick={handleGameStart}>Start Game</button>
     </div>
   );
 }
