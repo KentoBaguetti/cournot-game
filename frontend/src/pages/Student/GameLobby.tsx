@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSocket } from "../../socket";
 
@@ -26,6 +26,7 @@ export default function GameLobby() {
   const navigate = useNavigate();
   const location = useLocation();
   const { roomCode } = location.state || {};
+  const isNavigating = useRef(false);
 
   useEffect(() => {
     // Add a check to see if we need to retry connecting
@@ -79,13 +80,32 @@ export default function GameLobby() {
     // Listen for game start
     const handleGameStart = () => {
       if (gameInfo) {
-        // Navigate to the appropriate game page based on game type
-        if (gameInfo.gameType === "jankenpo") {
-          navigate("/janKenPo", { state: { roomId: roomCode } });
-        } else if (gameInfo.gameType === "cournot") {
-          navigate("/cournotGame", { state: { roomId: roomCode } });
-        } else {
-          navigate("/studentGame", { state: { roomId: roomCode } });
+        console.log("Game starting! Navigating to game page...");
+
+        // Set a flag to prevent multiple navigations
+        if (!isNavigating.current) {
+          isNavigating.current = true;
+
+          // Add a small delay to ensure all clients receive the event
+          setTimeout(() => {
+            // Navigate to the appropriate game page based on game type
+            if (gameInfo.gameType === "jankenpo") {
+              navigate("/janKenPo", {
+                state: { roomId: roomCode },
+                replace: true,
+              });
+            } else if (gameInfo.gameType === "cournot") {
+              navigate("/cournotGame", {
+                state: { roomId: roomCode },
+                replace: true,
+              });
+            } else {
+              navigate("/studentGame", {
+                state: { roomId: roomCode },
+                replace: true,
+              });
+            }
+          }, 500);
         }
       }
     };
@@ -199,8 +219,13 @@ export default function GameLobby() {
                     <div className="flex items-center">
                       <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                       {player}
+                      {player === gameInfo?.hostName && (
+                        <span className="ml-2 text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                          Host
+                        </span>
+                      )}
                     </div>
-                    {readyPlayers[player] && (
+                    {player !== gameInfo?.hostName && readyPlayers[player] && (
                       <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
                         Ready
                       </span>

@@ -54,6 +54,32 @@ export class SocketManager {
       // Remove socket connection but keep user data for potential reconnection
       this.connections.delete(socket.id);
 
+      // If the user was in a room, update the player list
+      const roomId = socket.roomId;
+      if (roomId) {
+        const game = this.gameManager.getGame(roomId);
+        if (game) {
+          // Mark player as disconnected
+          const player = game.players.get(userId);
+          if (player) {
+            player.setDisconnected(true);
+
+            // Broadcast updated player list
+            this.io.to(roomId).emit("server:listUsers", game.getPlayers());
+
+            // If the player was ready, update their ready status
+            if (player.isReady()) {
+              player.setReady(false);
+              this.io.to(roomId).emit("player:readyUpdate", {
+                playerId: userId,
+                playerName: player.getNickname(),
+                isReady: false,
+              });
+            }
+          }
+        }
+      }
+
       // Set a timeout to clean up user data if they don't reconnect
       setTimeout(() => {
         // Check if user has reconnected with a different socket

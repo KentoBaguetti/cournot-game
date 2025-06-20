@@ -422,6 +422,9 @@ io.on("connection", (socket: Socket) => {
       socket.roomId = "";
 
       console.log(`User ${userData.nickname} left game in room ${roomId}`);
+
+      // Broadcast updated player list to all clients in the room
+      io.to(roomId).emit("server:listUsers", game.getPlayers());
     } else {
       console.log(`Game with room id "${roomId}" does not exist`);
     }
@@ -601,29 +604,40 @@ io.on("connection", (socket: Socket) => {
     const player = game.players.get(userId);
     if (player) {
       player.setReady(isReady);
+      const playerName = player.getNickname();
+
+      console.log(`Player ${playerName} (${userId}) ready status: ${isReady}`);
 
       // Notify all players in the room about the ready status
       io.to(mainRoomId).emit("player:readyUpdate", {
         playerId: userId,
-        playerName: player.getNickname(),
+        playerName: playerName,
         isReady,
       });
 
-      // Check if all players are ready to start the game
-      const allReady = Array.from(game.players.values()).every((p) =>
-        p.isReady()
-      );
-      const minPlayers = 2; // Minimum players required to start
-
-      if (allReady && game.players.size >= minPlayers) {
-        // Start the game
-        io.to(mainRoomId).emit("game:start");
-        console.log(`Game ${mainRoomId} is starting - all players ready`);
-      } else {
-        console.log(`Player ${player.getNickname()} ready status: ${isReady}`);
+      // Log all players and their ready status for debugging
+      console.log("All players in the game:");
+      for (const [pid, p] of game.players) {
         console.log(
-          `All players ready: ${allReady}, Player count: ${game.players.size}`
+          `- ${p.getNickname()} (${pid}): isHost=${
+            pid === game.hostId
+          }, isReady=${p.isReady()}, isDisconnected=${p.isDisconnected()}`
         );
+      }
+
+      // Check if all student players are ready to start the game
+      const allStudentsReady = game.areAllStudentsReady();
+      const studentCount = game.getStudentCount();
+      const minPlayers = 1; // Minimum student players required to start
+
+      console.log(
+        `All students ready: ${allStudentsReady}, Student count: ${studentCount}`
+      );
+
+      if (allStudentsReady && studentCount >= minPlayers) {
+        // Start the game
+        console.log(`Game ${mainRoomId} is starting - all students ready`);
+        io.to(mainRoomId).emit("game:start");
       }
     }
   });

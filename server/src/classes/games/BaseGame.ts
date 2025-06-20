@@ -77,15 +77,31 @@ export abstract class BaseGame {
   onPlayerDisconnect(socket: Socket, userId: string): void {
     socket.leave(this.roomId);
     socket.roomId = "";
+
     // We don't delete the player from the map to allow for reconnection
     // Instead, mark the player as disconnected
     const player = this.players.get(userId);
     if (player) {
       player.setDisconnected(true);
       const username = player.getNickname();
+
+      // Emit disconnect event
       this.io
         .to(this.roomId)
         .emit("player:disconnect", `Player "${username}" has disconnected`);
+
+      // Also emit updated player list
+      this.io.to(this.roomId).emit("server:listUsers", this.getPlayers());
+
+      // If the player was ready, update their ready status
+      if (player.isReady()) {
+        player.setReady(false);
+        this.io.to(this.roomId).emit("player:readyUpdate", {
+          playerId: userId,
+          playerName: username,
+          isReady: false,
+        });
+      }
     }
   }
 
@@ -119,6 +135,56 @@ export abstract class BaseGame {
       }
     }
     return res;
+  }
+
+  getStudentPlayers(): string[] {
+    const res: string[] = [];
+    for (const [userId, player] of this.players) {
+      // Only add non-disconnected players that are not the host
+      if (!player.isDisconnected() && userId !== this.hostId) {
+        res.push(player.getNickname());
+      }
+    }
+    return res;
+  }
+
+  areAllStudentsReady(): boolean {
+    // First, count how many students we have and how many are ready
+    let studentCount = 0;
+    let readyCount = 0;
+
+    for (const [userId, player] of this.players) {
+      // Skip the host and disconnected players
+      if (userId === this.hostId || player.isDisconnected()) {
+        continue;
+      }
+
+      studentCount++;
+      if (player.isReady()) {
+        readyCount++;
+      }
+    }
+
+    // Log the counts for debugging
+    console.log(`Student count: ${studentCount}, Ready count: ${readyCount}`);
+
+    // If there are no students, return false
+    if (studentCount === 0) {
+      return false;
+    }
+
+    // Return true if all students are ready
+    return readyCount === studentCount;
+  }
+
+  getStudentCount(): number {
+    let count = 0;
+    for (const [userId, player] of this.players) {
+      if (userId !== this.hostId && !player.isDisconnected()) {
+        count++;
+      }
+    }
+    return count;
   }
 
   checkRole(socket: Socket): string {
