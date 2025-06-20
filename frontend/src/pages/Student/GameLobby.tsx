@@ -1,14 +1,17 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSocket } from "../../socket";
 import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function GameLobby() {
   const socket = useSocket();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const { roomCode } = location.state;
   const [allPlayers, setAllPlayers] = useState<string[]>([]);
   const hasJoinedGame = useRef(false);
+  const startGame = useRef(false);
 
   useEffect(() => {}, []);
 
@@ -25,12 +28,17 @@ export default function GameLobby() {
     socket.on("server:listUsers", (data: string[]) => {
       setAllPlayers(data);
     });
+    socket.on("game:start", () => {
+      startGame.current = true;
+      navigate("/games/jankenpo");
+    });
 
     // cleanup
     return () => {
       socket.off("server:listUsers");
+      socket.off("game:start");
     };
-  }, [socket, roomCode]);
+  }, [socket, roomCode, navigate]);
 
   return (
     <div className="flex flex-col justify-center items-center">

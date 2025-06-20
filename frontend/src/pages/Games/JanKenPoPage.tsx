@@ -7,23 +7,23 @@ export default function JanKenPoPage() {
   const [opponentAction, setOpponentAction] = useState<string>("");
 
   useEffect(() => {
-    socket?.emit("player:move", { action: userAction });
-    socket?.emit("game:checkMove");
-  }, [socket, userAction]);
-
-  useEffect(() => {
     if (!socket) return;
 
-    const handleCheckMove = ({ move }: { move: string }) => {
-      setOpponentAction(move);
-    };
+    // emits
+    if (userAction) {
+      socket.emit("player:move", { action: userAction });
+    }
 
-    socket.on("game:checkMove", handleCheckMove);
+    // listeners
+    socket.on("game:checkMove", ({ action }: { action: string }) => {
+      setOpponentAction(action);
+    });
 
+    // cleanup
     return () => {
-      socket.off("game:checkMove", handleCheckMove);
+      socket.off("game:checkMove");
     };
-  }, [socket]);
+  }, [socket, userAction]);
 
   return (
     <div className="flex flex-col justify-center items-center">

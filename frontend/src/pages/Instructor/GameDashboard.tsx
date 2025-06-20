@@ -19,6 +19,11 @@ export default function GameDashboard() {
 
   const handleGameStart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+
+    if (!socket) return;
+
+    socket.emit("game:start");
+
     setStartGame(true);
   };
 

@@ -68,7 +68,7 @@ function App() {
           }
         />
         <Route
-          path="/janKenPo"
+          path="/games/jankenpo"
           element={
             <SocketProvider>
               <JanKenPoPage />
