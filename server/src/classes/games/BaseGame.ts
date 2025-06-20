@@ -4,6 +4,7 @@ import { Student } from "../users/Student";
 import { Instructor } from "../users/Instructor";
 import { SocketManager } from "../../socket/SocketManager";
 import { BreakoutRoomData } from "../../types/types";
+import { GameConfigs } from "../../types/types";
 
 /**
  *
@@ -21,6 +22,7 @@ export abstract class BaseGame {
   public playerCount: number = 0;
   public roomId: string;
   public hostId: string;
+  public gameConfigs: GameConfigs;
 
   /**
    * using array for now to take advantage of socket.rooms api.
@@ -31,15 +33,18 @@ export abstract class BaseGame {
   public breakoutRoomCount: number = 0;
   public roomMap: Map<string, BreakoutRoomData> = new Map();
 
-  // abstract instance variables
-  public gameSettings: { [key: string]: number | string | any[] } = {};
-
   //////////////////////////////////////////////////////////////
   // constructor
   //////////////////////////////////////////////////////////////
-  constructor(roomId: string, protected io: Server, hostId: string) {
+  constructor(
+    roomId: string,
+    protected io: Server,
+    hostId: string,
+    gameConfigs: object
+  ) {
     this.roomId = roomId;
     this.hostId = hostId;
+    this.gameConfigs = gameConfigs;
   }
 
   // Set the socket manager reference
@@ -215,7 +220,7 @@ export abstract class BaseGame {
     settingName: string,
     value: number | string | any[]
   ) {
-    this.gameSettings[settingName] = value;
+    this.gameConfigs[settingName] = value;
   }
 
   async countSocketsInRoom(roomId: string): Promise<number> {

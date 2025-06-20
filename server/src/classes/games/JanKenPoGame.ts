@@ -1,15 +1,26 @@
 import { BaseGame } from "./BaseGame";
-import { Socket } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { Instructor } from "../users/Instructor";
 import { Student } from "../users/Student";
 import { BreakoutRoomData } from "../../types/types";
+import { GameConfigs, JankenPoGameConfigs } from "../../types/types";
 
 export class JanKenPoGame extends BaseGame {
-  gameSettings: {
-    maxPlayersPerRoom: number;
-  } = {
-    maxPlayersPerRoom: 2,
-  };
+  public gameConfigs: JankenPoGameConfigs;
+
+  constructor(
+    roomId: string,
+    io: Server,
+    hostId: string,
+    gameConfigs: GameConfigs
+  ) {
+    super(roomId, io, hostId, gameConfigs);
+    const config = gameConfigs as JankenPoGameConfigs;
+    if (!config.maxPlayersPerRoom || !config.roundLength || !config.maxRounds) {
+      throw new Error("Invalid game configs");
+    }
+    this.gameConfigs = config;
+  }
 
   // two cases: host and non-host - host is in the main room, non-host is in the breakout room
   async onPlayerJoin(
@@ -30,7 +41,7 @@ export class JanKenPoGame extends BaseGame {
       let tempRoomId = this.roomId + "_" + this.breakoutRoomCount; // "JWKDKE_0"
       if (
         (await this.countSocketsInRoom(tempRoomId)) >=
-        this.gameSettings.maxPlayersPerRoom
+        this.gameConfigs.maxPlayersPerRoom
       ) {
         this.breakoutRoomCount++;
         tempRoomId = this.roomId + "_" + this.breakoutRoomCount; // update BR id

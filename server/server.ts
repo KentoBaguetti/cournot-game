@@ -239,84 +239,90 @@ io.on("connection", (socket: Socket) => {
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   // Host Socket Endpoints
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
-  socket.on("host:createGame", ({ gameType }: { gameType: string }) => {
-    const userId = socket.userId;
-    if (!userId) {
-      console.error("No userId found for socket");
-    }
-
-    const userData = socketManager.getUserData(userId);
-    if (!userData) {
-      console.error("No user data found for userId", userId);
-      return;
-    }
-
-    const username = userData.nickname;
-
-    // generate the main room id, and this is what will be returned to the client/host
-    const mainRoomId = generateJoinCode();
-
-    const game: BaseGame | undefined = GameFactory.createGame(
-      gameType,
-      mainRoomId,
-      io,
-      userId
-    );
-
-    // apply the server socket manaager to the game
-    game.setSocketManager(socketManager);
-
-    roomStore.set(mainRoomId, {
-      gameType: gameType,
-      players: new Set<string>(),
-    });
-    gameManager.addGame(mainRoomId, game);
-
-    // join as host
-    game.onPlayerJoin(socket, userId, username, true);
-
-    // Update room data
-    const room = roomStore.get(mainRoomId);
-    room?.players.add(userId);
-
-    // update the users last room (in userData)
-    socketManager.updateUserRoom(userId, mainRoomId);
-    socket.roomId = mainRoomId;
-
-    // Update the JWT token with room information
-    if (socket.handshake.headers.cookie) {
-      const cookies = socket.handshake.headers.cookie
-        .split(";")
-        .reduce((acc, cookie) => {
-          const [key, value] = cookie.trim().split("=");
-          acc[key] = value;
-          return acc;
-        }, {} as Record<string, string>);
-
-      if (cookies.auth_token) {
-        // Create a mock request and response to update the token
-        const mockReq = {
-          cookies: { auth_token: cookies.auth_token },
-        } as unknown as Request;
-        const mockRes = {
-          cookie: (name: string, value: string, options: any) => {
-            socket.emit("auth:cookie_update", { name, value, options });
-          },
-          clearCookie: () => {},
-        } as unknown as Response;
-
-        updateTokenRoom(mockReq, mockRes, mainRoomId);
+  socket.on(
+    "host:createGame",
+    ({ gameType, gameConfigs }: { gameType: string; gameConfigs: object }) => {
+      const userId = socket.userId;
+      if (!userId) {
+        console.error("No userId found for socket");
       }
+
+      const userData = socketManager.getUserData(userId);
+      if (!userData) {
+        console.error("No user data found for userId", userId);
+        return;
+      }
+
+      const username = userData.nickname;
+
+      // generate the main room id, and this is what will be returned to the client/host
+      const mainRoomId = generateJoinCode();
+
+      const game: BaseGame | undefined = GameFactory.createGame(
+        gameType,
+        mainRoomId,
+        io,
+        userId,
+        gameConfigs
+      );
+
+      console.log(`Game Configs:\n${JSON.stringify(gameConfigs, null, 2)}`);
+
+      // apply the server socket manaager to the game
+      game.setSocketManager(socketManager);
+
+      roomStore.set(mainRoomId, {
+        gameType: gameType,
+        players: new Set<string>(),
+      });
+      gameManager.addGame(mainRoomId, game);
+
+      // join as host
+      game.onPlayerJoin(socket, userId, username, true);
+
+      // Update room data
+      const room = roomStore.get(mainRoomId);
+      room?.players.add(userId);
+
+      // update the users last room (in userData)
+      socketManager.updateUserRoom(userId, mainRoomId);
+      socket.roomId = mainRoomId;
+
+      // Update the JWT token with room information
+      if (socket.handshake.headers.cookie) {
+        const cookies = socket.handshake.headers.cookie
+          .split(";")
+          .reduce((acc, cookie) => {
+            const [key, value] = cookie.trim().split("=");
+            acc[key] = value;
+            return acc;
+          }, {} as Record<string, string>);
+
+        if (cookies.auth_token) {
+          // Create a mock request and response to update the token
+          const mockReq = {
+            cookies: { auth_token: cookies.auth_token },
+          } as unknown as Request;
+          const mockRes = {
+            cookie: (name: string, value: string, options: any) => {
+              socket.emit("auth:cookie_update", { name, value, options });
+            },
+            clearCookie: () => {},
+          } as unknown as Response;
+
+          updateTokenRoom(mockReq, mockRes, mainRoomId);
+        }
+      }
+
+      console.log(
+        `Game created: ${gameType}, Room: ${mainRoomId}, Host: ${username}`
+      );
+
+      // emit back to the room host the gameRoom id - this way we keep all the logic on the backend, don't want to have the code be generated on the frontend
+      socket.emit("game:gameCreated", { roomId: mainRoomId });
+      console.log("Emitted back to the host");
     }
-
-    console.log(
-      `Game created: ${gameType}, Room: ${mainRoomId}, Host: ${username}`
-    );
-
-    // emit back to the room host the gameRoom id - this way we keep all the logic on the backend, don't want to have the code be generated on the frontend
-    socket.emit("game:gameCreated", { roomId: mainRoomId });
-    console.log("Emitted back to the host");
-  });
+  );
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   // Student Socket Endpoints
@@ -534,9 +540,8 @@ io.on("connection", (socket: Socket) => {
       socket.emit("game:info", {
         gameType,
         hostName,
-        maxPlayers: game.gameSettings.maxPlayers || 0,
         roomId: mainRoomId,
-        // Add any other relevant game info here
+        gameConfigs: game.gameConfigs,
       });
 
       // Also send the current player list

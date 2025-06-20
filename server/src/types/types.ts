@@ -21,3 +21,11 @@ export interface BreakoutRoomData {
   roundNo: number;
   // roundHistory: string[]; add this later
 }
+
+export interface GameConfigs {}
+
+export interface JankenPoGameConfigs extends GameConfigs {
+  maxPlayersPerRoom: number;
+  roundLength: number;
+  maxRounds: number;
+}
