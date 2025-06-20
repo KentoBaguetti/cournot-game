@@ -4,6 +4,7 @@ export class Instructor {
   protected disconnected: boolean = false;
   protected nickname: string;
   public roomId: string;
+  private ready: boolean = false;
 
   constructor(
     protected socket: Socket,
@@ -41,5 +42,13 @@ export class Instructor {
 
   public isDisconnected(): boolean {
     return this.disconnected;
+  }
+
+  public setReady(isReady: boolean): void {
+    this.ready = isReady;
+  }
+
+  public isReady(): boolean {
+    return this.ready;
   }
 }

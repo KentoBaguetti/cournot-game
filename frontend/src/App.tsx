@@ -14,6 +14,7 @@ import InstructorDashboard from "./pages/Instructor/InstructorDashboard";
 import CreateGamePage from "./pages/Instructor/CreateGamePage";
 import CreateJankenpoGamePage from "./pages/Instructor/CreateJankenpoGamePage";
 import GameDashboard from "./pages/Instructor/GameDashboard";
+import GameLobby from "./pages/Student/GameLobby";
 
 function App() {
   // const [message, setMessage] = useState("");
@@ -127,6 +128,14 @@ function App() {
           element={
             <SocketProvider>
               <JanKenPoPage />
+            </SocketProvider>
+          }
+        />
+        <Route
+          path="/student/gameLobby"
+          element={
+            <SocketProvider>
+              <GameLobby />
             </SocketProvider>
           }
         />

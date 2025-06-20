@@ -4,6 +4,7 @@ import { Socket } from "socket.io";
 export class Student {
   protected disconnected: boolean = false;
   protected userMove: string = "";
+  private ready: boolean = false;
 
   constructor(
     protected socket: Socket,
@@ -46,5 +47,13 @@ export class Student {
 
   public getUserMove(): string {
     return this.userMove;
+  }
+
+  public setReady(isReady: boolean): void {
+    this.ready = isReady;
+  }
+
+  public isReady(): boolean {
+    return this.ready;
   }
 }

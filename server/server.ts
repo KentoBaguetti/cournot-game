@@ -328,11 +328,19 @@ io.on("connection", (socket: Socket) => {
     }
 
     const username = userData.nickname;
-
     const mainRoomId = roomId.length > 6 ? roomId.split("_")[0] : roomId;
-
     const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
+
     if (game) {
+      // Check if the socket is already in the room to prevent duplicate joins
+      if (socket.rooms.has(mainRoomId)) {
+        console.log(`Socket ${socket.id} is already in room ${mainRoomId}`);
+
+        // Just send the current player list without re-joining
+        socket.emit("server:listUsers", game.getPlayers());
+        return;
+      }
+
       // Set the SocketManager on the game if not already set
       if (!game.socketManager) {
         game.setSocketManager(socketManager);
@@ -381,10 +389,8 @@ io.on("connection", (socket: Socket) => {
         }
       }
 
-      console.log("Main room id", mainRoomId);
-      io.to(mainRoomId).emit("server:listUsers", game.getPlayers());
-
       console.log(`User ${username} joined game in room ${roomId}`);
+      io.to(mainRoomId).emit("server:listUsers", game.getPlayers());
     } else {
       console.log(`Game with room id "${roomId}" does not exist`);
       socket.emit("game:error", { message: "Game room does not exist" });
@@ -539,5 +545,116 @@ io.on("connection", (socket: Socket) => {
   ////////////////////////////////////////////////
   socket.on("master:test", () => {
     console.log("Master:test endpoint hit");
+  });
+
+  // Endpoint to get game information
+  socket.on("game:getInfo", ({ roomId }: { roomId: string }) => {
+    const mainRoomId = roomId.length > 6 ? roomId.split("_")[0] : roomId;
+    const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
+
+    if (game) {
+      // Get the game type (remove "Game" suffix if present)
+      const gameType = game.constructor.name.toLowerCase().replace(/game$/, "");
+
+      // Get host information
+      const hostId = game.hostId;
+      const host = game.players.get(hostId);
+      const hostName = host ? host.getNickname() : "Unknown";
+
+      // Send game information to the client
+      socket.emit("game:info", {
+        gameType,
+        hostName,
+        maxPlayers: game.gameSettings.maxPlayers || 0,
+        // Add any other relevant game info here
+      });
+
+      // Also send the current player list
+      socket.emit("server:listUsers", game.getPlayers());
+    } else {
+      socket.emit("game:error", { message: "Game not found" });
+    }
+  });
+
+  // Endpoint for player ready status
+  socket.on("player:ready", ({ isReady }: { isReady: boolean }) => {
+    const userId = socket.userId;
+    if (!userId) {
+      console.error("No userId found for socket");
+      return;
+    }
+
+    const roomId = socket.roomId;
+    if (!roomId) {
+      console.error("No roomId found for socket");
+      return;
+    }
+
+    const mainRoomId = roomId.length > 6 ? roomId.split("_")[0] : roomId;
+    const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
+
+    if (!game) {
+      console.error(`Game with room id "${mainRoomId}" does not exist`);
+      return;
+    }
+
+    const player = game.players.get(userId);
+    if (player) {
+      player.setReady(isReady);
+
+      // Notify all players in the room about the ready status
+      io.to(mainRoomId).emit("player:readyUpdate", {
+        playerId: userId,
+        playerName: player.getNickname(),
+        isReady,
+      });
+
+      // Check if all players are ready to start the game
+      const allReady = Array.from(game.players.values()).every((p) =>
+        p.isReady()
+      );
+      const minPlayers = 2; // Minimum players required to start
+
+      if (allReady && game.players.size >= minPlayers) {
+        // Start the game
+        io.to(mainRoomId).emit("game:start");
+        console.log(`Game ${mainRoomId} is starting - all players ready`);
+      } else {
+        console.log(`Player ${player.getNickname()} ready status: ${isReady}`);
+        console.log(
+          `All players ready: ${allReady}, Player count: ${game.players.size}`
+        );
+      }
+    }
+  });
+
+  // Endpoint to check connection and ensure player is in the right room
+  socket.on("game:checkConnection", ({ roomId }: { roomId: string }) => {
+    const userId = socket.userId;
+    if (!userId) return;
+
+    const mainRoomId = roomId.length > 6 ? roomId.split("_")[0] : roomId;
+    const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
+
+    if (game) {
+      // Check if player is already in the game
+      if (game.players.has(userId)) {
+        // Make sure socket is in the room
+        if (!socket.rooms.has(roomId)) {
+          socket.join(roomId);
+          console.log(`Reconnected player ${userId} to room ${roomId}`);
+        }
+
+        // Send current game state
+        socket.emit("game:currentState", {
+          players: game.getPlayers(),
+          // Add other game state information here
+        });
+      } else {
+        socket.emit("game:error", { message: "You are not part of this game" });
+      }
+    } else {
+      socket.emit("game:error", { message: "Game not found" });
+    }
   });
 });

@@ -113,34 +113,11 @@ export abstract class BaseGame {
   getPlayers(): string[] {
     const res: string[] = [];
     for (const [userId, player] of this.players) {
-      console.log(
-        userId,
-        player.constructor.name,
-        player.getNickname(),
-        player.isDisconnected() ? "(Disconnected)" : ""
-      );
-      res.push(player.getNickname());
+      // Only add non-disconnected players to the result
+      if (!player.isDisconnected()) {
+        res.push(player.getNickname());
+      }
     }
-    console.log("");
-    this.io
-      .in(this.roomId)
-      .fetchSockets()
-      .then((sockets) => {
-        sockets.forEach((socket) => {
-          // RemoteSocket doesn't have userId property directly, so we can only log the socket ID
-          const id = this.socketManager?.connections.get(socket.id) || "";
-          const playerNickname =
-            this.socketManager?.userStore.get(id)?.nickname || "None";
-          const player = this.players.get(id);
-          console.log(
-            `User in ${
-              this.roomId
-            }: uuid: ${id} ### nickname: ${playerNickname} ### Role: ${
-              player instanceof Instructor ? "Instructor" : "Student"
-            }`
-          );
-        });
-      });
     return res;
   }
 
