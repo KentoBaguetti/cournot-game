@@ -227,4 +227,8 @@ export abstract class BaseGame {
     const sockets = await this.io.in(roomId).fetchSockets();
     return sockets.length;
   }
+
+  onGameStart(): void {
+    console.log(`Game with room id "${this.roomId}" has started`);
+  }
 }
