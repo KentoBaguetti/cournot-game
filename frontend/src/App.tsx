@@ -2,10 +2,10 @@ import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import { SocketProvider } from "./socket";
 import Home from "./pages/Home";
-import StudentJoin from "./pages/StudentJoin";
-import StudentGamePage from "./pages/StudentGamePage";
+import StudentJoin from "./pages/Student/StudentJoin";
+import StudentGamePage from "./pages/Student/StudentGamePage";
 import InstructorLogin from "./pages/Instructor/InstructorLogin";
-import JanKenPoPage from "./pages/JanKenPoPage";
+import JanKenPoPage from "./pages/Games/JanKenPoPage";
 
 // non test shit
 import InstructorDashboard from "./pages/Instructor/InstructorDashboard";
