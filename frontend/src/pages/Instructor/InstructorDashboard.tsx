@@ -39,7 +39,7 @@ export default function InstructorDashboard() {
     <div className="flex flex-col justify-center items-center p-4">
       <h1 className="text-2xl font-bold mb-4">Instructor Dashboard</h1>
       <h2 className="mb-6">
-        Welcome,{" "}
+        Welcome,
         <span className="font-bold text-green-500">{instructorName}</span>
       </h2>
 

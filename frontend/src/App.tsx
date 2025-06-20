@@ -13,6 +13,7 @@ import JanKenPoPage from "./pages/JanKenPoPage";
 import InstructorDashboard from "./pages/Instructor/InstructorDashboard";
 import CreateGamePage from "./pages/Instructor/CreateGamePage";
 import CreateJankenpoGamePage from "./pages/Instructor/CreateJankenpoGamePage";
+import GameDashboard from "./pages/Instructor/GameDashboard";
 
 function App() {
   // const [message, setMessage] = useState("");
@@ -82,6 +83,15 @@ function App() {
           element={
             <SocketProvider>
               <InstructorDashboard />
+            </SocketProvider>
+          }
+        />
+
+        <Route
+          path="/instructor/gameDashboard"
+          element={
+            <SocketProvider>
+              <GameDashboard />
             </SocketProvider>
           }
         />

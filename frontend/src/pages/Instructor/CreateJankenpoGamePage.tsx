@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useSocket } from "../../socket";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function CreateJankenpoGamePage() {
   const socket = useSocket();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const [roundLength, setRoundLength] = useState(0);
   const [maxRounds, setMaxRounds] = useState(0);
@@ -22,6 +22,8 @@ export default function CreateJankenpoGamePage() {
         maxPlayersPerRoom,
       },
     });
+    socket?.emit("host:createGame", { gameType: "jankenpo" });
+    navigate("/instructor/gameDashboard");
   };
 
   return (

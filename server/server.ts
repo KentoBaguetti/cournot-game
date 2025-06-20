@@ -235,10 +235,6 @@ io.on("connection", (socket: Socket) => {
   // Handle socket connection using the SocketManager
   socketManager.handleConnection(socket);
 
-  socket.on("test", ({ data }: { data: any }) => {
-    console.log("test endpoint hit", data);
-  });
-
   socket.on("host:createGame", ({ gameType }: { gameType: string }) => {
     const userId = socket.userId;
     if (!userId) {
@@ -385,6 +381,9 @@ io.on("connection", (socket: Socket) => {
         }
       }
 
+      console.log("Main room id", mainRoomId);
+      io.to(mainRoomId).emit("server:listUsers", game.getPlayers());
+
       console.log(`User ${username} joined game in room ${roomId}`);
     } else {
       console.log(`Game with room id "${roomId}" does not exist`);
@@ -464,11 +463,11 @@ io.on("connection", (socket: Socket) => {
    *  already have access to socket.roomId, so no need to pass any parameters yet? maybe rewrite later?
    *  test endpoint for now
    */
-  socket.on("game:listUsers", () => {
+  socket.on("player:listUsers", () => {
     const game: BaseGame | undefined = gameManager.getGame(socket.roomId);
     if (game) {
       const users = game.getPlayers();
-      socket.emit("game:listUsers", users); // target only the socket the requested this data
+      socket.emit("server:listUsers", users); // target only the socket the requested this data
     } else {
       console.log(`Game with room id "${socket.roomId}" does not exist`);
     }
@@ -533,5 +532,12 @@ io.on("connection", (socket: Socket) => {
   socket.on("disconnect", () => {
     // Handle socket disconnection using the SocketManager
     socketManager.handleDisconnection(socket);
+  });
+
+  ////////////////////////////////////////////////
+  // master endpoints for testing
+  ////////////////////////////////////////////////
+  socket.on("master:test", () => {
+    console.log("Master:test endpoint hit");
   });
 });
