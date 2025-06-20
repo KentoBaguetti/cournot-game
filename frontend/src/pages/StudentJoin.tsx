@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function StudentJoin() {
-  const [code, setCode] = useState<string>("");
-  const [username, setUsername] = useState("");
+  // const [code, setCode] = useState<string>("");
+  //const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const codeRef = useRef<HTMLInputElement>(null);
@@ -17,10 +17,10 @@ export default function StudentJoin() {
     setError(null);
 
     const codeValue = codeRef.current ? codeRef.current.value : "";
-    setCode(codeValue);
+    //setCode(codeValue);
 
     const usernameValue = usernameRef.current ? usernameRef.current.value : "";
-    setUsername(usernameValue);
+    //setUsername(usernameValue);
 
     try {
       // Authenticate to get JWT
