@@ -71,7 +71,7 @@ export default function GameDashboard() {
       <h1>Game Dashboard</h1>
       <h2>Hello, {hostName}</h2>
       <div>
-        <h3>Room Code: {roomCode}</h3>
+        <h1>Room Code: {roomCode}</h1>
         <h3>Player List:</h3>
         {playersArr.map((player) => (
           <div key={player}>{player}</div>
