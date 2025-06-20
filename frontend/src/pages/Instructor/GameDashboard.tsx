@@ -11,6 +11,7 @@ export default function GameDashboard() {
   const socket = useSocket();
   const [hostName, setHostName] = useState("");
   const [playersArr, setPlayersArr] = useState<string[]>([]);
+  const [startGame, setStartGame] = useState(false);
 
   useEffect(() => {
     const getBasicGameInfo = async () => {
@@ -31,20 +32,26 @@ export default function GameDashboard() {
       setPlayersArr(data);
     });
 
+    if (startGame) {
+      console.log("Starting game");
+    }
+
     return () => {
       socket.off("server:listUsers");
     };
-  }, [socket]);
+  }, [socket, startGame]);
 
   return (
     <div className="flex flex-col justify-center items-center">
       <h1>Game Dashboard</h1>
-      <h6>Hello, {hostName}</h6>
+      <h2>Hello, {hostName}</h2>
       <div>
+        <h3>Player List:</h3>
         {playersArr.map((player) => (
           <div key={player}>{player}</div>
         ))}
       </div>
+      <button onClick={() => setStartGame(true)}>Start Game</button>
     </div>
   );
 }
