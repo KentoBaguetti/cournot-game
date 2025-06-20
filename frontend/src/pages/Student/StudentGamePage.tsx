@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSocket } from "../socket";
+import { useSocket } from "../../socket";
 // import { useNavigate } from "react-router-dom";
 
 export default function StudentGamePage() {

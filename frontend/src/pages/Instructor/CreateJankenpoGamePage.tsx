@@ -8,7 +8,6 @@ export default function CreateJankenpoGamePage() {
 
   const [roundLength, setRoundLength] = useState(0);
   const [maxRounds, setMaxRounds] = useState(0);
-  const [indefinite, setIndefinite] = useState(false);
   const [maxPlayersPerRoom, setMaxPlayersPerRoom] = useState(0);
 
   useEffect(() => {}, [socket]);
@@ -18,7 +17,6 @@ export default function CreateJankenpoGamePage() {
       data: {
         roundLength,
         maxRounds,
-        indefinite,
         maxPlayersPerRoom,
       },
     });
@@ -42,18 +40,13 @@ export default function CreateJankenpoGamePage() {
           value={maxRounds}
           onChange={(e) => setMaxRounds(Number(e.target.value))}
         />
-        <h4>Indeinite Game (Overrides max rounds)</h4>
-        <input
-          type="checkbox"
-          value={indefinite ? "Yes" : "No"}
-          onChange={(e) => setIndefinite(e.target.checked)}
-        />
         <h4>Max Players Per Room</h4>
         <input
           type="number"
           value={maxPlayersPerRoom}
           onChange={(e) => setMaxPlayersPerRoom(Number(e.target.value))}
         />
+        <br></br>
         <button onClick={handleCreateGame}>Create Game</button>
       </div>
     </div>

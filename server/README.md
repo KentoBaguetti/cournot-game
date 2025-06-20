@@ -56,8 +56,6 @@ The server will automatically:
 - `game:create` - Create a new game room
 - `game:join` - Join an existing game room
 - `game:leave` - Leave a game room
-- `game:checkRoles` - Check player roles in the current game
-- `game:expandSize` - Modify game room capacity
 
 ## Persistent User Sessions
 

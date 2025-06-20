@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSocket } from "../socket";
+import { useSocket } from "../../socket";
 
 export default function JanKenPoPage() {
   const socket = useSocket();

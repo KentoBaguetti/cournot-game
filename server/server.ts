@@ -28,6 +28,7 @@ import {
 } from "./src/utils/auth";
 import { SocketManager } from "./src/socket/SocketManager";
 import { parseRoomId, generateJoinCode } from "./src/utils/utils";
+import { ManyToOne } from "typeorm";
 
 //////////////////////////////////////////////////////////////////
 // server vars
@@ -235,6 +236,9 @@ io.on("connection", (socket: Socket) => {
   // Handle socket connection using the SocketManager
   socketManager.handleConnection(socket);
 
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Host Socket Endpoints
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
   socket.on("host:createGame", ({ gameType }: { gameType: string }) => {
     const userId = socket.userId;
     if (!userId) {
@@ -314,6 +318,10 @@ io.on("connection", (socket: Socket) => {
     console.log("Emitted back to the host");
   });
 
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Student Socket Endpoints
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
   socket.on("game:join", ({ roomId }: { roomId: string }) => {
     const userId = socket.userId;
     if (!userId) {
@@ -390,7 +398,11 @@ io.on("connection", (socket: Socket) => {
       }
 
       console.log(`User ${username} joined game in room ${roomId}`);
-      io.to(mainRoomId).emit("server:listUsers", game.getPlayers());
+      io.to(mainRoomId).emit("server:listUsers", game.getStudentPlayers());
+      io.to(mainRoomId).emit(
+        "server:listRoomsAndPlayers",
+        game.listRoomsAndPlayers()
+      );
     } else {
       console.log(`Game with room id "${roomId}" does not exist`);
       socket.emit("game:error", { message: "Game room does not exist" });
@@ -430,63 +442,16 @@ io.on("connection", (socket: Socket) => {
     }
   });
 
-  socket.on("game:checkRoles", () => {
-    console.log("game:checkroles is being hit");
-    const userId = socket.userId;
-    if (!userId) {
-      console.log("No userId found for socket");
-      return;
-    }
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Game Lobby Socket Endpoints
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    const userData = socketManager.getUserData(userId);
-    if (!userData) {
-      console.log("No user data found for userId", userId);
-      return;
-    }
-
-    const currentUserRoom = userData.lastRoom;
-
-    if (currentUserRoom) {
-      const game: BaseGame | undefined = gameManager.getGame(currentUserRoom);
-      game?.getPlayers();
-    } else {
-      console.log("User is not in any room");
-    }
-  });
-
-  socket.on("game:expandSize", ({ roomId, setting, size }) => {
+  socket.on("get:listRoomsAndPlayers", () => {
+    const roomId = parseRoomId(socket.roomId);
     const game: BaseGame | undefined = gameManager.getGame(roomId);
-    try {
-      game?.modifyGameSetting(socket, setting, size);
-      console.log(`Game room capacity expanded to: ${size}`);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.log(err.message);
-      } else {
-        console.log("An unknown error occurred");
-      }
-    }
-  });
-
-  /**
-   *  already have access to socket.roomId, so no need to pass any parameters yet? maybe rewrite later?
-   *  test endpoint for now
-   */
-  socket.on("player:listUsers", () => {
-    const game: BaseGame | undefined = gameManager.getGame(socket.roomId);
     if (game) {
-      const users = game.getPlayers();
-      socket.emit("server:listUsers", users); // target only the socket the requested this data
-    } else {
-      console.log(`Game with room id "${socket.roomId}" does not exist`);
-    }
-  });
-
-  socket.on("game:listRoomsAndPlayers", async () => {
-    const game: BaseGame | undefined = gameManager.getGame(socket.roomId);
-    if (game) {
-      const res: Map<string, string[]> = await game.listRoomsAndPlayers();
-      socket.emit("game:listRoomsAndPlayers", res);
+      const objectData: object = game.listRoomsAndPlayers();
+      socket.emit("server:listRoomsAndPlayers", objectData);
     } else {
       console.log("Error returning rooms and players");
     }
@@ -551,7 +516,8 @@ io.on("connection", (socket: Socket) => {
   });
 
   // Endpoint to get game information
-  socket.on("game:getInfo", ({ roomId }: { roomId: string }) => {
+  socket.on("game:getInfo", () => {
+    const roomId = socket.roomId;
     const mainRoomId = roomId.length > 6 ? roomId.split("_")[0] : roomId;
     const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
 
@@ -569,6 +535,7 @@ io.on("connection", (socket: Socket) => {
         gameType,
         hostName,
         maxPlayers: game.gameSettings.maxPlayers || 0,
+        roomId: mainRoomId,
         // Add any other relevant game info here
       });
 
@@ -579,96 +546,18 @@ io.on("connection", (socket: Socket) => {
     }
   });
 
-  // Endpoint for player ready status
-  socket.on("player:ready", ({ isReady }: { isReady: boolean }) => {
-    const userId = socket.userId;
-    if (!userId) {
-      console.error("No userId found for socket");
-      return;
-    }
-
-    const roomId = socket.roomId;
-    if (!roomId) {
-      console.error("No roomId found for socket");
-      return;
-    }
-
-    const mainRoomId = roomId.length > 6 ? roomId.split("_")[0] : roomId;
-    const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
-
-    if (!game) {
-      console.error(`Game with room id "${mainRoomId}" does not exist`);
-      return;
-    }
-
-    const player = game.players.get(userId);
-    if (player) {
-      player.setReady(isReady);
-      const playerName = player.getNickname();
-
-      console.log(`Player ${playerName} (${userId}) ready status: ${isReady}`);
-
-      // Notify all players in the room about the ready status
-      io.to(mainRoomId).emit("player:readyUpdate", {
-        playerId: userId,
-        playerName: playerName,
-        isReady,
-      });
-
-      // Log all players and their ready status for debugging
-      console.log("All players in the game:");
-      for (const [pid, p] of game.players) {
-        console.log(
-          `- ${p.getNickname()} (${pid}): isHost=${
-            pid === game.hostId
-          }, isReady=${p.isReady()}, isDisconnected=${p.isDisconnected()}`
-        );
-      }
-
-      // Check if all student players are ready to start the game
-      const allStudentsReady = game.areAllStudentsReady();
-      const studentCount = game.getStudentCount();
-      const minPlayers = 1; // Minimum student players required to start
-
-      console.log(
-        `All students ready: ${allStudentsReady}, Student count: ${studentCount}`
-      );
-
-      if (allStudentsReady && studentCount >= minPlayers) {
-        // Start the game
-        console.log(`Game ${mainRoomId} is starting - all students ready`);
-        io.to(mainRoomId).emit("game:start");
-      }
-    }
-  });
-
-  // Endpoint to check connection and ensure player is in the right room
-  socket.on("game:checkConnection", ({ roomId }: { roomId: string }) => {
-    const userId = socket.userId;
-    if (!userId) return;
-
-    const mainRoomId = roomId.length > 6 ? roomId.split("_")[0] : roomId;
-    const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
-
+  // make this endpoint the universal get users endpoint
+  socket.on("get:users", ({ includeHost }: { includeHost: boolean }) => {
+    const roomId = parseRoomId(socket.roomId);
+    const game: BaseGame | undefined = gameManager.getGame(roomId);
     if (game) {
-      // Check if player is already in the game
-      if (game.players.has(userId)) {
-        // Make sure socket is in the room
-        if (!socket.rooms.has(roomId)) {
-          socket.join(roomId);
-          console.log(`Reconnected player ${userId} to room ${roomId}`);
-        }
-
-        // Send current game state
-        socket.emit("game:currentState", {
-          players: game.getPlayers(),
-          // Add other game state information here
-        });
+      if (includeHost) {
+        socket.emit("server:listUsers", game.getPlayers());
       } else {
-        socket.emit("game:error", { message: "You are not part of this game" });
+        socket.emit("server:listUsers", game.getStudentPlayers());
       }
     } else {
-      socket.emit("game:error", { message: "Game not found" });
+      console.log(`Game with room id "${roomId}" does not exist`);
     }
   });
 });
