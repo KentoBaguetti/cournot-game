@@ -23,9 +23,9 @@ export default function CreateJankenpoGamePage() {
     socket?.emit("host:createGame", {
       gameType: "jankenpo",
       gameConfigs: {
-        roundLength,
-        maxRounds,
-        maxPlayersPerRoom,
+        roundLength: roundLength || 1,
+        maxRounds: maxRounds || 1,
+        maxPlayersPerRoom: maxPlayersPerRoom || 1,
       },
     });
     navigate("/instructor/gameDashboard");
