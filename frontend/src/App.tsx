@@ -3,8 +3,6 @@ import { Routes, Route } from "react-router-dom";
 import { SocketProvider } from "./socket";
 import Home from "./pages/Home";
 import StudentJoin from "./pages/StudentJoin";
-import InstructorJoin from "./pages/InstructorJoin";
-// import InstructorDashboard from "./pages/InstructorDashboard";
 import StudentGamePage from "./pages/StudentGamePage";
 import InstructorLogin from "./pages/Instructor/InstructorLogin";
 import JanKenPoPage from "./pages/JanKenPoPage";
@@ -17,51 +15,6 @@ import GameDashboard from "./pages/Instructor/GameDashboard";
 import GameLobby from "./pages/Student/GameLobby";
 
 function App() {
-  // const [message, setMessage] = useState("");
-  // const [inputValue, setInputValue] = useState("");
-
-  // useEffect(() => {
-  //   socket.on("server-response", (data) => {
-  //     setMessage(data);
-  //   });
-
-  //   return () => {
-  //     socket.off("server-response");
-  //   };
-  // }, []);
-
-  // const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   socket.emit("client-message", inputValue);
-  //   setInputValue("");
-  // };
-
-  // const createAndJoinGame = (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-
-  //   socket.emit("game:create", { roomId: "testgame1", gameType: "testgame" });
-  // };
-
-  // const joinGame = (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-
-  //   socket.emit("game:join", { roomId: "testgame1", host: false });
-  // };
-
-  // const handleCheckUsers = (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   socket.emit("game:checkRoles", { roomId: "testgame1" });
-  // };
-
-  // const expandGameSize = (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   socket.emit("game:expandSize", {
-  //     roomId: "testgame1",
-  //     setting: "maxPlayers",
-  //     size: 3,
-  //   });
-  // };
-
   return (
     <div className="">
       <Routes>
@@ -69,15 +22,6 @@ function App() {
         <Route path="/login" element={<InstructorLogin />} />
 
         <Route path="/student" element={<StudentJoin />} />
-
-        <Route
-          path="/instructor"
-          element={
-            <SocketProvider>
-              <InstructorJoin />
-            </SocketProvider>
-          }
-        />
 
         <Route
           path="/instructorDashboard"
