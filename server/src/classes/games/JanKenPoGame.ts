@@ -69,26 +69,22 @@ export class JanKenPoGame extends BaseGame {
     }
   }
 
-  async listRoomsAndPlayers(): Promise<Map<string, string[]>> {
+  listRoomsAndPlayers(): object {
     const res: Map<string, string[]> = new Map();
 
-    for (const currentRoomId of this.breakoutRoomIds) {
-      const sockets = await this.io.in(currentRoomId).fetchSockets();
-      const players: string[] = [];
-      for (const socket of sockets) {
-        const userId = this.socketManager?.connections.get(socket.id) || "";
-        const currentPlayerNickname: string =
-          this.socketManager?.userStore.get(userId)?.nickname || "None";
-        players.push(currentPlayerNickname);
+    for (const currRoomId of this.breakoutRoomIds) {
+      const temp: string[] = [];
+      const roomData: BreakoutRoomData | undefined =
+        this.roomMap.get(currRoomId);
+      if (roomData) {
+        for (const user of roomData.users) {
+          temp.push(user.getNickname());
+        }
       }
-      res.set(currentRoomId, players);
+      res.set(currRoomId, temp);
     }
-    console.log("Rooms : Players");
-    console.log(res);
-    console.log("Room Map");
-    console.log(this.roomMap);
-    console.log();
-    return res;
+    const objectData = Object.fromEntries(res);
+    return objectData;
   }
 
   onPlayerMove(socket: Socket, action: string): void {
