@@ -56,4 +56,12 @@ export class Student {
   public isReady(): boolean {
     return this.ready;
   }
+
+  public setBreakoutRoomId(breakoutRoomId: string): void {
+    this.breakoutRoomId = breakoutRoomId;
+  }
+
+  public getBreakoutRoomId(): string {
+    return this.breakoutRoomId;
+  }
 }

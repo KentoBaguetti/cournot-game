@@ -18,6 +18,7 @@ export interface TokenPayload {
 
 export interface BreakoutRoomData {
   users: Student[]; // since only students will be playing
+  userMoves: Map<Student, string>; // student : move
   roundNo: number;
   // roundHistory: string[]; add this later
 }

@@ -8,6 +8,12 @@ import { GameConfigs, JankenPoGameConfigs } from "../../types/types";
 export class JanKenPoGame extends BaseGame {
   public gameConfigs: JankenPoGameConfigs;
 
+  private winningMovesMap = {
+    rock: "scissors",
+    scissors: "paper",
+    paper: "rock",
+  };
+
   constructor(
     roomId: string,
     io: Server,
@@ -60,6 +66,7 @@ export class JanKenPoGame extends BaseGame {
       if (!this.roomMap.has(tempRoomId)) {
         this.roomMap.set(tempRoomId, {
           users: [player],
+          userMoves: new Map(),
           roundNo: 0,
         });
       } else {
@@ -78,6 +85,9 @@ export class JanKenPoGame extends BaseGame {
         .to(tempRoomId)
         .emit("player:connect", `Player "${username}" has connected`);
     }
+
+    console.log(this.roomMap);
+    console.log(socket.roomId);
   }
 
   listRoomsAndPlayers(): object {
@@ -98,6 +108,7 @@ export class JanKenPoGame extends BaseGame {
     return objectData;
   }
 
+  // for some reason the socket room id isnt the breakout room id but the mai room id
   onPlayerMove(socket: Socket, action: string): void {
     const player = this.players.get(socket.userId);
     if (!player) {
@@ -109,7 +120,47 @@ export class JanKenPoGame extends BaseGame {
       return;
     }
     player.setUserMove(action);
-    console.log(`Player ${socket.id} moved with action: ${action}`);
+    console.log(`Player ${player.getNickname()} moved with action: ${action}`);
+
+    console.log("///////////////////////////////////////");
+    console.log(socket.roomId);
+    console.log("///////////////////////////////////////");
+
+    // temp fix for now is to search the user via the maps
+    const breakoutRoomId = (player as Student).getBreakoutRoomId();
+    if (!breakoutRoomId) {
+      console.error("Breakout room id not found");
+      return;
+    }
+
+    const roomData = this.roomMap.get(breakoutRoomId);
+    if (!roomData) {
+      console.error("Room data not found");
+      return;
+    }
+    roomData.userMoves.set(player, action);
+
+    const opponent = roomData.users.find(
+      (user) => user.userId !== socket.userId
+    );
+    if (!opponent) {
+      console.error("Opponent not found");
+      return;
+    }
+
+    const opponentMove = roomData.userMoves.get(opponent);
+    if (!opponentMove) {
+      console.error("Opponent move not found");
+      return;
+    }
+
+    if (this.winningMovesMap[action] === opponentMove) {
+      console.log(`Player ${player.getNickname()} won the game`);
+    } else if (this.winningMovesMap[opponentMove] === action) {
+      console.log(`Player ${player.getNickname()} lost the game`);
+    } else {
+      console.log(`Player ${player.getNickname()} tied the game`);
+    }
   }
 
   // go through the breakout room, find the opponent, check for move, send the move to the socket
