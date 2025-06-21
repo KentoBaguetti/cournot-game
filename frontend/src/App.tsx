@@ -1,21 +1,18 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import { SocketProvider } from "./socket";
-
-// Both
 import Home from "./pages/Home";
-
-// Instructor pages
+import StudentJoin from "./pages/Student/StudentJoin";
 import InstructorLogin from "./pages/Instructor/InstructorLogin";
+import JanKenPoPage from "./pages/Games/JanKenPoPage";
+
+// non test shit
 import InstructorDashboard from "./pages/Instructor/InstructorDashboard";
 import CreateJankenpoGamePage from "./pages/Instructor/CreateJankenpoGamePage";
 import GameDashboard from "./pages/Instructor/GameDashboard";
 import DisplayGameInfoPage from "./pages/Instructor/DisplayGameInfoPage";
 
 // Student pages
-import StudentJoin from "./pages/Student/StudentJoin";
-import JanKenPoPage from "./pages/Games/JanKenPoPage";
-import GameLobby from "./pages/Student/GameLobby";
 
 function App() {
   return (
