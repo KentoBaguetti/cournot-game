@@ -10,6 +10,7 @@ import InstructorLogin from "./pages/Instructor/InstructorLogin";
 import InstructorDashboard from "./pages/Instructor/InstructorDashboard";
 import CreateJankenpoGamePage from "./pages/Instructor/CreateJankenpoGamePage";
 import GameDashboard from "./pages/Instructor/GameDashboard";
+import DisplayGameInfoPage from "./pages/Instructor/DisplayGameInfoPage";
 
 // Student pages
 import StudentJoin from "./pages/Student/StudentJoin";
@@ -48,6 +49,15 @@ function App() {
           element={
             <SocketProvider>
               <CreateJankenpoGamePage />
+            </SocketProvider>
+          }
+        />
+
+        <Route
+          path="/instructor/displayGameInfo"
+          element={
+            <SocketProvider>
+              <DisplayGameInfoPage />
             </SocketProvider>
           }
         />

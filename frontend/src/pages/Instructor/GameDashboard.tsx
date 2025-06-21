@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSocket } from "../../socket";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 /**
  * Use axios+express for less common data retrievals such as game name and configs, things that might not change a lot
@@ -9,6 +10,7 @@ import axios from "axios";
 
 export default function GameDashboard() {
   const socket = useSocket();
+  const navigate = useNavigate();
   const [hostName, setHostName] = useState("");
   const [playersArr, setPlayersArr] = useState<string[]>([]);
   const [startGame, setStartGame] = useState(false);
@@ -25,6 +27,10 @@ export default function GameDashboard() {
     socket.emit("game:start");
 
     setStartGame(true);
+  };
+
+  const handleNavigateToDisplayGameInfo = () => {
+    navigate("/instructor/displayGameInfo");
   };
 
   // initial mounts
@@ -91,6 +97,9 @@ export default function GameDashboard() {
         ))}
       </div>
       <button onClick={handleGameStart}>Start Game</button>
+      <button onClick={handleNavigateToDisplayGameInfo}>
+        Display page for students
+      </button>
     </div>
   );
 }
