@@ -13,6 +13,7 @@ import GameDashboard from "./pages/Instructor/GameDashboard";
 import DisplayGameInfoPage from "./pages/Instructor/DisplayGameInfoPage";
 
 // Student pages
+import GameLobby from "./pages/Student/GameLobby";
 
 function App() {
   return (
