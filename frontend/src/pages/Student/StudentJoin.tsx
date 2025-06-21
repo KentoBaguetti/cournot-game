@@ -1,40 +1,45 @@
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Users, ArrowRight, Home } from "lucide-react";
+import { Layout } from "../../components/Layout";
+import { Card } from "../../components/Card";
+import { Button } from "../../components/Button";
+import { Input } from "../../components/Input";
 import axios from "axios";
 
 export default function StudentJoin() {
-  // const [code, setCode] = useState<string>("");
-  //const [username, setUsername] = useState("");
+  const [gameCode, setGameCode] = useState("");
+  const [playerName, setPlayerName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const codeRef = useRef<HTMLInputElement>(null);
-  const usernameRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   const handleJoin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    if (!gameCode.trim() || !playerName.trim()) {
+      setError('Please enter both game code and your name');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
-
-    const codeValue = codeRef.current ? codeRef.current.value : "";
-    //setCode(codeValue);
-
-    const usernameValue = usernameRef.current ? usernameRef.current.value : "";
-    //setUsername(usernameValue);
 
     try {
       // Authenticate to get JWT
       await axios.post(
         "http://localhost:3001/auth/login",
         {
-          username: usernameValue,
-          roomId: codeValue,
+          username: playerName,
+          roomId: gameCode.toUpperCase(),
         },
         { withCredentials: true }
       );
 
-      // If we're already in the SocketProvider context, we can navigate directly
-      navigate("/student/gameLobby", { state: { roomCode: codeValue } });
+      // Navigate to game lobby
+      navigate("/student/gameLobby", { 
+        state: { roomCode: gameCode.toUpperCase() } 
+      });
     } catch (error) {
       console.error("Error joining game:", error);
       setError("Failed to join game. Please check your code and try again.");
@@ -43,52 +48,77 @@ export default function StudentJoin() {
   };
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen p-4">
-      <h1 className="text-2xl font-bold mb-6">Join a Game</h1>
-
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          <p>{error}</p>
+    <Layout>
+      <div className="max-w-md mx-auto px-4 py-16">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <Users className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Join Game</h1>
+          <p className="text-gray-600">
+            Enter the game code provided by your instructor and your name to join the session.
+          </p>
         </div>
-      )}
-      <div className="max-w-md">
-        <form onSubmit={handleJoin} className="w-full max-w-sm">
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Your Name
-            </label>
-            <input
-              type="text"
+
+        <Card>
+          <form onSubmit={handleJoin} className="space-y-6">
+            <Input
+              label="Your Name"
+              value={playerName}
+              onChange={setPlayerName}
               placeholder="Enter your name"
-              required={true}
-              ref={usernameRef}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required
             />
-          </div>
 
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Game Code
-            </label>
-            <input
-              type="text"
-              placeholder="Enter game code"
-              ref={codeRef}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            <Input
+              label="Game Code"
+              value={gameCode}
+              onChange={(value) => setGameCode(value.toUpperCase())}
+              placeholder="Enter 6-character code"
+              required
+              className="text-center text-lg font-mono tracking-widest"
             />
-          </div>
 
-          <div className="flex items-center justify-center">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-            >
-              {isLoading ? "Joining..." : "Join Game"}
-            </button>
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                <p className="text-red-700 text-sm">{error}</p>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              <Button
+                type="submit"
+                variant="success"
+                size="lg"
+                icon={ArrowRight}
+                disabled={isLoading}
+                className="w-full"
+              >
+                {isLoading ? 'Joining Game...' : 'Join Game'}
+              </Button>
+
+              <Button
+                onClick={() => navigate('/')}
+                variant="secondary"
+                size="md"
+                icon={Home}
+                className="w-full"
+              >
+                Back to Home
+              </Button>
+            </div>
+          </form>
+        </Card>
+
+        <div className="mt-8 text-center">
+          <div className="bg-blue-50 rounded-2xl p-6">
+            <h3 className="font-semibold text-gray-900 mb-2">Need Help?</h3>
+            <p className="text-sm text-gray-600">
+              Ask your instructor for the 6-character game code. Make sure to enter it exactly as shown.
+            </p>
           </div>
-        </form>
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 }
