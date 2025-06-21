@@ -1,12 +1,21 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Plus, Settings, Users, Play, Home, Copy, Check, BarChart3 } from 'lucide-react';
-import { Layout } from '../components/Layout';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
-import { Game } from '../types/game';
-import { generateGameCode } from '../utils/gameLogic';
-import { useGameContext } from '../contexts/GameContext';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Plus,
+  Settings,
+  Users,
+  Play,
+  Home,
+  Copy,
+  Check,
+  BarChart3,
+} from "lucide-react";
+import { Layout } from "../components/Layout";
+import { Card } from "../components/Card";
+import { Button } from "../components/Button";
+import { Game } from "../types/game";
+import { generateGameCode } from "../utils/gameLogic";
+import { useGameContext } from "../contexts/GameContext";
 
 export const InstructorDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -27,7 +36,7 @@ export const InstructorDashboard: React.FC = () => {
         roundDuration: 60,
         autoAdvance: false,
       },
-      status: 'waiting',
+      status: "waiting",
       currentRound: 0,
       maxRounds: 5,
     };
@@ -42,14 +51,13 @@ export const InstructorDashboard: React.FC = () => {
       });
 
       // Listen for game creation confirmation
-      const cleanup = socket.on('game:created', (data) => {
-        console.log('Game created on server:', data);
+      const cleanup = socket.on("game:created", (data) => {
         cleanup();
       });
     }
 
     setGames([...games, newGame]);
-    navigate('/instructor/configure', { state: { game: newGame } });
+    navigate("/instructor/configure", { state: { game: newGame } });
   };
 
   const copyGameCode = async (code: string) => {
@@ -70,20 +78,26 @@ export const InstructorDashboard: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-3xl font-bold">Instructor Dashboard</h1>
-                <p className="text-blue-200">Create and manage your oil production competition games</p>
+                <p className="text-blue-200">
+                  Create and manage your oil production competition games
+                </p>
               </div>
               {/* Connection Status */}
-              <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                socket.isConnected 
-                  ? 'bg-green-500 text-white' 
-                  : 'bg-red-500 text-white'
-              }`}>
-                {socket.isConnected ? 'Server Connected' : 'Server Disconnected'}
+              <div
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  socket.isConnected
+                    ? "bg-green-500 text-white"
+                    : "bg-red-500 text-white"
+                }`}
+              >
+                {socket.isConnected
+                  ? "Server Connected"
+                  : "Server Disconnected"}
               </div>
             </div>
             <div className="flex space-x-3">
               <Button
-                onClick={() => navigate('/')}
+                onClick={() => navigate("/")}
                 variant="secondary"
                 icon={Home}
               >
@@ -111,9 +125,12 @@ export const InstructorDashboard: React.FC = () => {
                 <span className="text-white text-sm">!</span>
               </div>
               <div>
-                <h3 className="font-semibold text-red-800">Server Connection Required</h3>
+                <h3 className="font-semibold text-red-800">
+                  Server Connection Required
+                </h3>
                 <p className="text-red-600 text-sm">
-                  Please ensure your game server is running to create and manage games.
+                  Please ensure your game server is running to create and manage
+                  games.
                 </p>
               </div>
             </div>
@@ -125,10 +142,13 @@ export const InstructorDashboard: React.FC = () => {
             <div className="w-24 h-24 bg-gradient-to-br from-orange-400 to-orange-500 rounded-3xl flex items-center justify-center mx-auto mb-8">
               <Plus className="w-12 h-12 text-white" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">No Games Yet</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              No Games Yet
+            </h3>
             <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg">
-              Create your first oil production competition game to get started. Configure 
-              game parameters and manage student sessions with real-time analytics.
+              Create your first oil production competition game to get started.
+              Configure game parameters and manage student sessions with
+              real-time analytics.
             </p>
             <Button
               onClick={createNewGame}
@@ -144,20 +164,27 @@ export const InstructorDashboard: React.FC = () => {
         ) : (
           <div className="grid gap-6">
             {games.map((game) => (
-              <div key={game.id} className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all duration-200">
+              <div
+                key={game.id}
+                className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all duration-200"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
-                      game.status === 'active' 
-                        ? 'bg-gradient-to-br from-green-400 to-green-500' 
-                        : game.status === 'waiting'
-                        ? 'bg-gradient-to-br from-blue-400 to-blue-500'
-                        : 'bg-gradient-to-br from-gray-400 to-gray-500'
-                    }`}>
+                    <div
+                      className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
+                        game.status === "active"
+                          ? "bg-gradient-to-br from-green-400 to-green-500"
+                          : game.status === "waiting"
+                          ? "bg-gradient-to-br from-blue-400 to-blue-500"
+                          : "bg-gradient-to-br from-gray-400 to-gray-500"
+                      }`}
+                    >
                       <Play className="w-8 h-8 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-gray-900">{game.name}</h3>
+                      <h3 className="text-2xl font-bold text-gray-900">
+                        {game.name}
+                      </h3>
                       <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
                         <span className="bg-gray-100 px-3 py-1 rounded-full font-mono font-bold">
                           Code: {game.code}
@@ -165,13 +192,15 @@ export const InstructorDashboard: React.FC = () => {
                         <span>•</span>
                         <span>{game.rooms.length} rooms</span>
                         <span>•</span>
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          game.status === 'active' 
-                            ? 'bg-green-100 text-green-700' 
-                            : game.status === 'waiting'
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-gray-100 text-gray-700'
-                        }`}>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-bold ${
+                            game.status === "active"
+                              ? "bg-green-100 text-green-700"
+                              : game.status === "waiting"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
                           {game.status.toUpperCase()}
                         </span>
                       </div>
@@ -184,12 +213,18 @@ export const InstructorDashboard: React.FC = () => {
                       variant="secondary"
                       size="sm"
                       icon={copiedCode === game.code ? Check : Copy}
-                      className={copiedCode === game.code ? 'bg-green-100 text-green-700' : ''}
+                      className={
+                        copiedCode === game.code
+                          ? "bg-green-100 text-green-700"
+                          : ""
+                      }
                     >
-                      {copiedCode === game.code ? 'Copied!' : 'Copy Code'}
+                      {copiedCode === game.code ? "Copied!" : "Copy Code"}
                     </Button>
                     <Button
-                      onClick={() => navigate('/instructor/configure', { state: { game } })}
+                      onClick={() =>
+                        navigate("/instructor/configure", { state: { game } })
+                      }
                       variant="secondary"
                       size="sm"
                       icon={Settings}
@@ -197,7 +232,9 @@ export const InstructorDashboard: React.FC = () => {
                       Configure
                     </Button>
                     <Button
-                      onClick={() => navigate('/instructor/manage', { state: { game } })}
+                      onClick={() =>
+                        navigate("/instructor/manage", { state: { game } })
+                      }
                       variant="primary"
                       size="sm"
                       icon={Users}

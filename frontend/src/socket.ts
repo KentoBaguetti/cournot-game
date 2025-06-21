@@ -33,7 +33,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         const token = await fetchTokenData();
         if (!isMounted) return;
-        console.log(`Token: ${token}`);
 
         const socket = io("http://localhost:3001", {
           auth: {
