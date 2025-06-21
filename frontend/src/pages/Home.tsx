@@ -16,15 +16,14 @@ export default function Home() {
   };
 
   return (
-    <Layout showHeader={true} title="Cournot Game">
+    <Layout showHeader={true} title="Goon City Simulator">
       <div className="max-w-6xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Welcome to the Cournot Game
+            Welcome to the Kasper Ku Gooning Game
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            An interactive economic simulation for learning market dynamics and
-            strategic decision making
+            Programmed Kasker Ku and co.
           </p>
         </div>
 
