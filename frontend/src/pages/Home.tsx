@@ -23,7 +23,7 @@ export default function Home() {
             Welcome to the Kasper Ku Gooning Game
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Programmed Kasker Ku and co.
+            Programmed by Kasker Ku and co.
           </p>
         </div>
 
