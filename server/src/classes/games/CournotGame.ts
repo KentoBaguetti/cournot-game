@@ -1,58 +1,106 @@
 import { Instructor } from "../users/Instructor";
 import { Student } from "../users/Student";
 import { BaseGame } from "./BaseGame";
-import { Socket } from "socket.io";
+import { Socket, Server } from "socket.io";
+import { GameConfigs, CournotGameConfigs } from "../../types/types";
+import {
+  calculateMarketPrice,
+  calculateProfit,
+} from "../../utils/cournotFormulas";
 
 export class CournotGame extends BaseGame {
-  onPlayerJoin(
-    socket: Socket,
-    userId: string,
-    username: string,
-    host: boolean
-  ): void {
-    const player = host
-      ? new Instructor(socket, userId, username)
-      : new Student(socket, userId, username);
-
-    this.players.set(userId, player);
-    socket.join(this.roomId);
-    this.io.to(this.roomId).emit("player:connect", this.players);
-    console.log(`Player "${username}" (${userId}) joined`);
-  }
-
-  onPlayerDisconnect(socket: Socket, userId: string): void {
-    socket.leave(this.roomId);
-
-    // We don't delete the player from the map to allow for reconnection
-    // Instead, mark the player as disconnected
-    const player = this.players.get(userId);
-    if (player) {
-      player.setDisconnected(true);
-      const username = player.getNickname();
-      console.log(`Player "${username}" (${userId}) has disconnected`);
-      this.io.to(this.roomId).emit("player:disconnect", this.players);
+  // Cournot constructor to specifically handle the different game configs
+  constructor(
+    roomId: string,
+    protected io: Server,
+    hostId: string,
+    gameConfigs: GameConfigs
+  ) {
+    super(roomId, io, hostId, gameConfigs);
+    const config = gameConfigs as CournotGameConfigs;
+    if (
+      !config.maxPlayersPerRoom ||
+      !config.roundLength ||
+      !config.maxRounds ||
+      !config.productCost ||
+      !config.maxProduction ||
+      !config.marketPrice ||
+      !config.totalMarketProduction
+    ) {
+      throw new Error("Invalid game configs");
     }
+    this.gameConfigs = config;
   }
 
-  onPlayerReconnect(socket: Socket, userId: string, username: string): void {
-    const player = this.players.get(userId);
-
-    if (player) {
-      // Update the player's socket and connection status
-      player.updateSocket(socket);
-      player.setDisconnected(false);
-
-      // Join the socket to the room
-      socket.join(this.roomId);
-
-      console.log(`Player "${username}" (${userId}) has reconnected`);
-      this.io.to(this.roomId).emit("player:reconnect", this.players);
-    } else {
-      // If player wasn't found, treat as a new join (non-host)
-      this.onPlayerJoin(socket, userId, username, false);
+  // on player move, set the player's move, and set the move in the breakout room
+  onPlayerMove(socket: Socket, action: string): void {
+    const player = this.players.get(socket.userId);
+    if (!player) {
+      console.error("Player not found");
+      return;
     }
+
+    if (player instanceof Instructor) {
+      console.error("Instructors can not move");
+      return;
+    }
+
+    player.setUserMove(action);
+
+    const breakoutRoomId = (player as Student).getBreakoutRoomId();
+    if (!breakoutRoomId) {
+      console.error("Breakout room not found");
+      return;
+    }
+
+    const roomData = this.roomMap.get(breakoutRoomId);
+    if (!roomData) {
+      console.error("Room data not found");
+      return;
+    }
+
+    roomData.userMoves.set(player, action);
   }
 
-  onPlayerMove(socket: Socket): void {}
   sendOpponentMove(socket: Socket): void {}
+
+  // return all the player moves in the breakout room to the socket instance
+  returnAllPlayerMoves(socket: Socket): void {
+    const player = this.players.get(socket.userId);
+
+    if (!player) {
+      console.error("Player not found");
+      return;
+    }
+
+    /**
+     *
+     * Two cases: Instructor or Student
+     *
+     * Instructor:
+     *  - return all moves from all breakout rooms
+     *
+     * Student:
+     *  - return all moves from the breakout room the student is in
+     *
+     * Needs to be refined more , just a quick implementation for now
+     *
+     */
+    if (player instanceof Instructor) {
+      socket.emit("server:allPlayerMoves", this.roomMap);
+    } else {
+      const breakoutRoomId = (player as Student).getBreakoutRoomId();
+      if (!breakoutRoomId) {
+        console.error("Breakout room not found");
+        return;
+      }
+      const roomData = this.roomMap.get(breakoutRoomId);
+      if (!roomData) {
+        console.error(
+          `Room data not found for breakout room: ${breakoutRoomId}`
+        );
+      }
+      socket.emit("server:currentRoomMoves", roomData);
+    }
+  }
 }

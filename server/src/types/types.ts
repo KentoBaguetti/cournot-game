@@ -30,3 +30,13 @@ export interface JankenPoGameConfigs extends GameConfigs {
   roundLength: number;
   maxRounds: number;
 }
+
+export interface CournotGameConfigs extends GameConfigs {
+  maxPlayersPerRoom: number;
+  maxRounds: number;
+  roundLength: number;
+  productCost: number;
+  maxProduction: number;
+  marketPrice: number;
+  totalMarketProduction: number;
+}
