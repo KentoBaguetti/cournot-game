@@ -145,6 +145,7 @@ export class CournotGame extends BaseGame {
      *  - return all moves from the breakout room the student is in
      *
      * Needs to be refined more , just a quick implementation for now
+     * eg make data consistent for the frontend
      *
      */
     if (player instanceof Instructor) {
