@@ -68,6 +68,7 @@ export class JanKenPoGame extends BaseGame {
           users: [player],
           userMoves: new Map(),
           roundNo: 0,
+          roundHistory: new Map(),
         });
       } else {
         this.roomMap.get(tempRoomId)?.users.push(player);

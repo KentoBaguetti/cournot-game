@@ -32,6 +32,60 @@ export class CournotGame extends BaseGame {
     this.gameConfigs = config;
   }
 
+  ///////////////////////////////////////////////////////////////////////////////
+  // override the onPlayerJoin method specifically for the CournotGame
+  ///////////////////////////////////////////////////////////////////////////////
+  async onPlayerJoin(
+    socket: Socket,
+    userId: string,
+    username: string,
+    host: boolean
+  ): Promise<void> {
+    if (host) {
+      socket.join(this.roomId);
+      const player = new Instructor(socket, userId, username, this.roomId);
+      this.players.set(userId, player);
+      this.playerCount++;
+
+      // this is the main room id, but should check in case this is redundant
+      socket.roomId = this.roomId;
+    } else {
+      let tempRoomId = this.roomId + "_" + this.breakoutRoomCount;
+      if (
+        (await this.countSocketsInRoom(tempRoomId)) >=
+        this.gameConfigs.maxPlayersPerRoom
+      ) {
+        this.breakoutRoomCount++;
+        tempRoomId = this.roomId + "_" + this.breakoutRoomCount;
+        socket.join(tempRoomId);
+      } else {
+        socket.join(tempRoomId);
+      }
+      const player = new Student(socket, userId, username, tempRoomId);
+
+      // set the room map
+      if (!this.roomMap.has(tempRoomId)) {
+        this.roomMap.set(tempRoomId, {
+          users: [player],
+          userMoves: new Map(),
+          roundNo: 0,
+          roundHistory: new Map(),
+        });
+      } else {
+        this.roomMap.get(tempRoomId)?.users.push(player);
+      }
+
+      // set the player map
+      this.players.set(userId, player);
+      this.playerCount++;
+
+      // set the breakout room ids
+      this.breakoutRoomIds.push(tempRoomId);
+
+      socket.roomId = tempRoomId;
+    }
+  }
+
   // on player move, set the player's move, and set the move in the breakout room
   onPlayerMove(socket: Socket, action: string): void {
     const player = this.players.get(socket.userId);
