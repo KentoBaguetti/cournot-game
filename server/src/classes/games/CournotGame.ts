@@ -34,6 +34,7 @@ export class CournotGame extends BaseGame {
 
   ///////////////////////////////////////////////////////////////////////////////
   // override the onPlayerJoin method specifically for the CournotGame
+  // TODO: figure out how to make this method synchronous
   ///////////////////////////////////////////////////////////////////////////////
   async onPlayerJoin(
     socket: Socket,
@@ -85,8 +86,9 @@ export class CournotGame extends BaseGame {
       socket.roomId = tempRoomId;
     }
   }
-
+  ///////////////////////////////////////////////////////////////////////////////
   // on player move, set the player's move, and set the move in the breakout room
+  ///////////////////////////////////////////////////////////////////////////////
   onPlayerMove(socket: Socket, action: string): void {
     const player = this.players.get(socket.userId);
     if (!player) {
@@ -116,9 +118,14 @@ export class CournotGame extends BaseGame {
     roomData.userMoves.set(player, action);
   }
 
+  ///////////////////////////////////////////////////////////////////////////////
+  // send the opponent move to the socket instance
+  ///////////////////////////////////////////////////////////////////////////////
   sendOpponentMove(socket: Socket): void {}
 
+  ///////////////////////////////////////////////////////////////////////////////
   // return all the player moves in the breakout room to the socket instance
+  ///////////////////////////////////////////////////////////////////////////////
   returnAllPlayerMoves(socket: Socket): void {
     const player = this.players.get(socket.userId);
 
