@@ -109,7 +109,7 @@ export class JanKenPoGame extends BaseGame {
     return objectData;
   }
 
-  // for some reason the socket room id isnt the breakout room id but the mai room id
+  // for some reason the socket room id isnt the breakout room id but the main room id
   onPlayerMove(socket: Socket, action: string): void {
     const player = this.players.get(socket.userId);
     if (!player) {
@@ -166,6 +166,7 @@ export class JanKenPoGame extends BaseGame {
 
   // go through the breakout room, find the opponent, check for move, send the move to the socket
   sendOpponentMove(socket: Socket): void {
+    console.log("sendOpponentMove method hit");
     const player = this.players.get(socket.userId);
     if (!player) {
       console.error("Player not found");
@@ -176,7 +177,8 @@ export class JanKenPoGame extends BaseGame {
       return;
     }
 
-    const roomId = socket.roomId;
+    // const mainRoomId = socket.roomId;
+    const roomId = (player as Student).getBreakoutRoomId();
     if (!roomId) {
       console.error("Room id not found");
       return;
@@ -195,6 +197,6 @@ export class JanKenPoGame extends BaseGame {
       console.error("Opponent move not found");
       return;
     }
-    socket.emit("game:checkMove", { move: opponentMove });
+    socket.emit("game:checkMove", { action: opponentMove });
   }
 }
