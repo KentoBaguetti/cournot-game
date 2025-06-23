@@ -256,7 +256,12 @@ io.on("connection", (socket: Socket) => {
       const username = userData.nickname;
 
       // generate the main room id, and this is what will be returned to the client/host
-      const mainRoomId = generateJoinCode();
+      // keep generating a new room id until we find one that doesn't exist
+      // *edge case*
+      let mainRoomId = generateJoinCode();
+      while (roomStore.has(mainRoomId)) {
+        mainRoomId = generateJoinCode();
+      }
 
       const game: BaseGame | undefined = GameFactory.createGame(
         gameType,
