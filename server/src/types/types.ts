@@ -23,9 +23,7 @@ export interface BreakoutRoomData {
   roundHistory: Map<number, Map<Student, (number | string)[]>>; // roundNo : Student : [quantitative or qualitative values]
 }
 
-export interface GameConfigs {
-  maxPlayersPerRoom: number;
-}
+export interface GameConfigs {}
 
 export interface JankenPoGameConfigs extends GameConfigs {
   maxPlayersPerRoom: number;

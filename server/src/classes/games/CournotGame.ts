@@ -53,7 +53,7 @@ export class CournotGame extends BaseGame {
       let tempRoomId = this.roomId + "_" + this.breakoutRoomCount;
       if (
         (await this.countSocketsInRoom(tempRoomId)) >=
-        this.gameConfigs.maxPlayersPerRoom
+        (this.gameConfigs as CournotGameConfigs).maxPlayersPerRoom
       ) {
         this.breakoutRoomCount++;
         tempRoomId = this.roomId + "_" + this.breakoutRoomCount;
