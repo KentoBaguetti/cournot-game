@@ -4,9 +4,17 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Register the Inter font class so @apply can see it */
 @layer base {
-  * {
+  html {
     font-family: "Inter", sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 700;
   }
 }

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useSocket } from "../../socket";
 import { useNavigate } from "react-router-dom";
+import { Layout } from "../../components/Layout";
+import { Card } from "../../components/Card";
+import { Button } from "../../components/Button";
 
 export default function CreateJankenpoGamePage() {
   const socket = useSocket();
@@ -42,51 +45,102 @@ export default function CreateJankenpoGamePage() {
     };
 
   return (
-    <div className="flex flex-col justify-center items-center">
-      <h1>Create a new Jankenpo Game</h1>
-      <div className="w-80 space-y-4">
-        <div className="space-y-2">
-          <h4 className="font-medium">Round Length</h4>
-          <input
-            type="text"
-            value={roundLength}
-            onChange={handleNumberInput(setRoundLength)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            inputMode="numeric"
-            pattern="[0-9]*"
-          />
+    <Layout showHeader={true} title="JanKenPo Game Setup">
+      <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">
+            Configure JanKenPo Game
+          </h1>
+          <p className="mt-2 text-lg text-gray-600">
+            Set up the parameters for your Rock Paper Scissors game
+          </p>
         </div>
-        <div className="space-y-2">
-          <h4 className="font-medium">Max Rounds</h4>
-          <input
-            type="text"
-            value={maxRounds}
-            onChange={handleNumberInput(setMaxRounds)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            inputMode="numeric"
-            pattern="[0-9]*"
-          />
-        </div>
-        <div className="space-y-2">
-          <h4 className="font-medium">Max Players Per Room</h4>
-          <input
-            type="text"
-            value={maxPlayersPerRoom}
-            onChange={handleNumberInput(setMaxPlayersPerRoom)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            inputMode="numeric"
-            pattern="[0-9]*"
-          />
-        </div>
-        <div className="pt-4">
-          <button
-            onClick={handleCreateGame}
-            className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          >
-            Create Game
-          </button>
+
+        <div className="max-w-md mx-auto">
+          <Card className="p-6">
+            <div className="space-y-6">
+              <div>
+                <label
+                  htmlFor="roundLength"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Round Length (seconds)
+                </label>
+                <div className="relative rounded-md shadow-sm">
+                  <input
+                    id="roundLength"
+                    type="text"
+                    value={roundLength}
+                    onChange={handleNumberInput(setRoundLength)}
+                    className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                  />
+                </div>
+                <p className="mt-1 text-sm text-gray-500">
+                  Duration of each round in seconds
+                </p>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="maxRounds"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Maximum Rounds
+                </label>
+                <div className="relative rounded-md shadow-sm">
+                  <input
+                    id="maxRounds"
+                    type="text"
+                    value={maxRounds}
+                    onChange={handleNumberInput(setMaxRounds)}
+                    className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                  />
+                </div>
+                <p className="mt-1 text-sm text-gray-500">
+                  Total number of rounds in the game
+                </p>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="maxPlayersPerRoom"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Maximum Players Per Room
+                </label>
+                <div className="relative rounded-md shadow-sm">
+                  <input
+                    id="maxPlayersPerRoom"
+                    type="text"
+                    value={maxPlayersPerRoom}
+                    onChange={handleNumberInput(setMaxPlayersPerRoom)}
+                    className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                  />
+                </div>
+                <p className="mt-1 text-sm text-gray-500">
+                  Maximum number of players allowed in each breakout room
+                </p>
+              </div>
+
+              <div className="pt-4">
+                <Button
+                  onClick={handleCreateGame}
+                  variant="primary"
+                  className="w-full"
+                >
+                  Create Game
+                </Button>
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 }

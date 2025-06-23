@@ -17,7 +17,7 @@ import GameLobby from "./pages/Student/GameLobby";
 
 function App() {
   return (
-    <div className="">
+    <div className="min-h-screen bg-blue-50">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<InstructorLogin />} />
