@@ -199,4 +199,41 @@ export class JanKenPoGame extends BaseGame {
     }
     socket.emit("game:checkMove", { action: opponentMove });
   }
+
+  // test method - should send the current users move to the opponent
+  sendMoveToOpponent(socket: Socket): void {
+    console.log("sendMoveToOpponent method hit");
+    const player = this.players.get(socket.userId);
+    if (!player) {
+      console.error("Player DNE");
+      return;
+    }
+
+    if (player instanceof Instructor) {
+      console.error("player is of type instructor and can not move");
+      return;
+    }
+
+    const roomId = (player as Student).getBreakoutRoomId();
+    if (!roomId) {
+      console.error("Room id not found");
+      return;
+    }
+
+    const roomData = this.roomMap.get(roomId);
+    if (!roomData) {
+      console.error(`Room data not found for room id: ${roomId}`);
+      return;
+    }
+
+    const roomUsers = roomData.users;
+    const opponent = roomUsers.find((user) => user.userId !== socket.userId);
+    const opponentSocket = opponent?.getSocket();
+    if (!opponentSocket) {
+      console.error("Opponent socket not found");
+      return;
+    }
+    const currentUserMove = player.getUserMove();
+    opponentSocket.emit("game:checkMove", { action: currentUserMove });
+  }
 }

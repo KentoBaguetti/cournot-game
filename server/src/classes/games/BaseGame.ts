@@ -231,4 +231,7 @@ export abstract class BaseGame {
   onGameStart(): void {
     console.log(`Game with room id "${this.roomId}" has started`);
   }
+
+  // test methods
+  sendMoveToOpponent(socket: Socket): void {}
 }

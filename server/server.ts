@@ -523,6 +523,7 @@ io.on("connection", (socket: Socket) => {
 
     game.onPlayerMove(socket, action);
     game.sendOpponentMove(socket);
+    game.sendMoveToOpponent(socket);
   });
 
   socket.on("game:checkMove", () => {
