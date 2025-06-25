@@ -234,4 +234,9 @@ export abstract class BaseGame {
 
   // test methods
   sendMoveToOpponent(socket: Socket): void {}
+  setPlayerMove(socket: Socket, action: string): void {}
+  getOpponentMove(socket: Socket): string | undefined {
+    return;
+  }
+  sendMoves(socket: Socket): void {}
 }

@@ -236,4 +236,81 @@ export class JanKenPoGame extends BaseGame {
     const currentUserMove = player.getUserMove();
     opponentSocket.emit("game:checkMove", { action: currentUserMove });
   }
+
+  // change this to make moves less complicated
+  // one method to set a player move
+  // one method to check if there are opponent moves
+
+  setPlayerMove(socket: Socket, action: string): void {
+    const player = this.players.get(socket.userId);
+    if (!player) {
+      console.error("Player DNE");
+      return;
+    }
+    if (player instanceof Instructor) {
+      console.error("Instructor cannot move");
+      return;
+    }
+
+    const roomId = (player as Student).getBreakoutRoomId();
+    if (!roomId) {
+      console.error("Room id not found");
+      return;
+    }
+    this.roomMap.get(roomId)?.userMoves.set(player, action);
+    console.log(
+      `Player "${player.getNickname()}" moved with action: ${action}`
+    );
+  }
+
+  // if undefined then the opponent has not moved yet, the user is then user1 (first player to make a move)
+  // if defined, then the opponent has moved and follow user2 plan
+  getOpponentMove(socket: Socket): string | undefined {
+    const player = this.players.get(socket.userId);
+    if (!player) {
+      return;
+    }
+    const roomUsers = this.roomMap.get(
+      (player as Student).getBreakoutRoomId()
+    )?.users;
+    if (!roomUsers) {
+      return;
+    }
+    const opponent = roomUsers.find((user) => user.userId !== socket.userId);
+    if (!opponent) {
+      return;
+    }
+    const opponentMove = this.roomMap
+      .get((player as Student).getBreakoutRoomId())
+      ?.userMoves.get(opponent);
+    console.log(
+      `Returning opponent "${opponent.getNickname()}" move: ${opponentMove}`
+    );
+    return opponentMove;
+  }
+
+  sendMoves(socket: Socket): void {
+    const player = this.players.get(socket.userId);
+    if (!player) {
+      return;
+    }
+    if (player instanceof Instructor) {
+      return;
+    }
+    const roomUsers = this.roomMap.get(
+      (player as Student).getBreakoutRoomId()
+    )?.users;
+    if (!roomUsers) {
+      return;
+    }
+    const opponent = roomUsers.find((user) => user.userId !== socket.userId);
+    if (!opponent) {
+      return;
+    }
+    const opponentSocket = opponent.getSocket();
+    const playerMove = player.getUserMove();
+    const opponentMove = opponent.getUserMove();
+    opponentSocket.emit("game:checkMove", { action: playerMove });
+    socket.emit("game:checkMove", { action: opponentMove });
+  }
 }

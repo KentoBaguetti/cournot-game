@@ -28,7 +28,6 @@ import {
 } from "./src/utils/auth";
 import { SocketManager } from "./src/socket/SocketManager";
 import { parseRoomId, generateJoinCode } from "./src/utils/utils";
-import { ManyToOne } from "typeorm";
 
 //////////////////////////////////////////////////////////////////
 // server vars
@@ -521,9 +520,16 @@ io.on("connection", (socket: Socket) => {
       return;
     }
 
-    game.onPlayerMove(socket, action);
-    game.sendOpponentMove(socket);
-    game.sendMoveToOpponent(socket);
+    // game.onPlayerMove(socket, action);
+    // game.sendOpponentMove(socket);
+    // game.sendMoveToOpponent(socket);
+    game.setPlayerMove(socket, action);
+    const opponentMove = game.getOpponentMove(socket);
+    if (opponentMove) {
+      game.sendMoves(socket);
+    } else {
+      console.log("WJEWJEOQJEOIQE");
+    }
   });
 
   socket.on("game:checkMove", () => {
