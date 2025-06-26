@@ -52,8 +52,8 @@ const setTokenCookie = (res: Response, userData: UserTokenData) => {
   res.cookie("auth_token", token, {
     httpOnly: true,
     // secure: process.env.NODE_ENV === "production", // Only use secure in production
-    secure: true,
-    sameSite: "none",
+    secure: false,
+    sameSite: "lax",
     maxAge: 60 * 60 * 1000, // 1 hour in milliseconds (matching JWT expiry)
   });
 
@@ -92,8 +92,8 @@ const clearTokenCookie = (res: Response) => {
   res.clearCookie("auth_token", {
     httpOnly: true,
     // secure: process.env.NODE_ENV === "production",
-    secure: true,
-    sameSite: "none",
+    secure: false,
+    sameSite: "lax",
   });
 };
 

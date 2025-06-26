@@ -21,7 +21,7 @@ export default function InstructorLogin() {
     try {
       // sets the token as a cookie, no response needed so far
       await axios.post(
-        "http://localhost:3001/auth/login",
+        "http://192.168.68.107:3001/auth/login",
         {
           username,
           roomId: "", // roomId is empty when the user logs in

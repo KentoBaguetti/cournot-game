@@ -21,7 +21,7 @@ export default function StudentJoin() {
     try {
       // Authenticate to get JWT
       await axios.post(
-        "http://localhost:3001/auth/login",
+        "http://192.168.68.107:3001/auth/login",
         {
           username,
           roomId: code,

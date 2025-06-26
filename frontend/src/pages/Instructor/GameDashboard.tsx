@@ -37,7 +37,7 @@ export default function GameDashboard() {
   // initial mounts
   useEffect(() => {
     const getBasicGameInfo = async () => {
-      const authmeRes = await axios.get("http://localhost:3001/auth/me", {
+      const authmeRes = await axios.get("http://192.168.68.107:3001/auth/me", {
         withCredentials: true,
       });
       setHostName(authmeRes.data.user.username);

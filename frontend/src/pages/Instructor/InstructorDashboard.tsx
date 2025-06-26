@@ -18,14 +18,17 @@ export default function InstructorDashboard() {
       try {
         setIsLoading(true);
         // Fetch instructor name
-        const meResponse = await axios.get("http://localhost:3001/auth/me", {
-          withCredentials: true,
-        });
+        const meResponse = await axios.get(
+          "http://192.168.68.107:3001/auth/me",
+          {
+            withCredentials: true,
+          }
+        );
         setInstructorName(meResponse.data.user.username);
 
         // Fetch available games
         const gamesResponse = await axios.get(
-          "http://localhost:3001/game/getGames",
+          "http://192.168.68.107:3001/game/getGames",
           { withCredentials: true }
         );
         setGames(gamesResponse.data.games);

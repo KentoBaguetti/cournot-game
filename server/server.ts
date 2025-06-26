@@ -37,7 +37,7 @@ const app: Express = express();
 app.use(
   // express cors
   cors({
-    origin: "http://localhost:5173",
+    origin: "http://192.168.68.107:5173",
     methods: ["GET", "POST"],
     credentials: true,
   })
@@ -49,7 +49,7 @@ const server = createServer(app); // low level access server to allow for websoc
 const io = new Server(server, {
   connectionStateRecovery: {},
   cors: {
-    origin: "http://localhost:5173", // frontend port (vite)
+    origin: "http://192.168.68.107:5173", // frontend port (vite)
     methods: ["GET", "POST"],
     credentials: true, // Important for cookies
   },
@@ -67,7 +67,7 @@ const roomStore: Map<string, RoomData> = new Map(); // rooms : set of all player
 ///////////////////////////////////////////////////////////////////
 // express routes
 //////////////////////////////////////////////////////////////////
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port: ${PORT}`);
 });
 

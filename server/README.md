@@ -40,7 +40,7 @@ When connecting to the Socket.IO server, the client should include the auth toke
 
 ```javascript
 // Client-side connection example
-const socket = io("http://localhost:3001", {
+const socket = io("http://192.168.68.107:3001", {
   withCredentials: true, // Important for cookies
 });
 ```
