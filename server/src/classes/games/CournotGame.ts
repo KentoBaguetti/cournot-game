@@ -204,8 +204,8 @@ export class CournotGame extends BaseGame {
     return calculateQuantitySum(allQuantities);
   }
 
-  calculateProfitForFirm(socket: Socket): number {
-    const player = this.players.get(socket.userId);
+  calculateProfitForFirm(userId: string): number {
+    const player = this.players.get(userId);
     if (!player) {
       console.error("Player not found");
       return 0;
@@ -235,5 +235,44 @@ export class CournotGame extends BaseGame {
       totalQuantity
     );
     return profit;
+  }
+
+  calculateMarketPrice(roomId: string): number {
+    const totalQuantity: number[] = this.getRoomQuantitiesAsArray(roomId);
+    return priceFunction(
+      (this.gameConfigs as CournotGameConfigs).x,
+      totalQuantity
+    );
+  }
+
+  /**
+   * Calculate the sum of each firm's profit for all the firms in a breakout room
+   * @param roomId  - the room id of a specific breakout room and "game"
+   */
+  calculateTotalProfit(roomId: string): number {
+    const roomData = this.roomMap.get(roomId);
+    if (!roomData) {
+      console.error(`Room data not found for room: ${roomId}`);
+      return 0;
+    }
+    let totalProfit: number = 0;
+    for (const user of roomData.userMoves.keys()) {
+      const profit = this.calculateProfitForFirm(user.userId);
+      totalProfit += profit;
+    }
+    return totalProfit;
+  }
+
+  calculateMaxProfitForFirm(userId: string): number {
+    const player = this.players.get(userId);
+    if (!player) {
+      console.error("Player not found");
+      return 0;
+    }
+    const breakoutRoomId = (player as Student).getBreakoutRoomId();
+    if (!breakoutRoomId) {
+      console.error("Breakout room not found");
+      return 0;
+    }
   }
 }
