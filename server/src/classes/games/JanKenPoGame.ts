@@ -268,16 +268,19 @@ export class JanKenPoGame extends BaseGame {
   getOpponentMove(socket: Socket): string | undefined {
     const player = this.players.get(socket.userId);
     if (!player) {
+      console.error("Player DNE")
       return;
     }
     const roomUsers = this.roomMap.get(
       (player as Student).getBreakoutRoomId()
     )?.users;
     if (!roomUsers) {
+      console.error("Room users not found");
       return;
     }
     const opponent = roomUsers.find((user) => user.userId !== socket.userId);
     if (!opponent) {
+      console.error("Opponent not found");
       return;
     }
     const opponentMove = this.roomMap
@@ -292,25 +295,48 @@ export class JanKenPoGame extends BaseGame {
   sendMoves(socket: Socket): void {
     const player = this.players.get(socket.userId);
     if (!player) {
+      console.error("Player DNE");
       return;
     }
     if (player instanceof Instructor) {
+      console.error("Instructor cannot move");
       return;
     }
     const roomUsers = this.roomMap.get(
       (player as Student).getBreakoutRoomId()
     )?.users;
     if (!roomUsers) {
+      console.error("Room users not found");
       return;
     }
     const opponent = roomUsers.find((user) => user.userId !== socket.userId);
     if (!opponent) {
+      console.error("Opponent not found");
       return;
     }
     const opponentSocket = opponent.getSocket();
-    const playerMove = player.getUserMove();
-    const opponentMove = opponent.getUserMove();
-    opponentSocket.emit("game:checkMove", { action: playerMove });
-    socket.emit("game:checkMove", { action: opponentMove });
+    const playerMove = this.roomMap.get((player as Student).getBreakoutRoomId())?.userMoves.get(player);
+    const opponentMove = this.roomMap.get((player as Student).getBreakoutRoomId())?.userMoves.get(opponent);
+    if (!playerMove || !opponentMove) {
+      console.error("Move not found");
+      return;
+    }
+    try {
+      opponentSocket.emit("game:checkMove", { action: playerMove });
+      socket.emit("game:checkMove", { action: opponentMove });
+      console.log("Move sent")
+    } catch (error) {
+      console.error("Error sending moves");
+    }
+
+    console.log("///////////////////////////////////////");
+    if (playerMove === opponentMove) {
+      console.log(`Draw: Player ${player.getNickname()} and ${opponent.getNickname()} tied with the move: ${playerMove}`);
+    } else if (this.winningMovesMap[playerMove] === opponentMove) {
+      console.log(`Player ${player.getNickname()} won the game`);
+    } else {
+      console.log(`Player ${opponent.getNickname()} won the game`);
+    }
+    console.log("///////////////////////////////////////");
   }
 }

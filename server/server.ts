@@ -528,7 +528,7 @@ io.on("connection", (socket: Socket) => {
     if (opponentMove) {
       game.sendMoves(socket);
     } else {
-      console.log("WJEWJEOQJEOIQE");
+      console.log("Can not find an opponent move");
     }
   });
 
