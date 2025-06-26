@@ -274,5 +274,24 @@ export class CournotGame extends BaseGame {
       console.error("Breakout room not found");
       return 0;
     }
+    const roomData = this.roomMap.get(breakoutRoomId);
+    if (!roomData) {
+        console.error(`Room data does not exist for room: ${breakoutRoomId}`);
+        return 0;
+    }
+    if (!roomData.userMoves) {
+        console.error(`User moves map does not exist in the breakout room: ${breakoutRoomId}`);
+        return 0;
+    }
+    let quantitiesWithoutCurrentFirmQuantity: number[] = [];
+    for (const user of roomData.userMoves.keys()) {
+        if (user !== (player as Student)) {
+            const userMove = roomData.userMoves.get(user);
+            if (typeof userMove === "number") {
+                quantitiesWithoutCurrentFirmQuantity.push(userMove);
+            }
+        }
+    }
+    return maxProfitFunction((this.gameConfigs as CournotGameConfigs).x, (this.gameConfigs as CournotGameConfigs).y, (this.gameConfigs as CournotGameConfigs).z, quantitiesWithoutCurrentFirmQuantity);
   }
 }
