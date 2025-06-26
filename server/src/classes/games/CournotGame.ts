@@ -10,6 +10,7 @@ import {
   calculateQuantitySum,
   priceFunction,
   costFunction,
+  calculateMaxMonopolyQuantity,
 } from "../../utils/cournotFormulas";
 
 export class CournotGame extends BaseGame {
@@ -299,6 +300,29 @@ export class CournotGame extends BaseGame {
       (this.gameConfigs as CournotGameConfigs).y,
       (this.gameConfigs as CournotGameConfigs).z,
       quantitiesWithoutCurrentFirmQuantity
+    );
+  }
+
+  calculateMonopolyQuantity(): number {
+    return calculateMaxMonopolyQuantity(
+      (this.gameConfigs as CournotGameConfigs).x,
+      (this.gameConfigs as CournotGameConfigs).y,
+      (this.gameConfigs as CournotGameConfigs).z
+    );
+  }
+
+  /**
+   * Calculate the profit for a single firm in a monopoly market for a specific room
+   * this shit will contain a simultaneous equation
+   * @param roomId
+   */
+  calculateMonopolyProfit(): number {
+    const monopolyQuantity = this.calculateMonopolyQuantity();
+    return (
+      monopolyQuantity *
+        ((this.gameConfigs as CournotGameConfigs).x - monopolyQuantity) -
+      monopolyQuantity * (this.gameConfigs as CournotGameConfigs).y +
+      2 * monopolyQuantity * (this.gameConfigs as CournotGameConfigs).z
     );
   }
 }

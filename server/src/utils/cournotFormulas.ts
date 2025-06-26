@@ -59,6 +59,14 @@ const maxProfitFunction = (
   return (y + qSum - x) / (2 * z - 2);
 };
 
+const calculateMaxMonopolyQuantity = (
+  x: number,
+  y: number,
+  z: number
+): number => {
+  return (y - x) / (2 * z - 2);
+};
+
 export {
   calculateMarketPrice,
   priceFunction,
@@ -66,4 +74,5 @@ export {
   profitFunction,
   maxProfitFunction,
   calculateQuantitySum,
+  calculateMaxMonopolyQuantity,
 };
