@@ -5,7 +5,11 @@ import { Socket, Server } from "socket.io";
 import { GameConfigs, CournotGameConfigs } from "../../types/types";
 import {
   calculateMarketPrice,
-  calculateProfit,
+  maxProfitFunction,
+  profitFunction,
+  calculateQuantitySum,
+  priceFunction,
+  costFunction,
 } from "../../utils/cournotFormulas";
 
 export class CournotGame extends BaseGame {
@@ -22,10 +26,9 @@ export class CournotGame extends BaseGame {
       !config.maxPlayersPerRoom ||
       !config.roundLength ||
       !config.maxRounds ||
-      !config.productCost ||
-      !config.maxProduction ||
-      !config.marketPrice ||
-      !config.totalMarketProduction
+      !config.x ||
+      !config.y ||
+      !config.z
     ) {
       throw new Error("Invalid game configs");
     }
@@ -164,5 +167,73 @@ export class CournotGame extends BaseGame {
       }
       socket.emit("server:currentRoomMoves", roomData);
     }
+  }
+
+  /**
+   * Helper method - Get the quantities produced by all the firms in the room as an array
+   * @param roomId - the room id to get the quantities for
+   * @returns an array of quantities produced by all the firms in the room
+   */
+  getRoomQuantitiesAsArray(roomId: string): number[] {
+    const roomData = this.roomMap.get(roomId);
+    if (!roomData) {
+      console.error(`Room data not found for room: ${roomId}`);
+      return [];
+    }
+    let allQuantites: number[] = [];
+    for (const userQuantity of roomData.userMoves.values()) {
+      if (typeof userQuantity === "number") {
+        allQuantites.push(userQuantity);
+      }
+    }
+    return allQuantites;
+  }
+
+  /**
+   * Get the total quantity produced by all the firms
+   * @param roomId - the room id to get the total quantity for
+   * @returns the total quantity of all the firms in the room
+   */
+  getTotalRoomQuantity(roomId: string): number {
+    const roomData = this.roomMap.get(roomId);
+    if (!roomData) {
+      console.error(`Room data not found for room: ${roomId}`);
+      return 0;
+    }
+    const allQuantities = this.getRoomQuantitiesAsArray(roomId);
+    return calculateQuantitySum(allQuantities);
+  }
+
+  calculateProfitForFirm(socket: Socket): number {
+    const player = this.players.get(socket.userId);
+    if (!player) {
+      console.error("Player not found");
+      return 0;
+    }
+    const breakoutRoomId = (player as Student).getBreakoutRoomId();
+    if (!breakoutRoomId) {
+      console.error("Breakout room not found");
+      return 0;
+    }
+    const roomData = this.roomMap.get(breakoutRoomId);
+    if (!roomData) {
+      console.error(`Room data not found for breakout room: ${breakoutRoomId}`);
+      return 0;
+    }
+    const totalQuantity: number[] =
+      this.getRoomQuantitiesAsArray(breakoutRoomId);
+    const firmQuantity = roomData.userMoves.get(player as Student);
+    if (typeof firmQuantity !== "number") {
+      console.error("Firm quantity not found");
+      return 0;
+    }
+    const profit: number = profitFunction(
+      (this.gameConfigs as CournotGameConfigs).x,
+      (this.gameConfigs as CournotGameConfigs).y,
+      (this.gameConfigs as CournotGameConfigs).z,
+      firmQuantity,
+      totalQuantity
+    );
+    return profit;
   }
 }

@@ -65,4 +65,5 @@ export {
   costFunction,
   profitFunction,
   maxProfitFunction,
+  calculateQuantitySum,
 };

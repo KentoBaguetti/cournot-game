@@ -18,7 +18,7 @@ export interface TokenPayload {
 
 export interface BreakoutRoomData {
   users: Student[]; // since only students will be playing
-  userMoves: Map<Student, string>; // student : move
+  userMoves: Map<Student, string | number>; // student : move
   roundNo: number;
   roundHistory: Map<number, Map<Student, (number | string)[]>>; // roundNo : Student : [quantitative or qualitative values]
 }
@@ -31,12 +31,15 @@ export interface JankenPoGameConfigs extends GameConfigs {
   maxRounds: number;
 }
 
+/**
+ * Game configs for the Cournot Game | These are values set by the instructor
+ * x, y, z are just coefficients for the price and cost functions, they do not have specific names (should default to 1)
+ */
 export interface CournotGameConfigs extends GameConfigs {
   maxPlayersPerRoom: number;
   maxRounds: number;
   roundLength: number;
-  productCost: number;
-  maxProduction: number;
-  marketPrice: number;
-  totalMarketProduction: number;
+  x: number;
+  y: number;
+  z: number;
 }
