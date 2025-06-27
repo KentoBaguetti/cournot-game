@@ -483,21 +483,25 @@ io.on("connection", (socket: Socket) => {
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   // Game Start Endpoint
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
-  socket.on("game:start", () => {
-    const mainRoomId = parseRoomId(socket.roomId);
-    const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
-    if (!game) {
-      console.log(`Game with room id "${mainRoomId}" does not exist`);
-      return;
-    }
+  socket.on(
+    "game:start",
+    ({ gameInfo }: { gameInfo: { gameType: string; roomId: string } }) => {
+      console.log(`Game Info: ${JSON.stringify(gameInfo, null, 2)}`);
+      const mainRoomId = parseRoomId(socket.roomId);
+      const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
+      if (!game) {
+        console.log(`Game with room id "${mainRoomId}" does not exist`);
+        return;
+      }
 
-    game.onGameStart();
+      game.onGameStart();
 
-    const allBreakoutRoomIds: string[] = game.breakoutRoomIds;
-    for (const breakoutRoomId of allBreakoutRoomIds) {
-      io.to(breakoutRoomId).emit("game:start");
+      const allBreakoutRoomIds: string[] = game.breakoutRoomIds;
+      for (const breakoutRoomId of allBreakoutRoomIds) {
+        io.to(breakoutRoomId).emit("game:start", { gameInfo });
+      }
     }
-  });
+  );
 
   ////////////////////////////////////////////////
   // socket endpoints for the jankenpo game

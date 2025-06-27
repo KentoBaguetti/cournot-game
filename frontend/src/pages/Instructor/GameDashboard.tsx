@@ -18,6 +18,7 @@ export default function GameDashboard() {
   const [playersArr, setPlayersArr] = useState<string[]>([]);
   const [startGame, setStartGame] = useState(false);
   const [roomCode, setRoomCode] = useState("");
+  const [gameType, setGameType] = useState("");
   const [roomsAndPlayers, setRoomsAndPlayers] = useState<
     Record<string, string[]>
   >({});
@@ -25,7 +26,12 @@ export default function GameDashboard() {
   const handleGameStart = () => {
     if (!socket) return;
 
-    socket.emit("game:start");
+    socket.emit("game:start", {
+      gameInfo: {
+        gameType: gameType,
+        roomId: roomCode,
+      },
+    });
 
     setStartGame(true);
   };
@@ -61,6 +67,7 @@ export default function GameDashboard() {
     });
     socket.on("game:info", (data) => {
       setRoomCode(data.roomId);
+      setGameType(data.gameType);
     });
     socket.on("server:listRoomsAndPlayers", (data) => {
       console.log(`Type: ${typeof data}`);
@@ -77,6 +84,18 @@ export default function GameDashboard() {
       socket.off("server:listRoomsAndPlayers");
     };
   }, [socket, startGame]);
+
+  // Check if all required data is available to start the game
+  const canStartGame = Boolean(
+    socket && gameType && roomCode && playersArr.length > 0 && !startGame
+  );
+
+  // Determine button text based on game state
+  const getButtonText = () => {
+    if (startGame) return "Game Started";
+    if (!canStartGame) return "Loading...";
+    return "Start Game";
+  };
 
   return (
     <Layout showHeader={true} title="Game Dashboard">
@@ -96,9 +115,9 @@ export default function GameDashboard() {
               <Button
                 variant="primary"
                 onClick={handleGameStart}
-                disabled={startGame || playersArr.length === 0}
+                disabled={!canStartGame}
               >
-                {startGame ? "Game Started" : "Start Game"}
+                {getButtonText()}
               </Button>
               <Button
                 variant="secondary"

@@ -31,11 +31,14 @@ export default function GameLobby() {
       setAllPlayers(data);
     });
 
-    socket.on("game:start", () => {
-      startGame.current = true;
-      setIsWaiting(false);
-      navigate("/games/jankenpo");
-    });
+    socket.on(
+      "game:start",
+      ({ gameInfo }: { gameInfo: { gameType: string } }) => {
+        startGame.current = true;
+        setIsWaiting(false);
+        navigate(`/games/${gameInfo.gameType}`);
+      }
+    );
 
     // cleanup
     return () => {
