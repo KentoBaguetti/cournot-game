@@ -8,12 +8,16 @@ import JanKenPoPage from "./pages/Games/JanKenPoPage";
 
 // non test shit
 import InstructorDashboard from "./pages/Instructor/InstructorDashboard";
-import CreateJankenpoGamePage from "./pages/Instructor/CreateJankenpoGamePage";
+
 import GameDashboard from "./pages/Instructor/GameDashboard";
 import DisplayGameInfoPage from "./pages/Instructor/DisplayGameInfoPage";
 
 // Student pages
 import GameLobby from "./pages/Student/GameLobby";
+
+// create game pages
+import CreateJankenpoGamePage from "./pages/Instructor/CreateJankenpoGamePage";
+import CreateCournotGamePage from "./pages/Instructor/CreateCournotGamePage";
 
 function App() {
   return (
@@ -47,6 +51,15 @@ function App() {
           element={
             <SocketProvider>
               <CreateJankenpoGamePage />
+            </SocketProvider>
+          }
+        />
+
+        <Route
+          path="/instructor/create/cournot"
+          element={
+            <SocketProvider>
+              <CreateCournotGamePage />
             </SocketProvider>
           }
         />

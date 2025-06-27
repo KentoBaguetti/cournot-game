@@ -174,6 +174,7 @@ app.get("/game/getGames", isAuthenticated, (req, res) => {
   const games = {
     testgame: ["testGame", "Test Game"],
     jankenpo: ["jankenpo", "JanKenPo"],
+    cournot: ["cournot", "Cournot Game"],
   };
   res.json({ games });
 });
