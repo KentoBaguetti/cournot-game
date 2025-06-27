@@ -4,7 +4,6 @@ import { SocketProvider } from "./socket";
 import Home from "./pages/Home";
 import StudentJoin from "./pages/Student/StudentJoin";
 import InstructorLogin from "./pages/Instructor/InstructorLogin";
-import JanKenPoPage from "./pages/Games/JanKenPoPage";
 
 // non test shit
 import InstructorDashboard from "./pages/Instructor/InstructorDashboard";
@@ -18,6 +17,10 @@ import GameLobby from "./pages/Student/GameLobby";
 // create game pages
 import CreateJankenpoGamePage from "./pages/Instructor/CreateJankenpoGamePage";
 import CreateCournotGamePage from "./pages/Instructor/CreateCournotGamePage";
+
+// game pages
+import JanKenPoPage from "./pages/Games/JanKenPoPage";
+import CournotGamePage from "./pages/Games/CournotGamePage";
 
 function App() {
   return (
@@ -81,6 +84,16 @@ function App() {
             </SocketProvider>
           }
         />
+
+        <Route
+          path="/games/cournot"
+          element={
+            <SocketProvider>
+              <CournotGamePage />
+            </SocketProvider>
+          }
+        />
+
         <Route
           path="/student/gameLobby"
           element={
