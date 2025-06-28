@@ -30,6 +30,10 @@ export default function CournotGamePage() {
       socket.emit("player:move", { action: userQuantity });
     }
 
+    if (!isReady) {
+      socket.emit("player:unready");
+    }
+
     if (!recievedGameData) {
       socket.emit("player:getGameData");
       setRecievedGameData(true);
@@ -47,7 +51,7 @@ export default function CournotGamePage() {
     return () => {
       socket.off("server:cournotInfo");
     };
-  }, [socket, userQuantity, x, isReady]);
+  }, [socket, userQuantity, x, isReady, recievedGameData]);
 
   const handleNumberInput =
     (setFunction: (value: number) => void) =>
@@ -91,6 +95,7 @@ export default function CournotGamePage() {
   );
 }
 
+// this helper method will be for the market price calculator to aid students
 const calculateMarketPrice = (x: number, totalMarketProduction: number) => {
   return x - totalMarketProduction;
 };

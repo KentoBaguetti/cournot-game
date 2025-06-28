@@ -185,6 +185,29 @@ export class CournotGame extends BaseGame {
     roomData.userReadyMap.set(player as Student, false);
   }
 
+  setPlayerMove(socket: Socket, action: string | number): void {
+    const player = this.players.get(socket.userId);
+    if (!player) {
+      console.error(`Player with user id "${socket.userId}" not found`);
+      return;
+    }
+    if (player instanceof Instructor) {
+      console.error("Instructors can not move");
+      return;
+    }
+    const breakoutRoomId = (player as Student).getBreakoutRoomId();
+    if (!breakoutRoomId) {
+      console.error(`Breakout room not found for room ${breakoutRoomId}`);
+      return;
+    }
+    const roomData = this.roomMap.get(breakoutRoomId);
+    if (!roomData) {
+      console.error(`Room data not found for room ${breakoutRoomId}`);
+      return;
+    }
+    roomData.userMoves.set(player as Student, action);
+  }
+
   ///////////////////////////////////////////////////////////////////////////////
   // send calculate cournot data back to the user
   // the "action" that the user made is the "Quantity" they are producing

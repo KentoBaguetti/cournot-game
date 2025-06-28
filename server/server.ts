@@ -529,12 +529,25 @@ io.on("connection", (socket: Socket) => {
     // game.sendOpponentMove(socket);
     // game.sendMoveToOpponent(socket);
     game.setPlayerMove(socket, action);
-    const opponentMove = game.getOpponentMove(socket);
-    if (opponentMove) {
-      game.sendMoves(socket);
-    } else {
-      console.log("Can not find an opponent move");
+    game.confirmPlayerMove(socket);
+    console.log("Player Ready");
+    // const opponentMove = game.getOpponentMove(socket);
+    // if (opponentMove) {
+    //   game.sendMoves(socket);
+    // } else {
+    //   console.log("Can not find an opponent move");
+    // }
+  });
+
+  socket.on("player:unready", () => {
+    const mainRoomId = parseRoomId(socket.roomId);
+    const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
+    if (!game) {
+      console.log(`Game with room ID "${mainRoomId}" does not exist`);
+      return;
     }
+    game.unconfirmPlayerMove(socket);
+    console.log("Player Unready");
   });
 
   socket.on("game:checkMove", () => {

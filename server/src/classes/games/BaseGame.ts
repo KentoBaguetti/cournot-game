@@ -241,4 +241,16 @@ export abstract class BaseGame {
     return;
   }
   sendMoves(socket: Socket): void {}
+
+  confirmPlayerMove(socket: Socket): void {}
+  unconfirmPlayerMove(socket: Socket): void {}
+  checkIfAllStudentsReady(roomId: string): boolean {
+    return false;
+  }
+  getRoomQuantitiesAsArray(roomId: string): number[] {
+    return [];
+  }
+  getTotalRoomQuantity(roomId: string): number {
+    return 0;
+  }
 }
