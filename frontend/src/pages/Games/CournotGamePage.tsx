@@ -6,6 +6,7 @@ export default function CournotGamePage() {
   const socket = useSocket();
 
   const [userQuantity, setUserQuantity] = useState<number>(0);
+  const [marketPrice, setMarketPrice] = useState<number>(0);
   const [userProfit, setUserProfit] = useState<number>(0);
   const [x, setX] = useState<number>(0);
   const [y, setY] = useState<number>(0);
@@ -14,6 +15,11 @@ export default function CournotGamePage() {
   useEffect(() => {
     if (!socket) {
       return;
+    }
+
+    if (userQuantity) {
+      const marketPrice = calculateMarketPrice(x, userQuantity);
+      setMarketPrice(marketPrice);
     }
 
     // emits
@@ -35,7 +41,7 @@ export default function CournotGamePage() {
     return () => {
       socket.off("server:cournotInfo");
     };
-  }, [socket]);
+  }, [socket, userQuantity]);
 
   const handleNumberInput =
     (setFunction: (value: number) => void) =>
@@ -53,6 +59,7 @@ export default function CournotGamePage() {
       <p>y: {y}</p>
       <p>z: {z}</p>
       <p>user profit: {userProfit}</p>
+      <p>market price: {marketPrice}</p>
       <input
         id="userQuantity"
         type="text"
@@ -68,3 +75,7 @@ export default function CournotGamePage() {
     </Layout>
   );
 }
+
+const calculateMarketPrice = (x: number, totalMarketProduction: number) => {
+  return x - totalMarketProduction;
+};
