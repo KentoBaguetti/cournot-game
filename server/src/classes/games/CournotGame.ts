@@ -73,11 +73,14 @@ export class CournotGame extends BaseGame {
         this.roomMap.set(tempRoomId, {
           users: [player],
           userMoves: new Map(),
+          userReadyMap: new Map(),
           roundNo: 0,
           roundHistory: new Map(),
         });
       } else {
+        // set the room map
         this.roomMap.get(tempRoomId)?.users.push(player);
+        this.roomMap.get(tempRoomId)?.userReadyMap.set(player, false);
       }
 
       // set the player map
@@ -121,6 +124,65 @@ export class CournotGame extends BaseGame {
     }
 
     roomData.userMoves.set(player, action);
+  }
+
+  // send the xyz values to the student so they can do calculations on the frontend
+  sendGameInfoToStudent(socket: Socket): void {
+    const x = (this.gameConfigs as CournotGameConfigs).x;
+    const y = (this.gameConfigs as CournotGameConfigs).y;
+    const z = (this.gameConfigs as CournotGameConfigs).z;
+
+    socket.emit("server:cournotInfo", {
+      x,
+      y,
+      z,
+    });
+
+    console.log(`sending game data: ${x}, ${y}, ${z}`);
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // confirm a player's move
+  ///////////////////////////////////////////////////////////////////////////////
+  confirmPlayerMove(socket: Socket): void {
+    const player = this.players.get(socket.userId);
+    if (!player) {
+      console.error(`Player not found for the user id: ${socket.userId}`);
+      return;
+    }
+    const breakoutRoomId = (player as Student).getBreakoutRoomId();
+    if (!breakoutRoomId) {
+      console.error(`Breakout room not found for room: ${breakoutRoomId}`);
+      return;
+    }
+    const roomData = this.roomMap.get(breakoutRoomId);
+    if (!roomData) {
+      console.error(`Room data not found for room: ${breakoutRoomId}`);
+      return;
+    }
+    roomData.userReadyMap.set(player as Student, true);
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // unconfirm a player's move
+  ///////////////////////////////////////////////////////////////////////////////
+  unconfirmPlayerMove(socket: Socket): void {
+    const player = this.players.get(socket.userId);
+    if (!player) {
+      console.error(`Player not found for the user id: ${socket.userId}`);
+      return;
+    }
+    const breakoutRoomId = (player as Student).getBreakoutRoomId();
+    if (!breakoutRoomId) {
+      console.error(`Breakout room not found for room: ${breakoutRoomId}`);
+      return;
+    }
+    const roomData = this.roomMap.get(breakoutRoomId);
+    if (!roomData) {
+      console.error(`Room data not found for room: ${breakoutRoomId}`);
+      return;
+    }
+    roomData.userReadyMap.set(player as Student, false);
   }
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -224,19 +286,21 @@ export class CournotGame extends BaseGame {
     }
   }
 
-  // send the xyz values to the student so they can do calculations on the frontend
-  sendGameInfoToStudent(socket: Socket): void {
-    const x = (this.gameConfigs as CournotGameConfigs).x;
-    const y = (this.gameConfigs as CournotGameConfigs).y;
-    const z = (this.gameConfigs as CournotGameConfigs).z;
-
-    socket.emit("server:cournotInfo", {
-      x,
-      y,
-      z,
-    });
-
-    console.log(`sending game data: ${x}, ${y}, ${z}`);
+  /**
+   * Check if all students in a given breakout room are ready. eg all players have made a move and confirmed
+   */
+  checkIfAllStudentsReady(roomId: string): boolean {
+    const roomData = this.roomMap.get(roomId);
+    if (!roomData) {
+      console.error(`Room data not found for room: ${roomId}`);
+      return false;
+    }
+    for (const user of roomData.userReadyMap.keys()) {
+      if (!roomData.userReadyMap.get(user)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**

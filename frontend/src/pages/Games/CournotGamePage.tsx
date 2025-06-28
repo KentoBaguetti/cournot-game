@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Layout } from "../../components/Layout";
+import { Button } from "../../components/Button";
 import { useSocket } from "../../socket";
 
 export default function CournotGamePage() {
@@ -8,6 +9,8 @@ export default function CournotGamePage() {
   const [userQuantity, setUserQuantity] = useState<number>(0);
   const [marketPrice, setMarketPrice] = useState<number>(0);
   const [userProfit, setUserProfit] = useState<number>(0);
+  const [isReady, setIsReady] = useState<boolean>(false);
+  const [recievedGameData, setRecievedGameData] = useState<boolean>(false);
   const [x, setX] = useState<number>(0);
   const [y, setY] = useState<number>(0);
   const [z, setZ] = useState<number>(0);
@@ -23,11 +26,14 @@ export default function CournotGamePage() {
     }
 
     // emits
-    if (userQuantity) {
+    if (userQuantity && isReady) {
       socket.emit("player:move", { action: userQuantity });
     }
 
-    socket.emit("player:getGameData");
+    if (!recievedGameData) {
+      socket.emit("player:getGameData");
+      setRecievedGameData(true);
+    }
 
     //listeners
     socket.on("server:cournotInfo", (data) => {
@@ -41,7 +47,7 @@ export default function CournotGamePage() {
     return () => {
       socket.off("server:cournotInfo");
     };
-  }, [socket, userQuantity]);
+  }, [socket, userQuantity, x, isReady]);
 
   const handleNumberInput =
     (setFunction: (value: number) => void) =>
@@ -54,24 +60,33 @@ export default function CournotGamePage() {
 
   return (
     <Layout showHeader={true} title="Cournot Game">
-      <div>Cournot game page</div>
-      <p>x: {x}</p>
-      <p>y: {y}</p>
-      <p>z: {z}</p>
-      <p>user profit: {userProfit}</p>
-      <p>market price: {marketPrice}</p>
-      <input
-        id="userQuantity"
-        type="text"
-        value={userQuantity}
-        onChange={handleNumberInput(setUserQuantity)}
-        className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        inputMode="numeric"
-        pattern="[0-9]*"
-      />
-      <button onClick={() => setUserQuantity(userQuantity)}>
-        Set Quantity
-      </button>
+      <div className="">
+        <div>Cournot game page</div>
+        <p>x: {x}</p>
+        <p>y: {y}</p>
+        <p>z: {z}</p>
+        <p>user profit: {userProfit}</p>
+        <p>market price: {marketPrice}</p>
+        <input
+          id="userQuantity"
+          type="text"
+          value={userQuantity}
+          onChange={handleNumberInput(setUserQuantity)}
+          className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          disabled={isReady}
+        />
+        <Button
+          onClick={() => {
+            setUserQuantity(userQuantity);
+            setIsReady(!isReady);
+            console.log(userQuantity);
+          }}
+        >
+          {isReady ? "Unconfirm" : "Confirm"}
+        </Button>
+      </div>
     </Layout>
   );
 }
