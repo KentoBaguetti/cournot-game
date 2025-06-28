@@ -232,6 +232,8 @@ export abstract class BaseGame {
     console.log(`Game with room id "${this.roomId}" has started`);
   }
 
+  sendGameInfoToStudent(socket: Socket): void {}
+
   // test methods
   sendMoveToOpponent(socket: Socket): void {}
   setPlayerMove(socket: Socket, action: string): void {}

@@ -547,6 +547,16 @@ io.on("connection", (socket: Socket) => {
     }
   });
 
+  socket.on("player:getGameData", () => {
+    const mainRoomId = parseRoomId(socket.roomId);
+    const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
+    if (game) {
+      game.sendGameInfoToStudent(socket);
+    } else {
+      console.log(`Game with room id "${mainRoomId}" does not exist`);
+    }
+  });
+
   // big test endpoint, will need a lot of rewriting if I want to use this later as an acc endpoint
   socket.on("game:emitToCurrentRoom", ({ msg }: { msg: string }) => {
     const currentRoomId = socket.roomId;

@@ -93,7 +93,7 @@ export class CournotGame extends BaseGame {
   ///////////////////////////////////////////////////////////////////////////////
   // on player move, set the player's move, and set the move in the breakout room
   ///////////////////////////////////////////////////////////////////////////////
-  onPlayerMove(socket: Socket, action: string): void {
+  onPlayerMove(socket: Socket, action: string | number): void {
     const player = this.players.get(socket.userId);
     if (!player) {
       console.error("Player not found");
@@ -105,6 +105,7 @@ export class CournotGame extends BaseGame {
       return;
     }
 
+    // this doesnt matter - should refactor codebase to remove the userMove property from the player class
     player.setUserMove(action);
 
     const breakoutRoomId = (player as Student).getBreakoutRoomId();
@@ -120,6 +121,59 @@ export class CournotGame extends BaseGame {
     }
 
     roomData.userMoves.set(player, action);
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // send calculate cournot data back to the user
+  // the "action" that the user made is the "Quantity" they are producing
+  // NOTE: send cournot data immediately from this method, that way I dont need to handle ts in the server
+  // NOTE: Make another method to send data to the instructor as this one is only for students
+  ///////////////////////////////////////////////////////////////////////////////
+  sendCournotData(socket: Socket): void {
+    const player = this.players.get(socket.userId);
+    if (!player) {
+      console.error(`Player not found for the user id: ${socket.userId}`);
+      return;
+    }
+
+    if (player instanceof Instructor) {
+      console.error(
+        "Instructor class should not be able to use this method: 'sendCournotData()'"
+      );
+      return;
+    }
+
+    const breakoutRoomId = (player as Student).getBreakoutRoomId();
+    if (!breakoutRoomId) {
+      console.error(`Breakout room "${breakoutRoomId}" not found`);
+      return;
+    }
+
+    const roomData = this.roomMap.get(breakoutRoomId);
+    if (!roomData) {
+      console.error(`Room data not set for breakout room: ${breakoutRoomId}`);
+      return;
+    }
+
+    const userMoves = roomData.userMoves;
+    if (!userMoves) {
+      console.error(`User moves not set for breakout room: ${breakoutRoomId}`);
+      return;
+    }
+
+    const userQuantity = userMoves.get(player);
+    if (typeof userQuantity !== "number") {
+      console.error(
+        `User quantity not set for breakout room: ${breakoutRoomId} for player: ${player.getNickname()}`
+      );
+      return;
+    }
+
+    const userProfit = this.calculateProfitForFirm(player.userId);
+
+    socket.emit("game:cournotData", {
+      userProfit,
+    });
   }
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -168,6 +222,21 @@ export class CournotGame extends BaseGame {
       }
       socket.emit("server:currentRoomMoves", roomData);
     }
+  }
+
+  // send the xyz values to the student so they can do calculations on the frontend
+  sendGameInfoToStudent(socket: Socket): void {
+    const x = (this.gameConfigs as CournotGameConfigs).x;
+    const y = (this.gameConfigs as CournotGameConfigs).y;
+    const z = (this.gameConfigs as CournotGameConfigs).z;
+
+    socket.emit("server:cournotInfo", {
+      x,
+      y,
+      z,
+    });
+
+    console.log(`sending game data: ${x}, ${y}, ${z}`);
   }
 
   /**
@@ -238,12 +307,21 @@ export class CournotGame extends BaseGame {
     return profit;
   }
 
-  calculateMarketPrice(roomId: string): number {
+  // this function is called at the end of a round to calculate the market price for a single room
+  calculateMarketPriceForRoom(roomId: string): number {
     const totalQuantity: number[] = this.getRoomQuantitiesAsArray(roomId);
     return priceFunction(
       (this.gameConfigs as CournotGameConfigs).x,
       totalQuantity
     );
+  }
+
+  // this is called for the calculator to help students visualize their profit
+  // move this to the frontend
+  calculateMarketPrice(totalMarketProduction: number): number {
+    return priceFunction((this.gameConfigs as CournotGameConfigs).x, [
+      totalMarketProduction,
+    ]);
   }
 
   /**
@@ -324,5 +402,12 @@ export class CournotGame extends BaseGame {
       monopolyQuantity * (this.gameConfigs as CournotGameConfigs).y +
       2 * monopolyQuantity * (this.gameConfigs as CournotGameConfigs).z
     );
+  }
+
+  // TODO
+  // return the maximum production for a firm
+  // the quantity at which the market price starts to become negative
+  calculateMaximumProduction(): number {
+    return 0;
   }
 }
