@@ -76,6 +76,9 @@ export class CournotGame extends BaseGame {
           userReadyMap: new Map(),
           roundNo: 0,
           roundHistory: new Map(),
+          timerActive: false,
+          timerEndTime: 0,
+          timerInterval: undefined,
         });
       } else {
         // set the room map
@@ -93,6 +96,26 @@ export class CournotGame extends BaseGame {
       socket.roomId = tempRoomId;
     }
   }
+
+  onGameStart(): void {
+    for (const breakoutRoomId of this.breakoutRoomIds) {
+      const roomData = this.roomMap.get(breakoutRoomId);
+      if (!roomData) {
+        console.error(`Room data not found for room: ${breakoutRoomId}`);
+        continue;
+      }
+
+      const roundLength = (this.gameConfigs as CournotGameConfigs).roundLength;
+
+      this.startRoundTimer(breakoutRoomId, roundLength);
+
+      this.io.to(breakoutRoomId).emit("server:roundStart", {
+        roundNo: roomData.roundNo,
+        roundLength,
+      });
+    }
+  }
+
   ///////////////////////////////////////////////////////////////////////////////
   // on player move, set the player's move, and set the move in the breakout room
   ///////////////////////////////////////////////////////////////////////////////
@@ -496,5 +519,111 @@ export class CournotGame extends BaseGame {
   // the quantity at which the market price starts to become negative
   calculateMaximumProduction(): number {
     return 0;
+  }
+
+  // timer methods
+  handleRoundEnd(breakoutRoomId: string): void {
+    const roomData = this.roomMap.get(breakoutRoomId);
+    if (!roomData) {
+      console.error(`Room data not found for room: ${breakoutRoomId}`);
+      return;
+    }
+
+    this.saveRoundData(breakoutRoomId);
+
+    roomData.roundNo++;
+
+    for (const user of roomData.userReadyMap.keys()) {
+      roomData.userReadyMap.set(user, false);
+    }
+
+    roomData.userMoves.clear();
+
+    // notify students
+    this.io.to(breakoutRoomId).emit("server:roundEnd", {
+      roundNo: roomData.roundNo - 1,
+      nextRoundNo: roomData.roundNo,
+      marketPrice: this.calculateMarketPriceForRoom(breakoutRoomId),
+      roundHistory: roomData.roundHistory,
+      totalProfit: this.calculateTotalProfit(breakoutRoomId),
+      monopolyProfit: this.calculateMonopolyProfit(),
+      maxProfit: this.calculateMaxProfitForFirm(breakoutRoomId),
+      totalQuantity: this.getTotalRoomQuantity(breakoutRoomId),
+    });
+
+    const maxRounds = (this.gameConfigs as CournotGameConfigs).maxRounds;
+
+    if (roomData.roundNo < maxRounds) {
+      setTimeout(() => {
+        const roundLength = (this.gameConfigs as CournotGameConfigs)
+          .roundLength;
+        this.startRoundTimer(breakoutRoomId, roundLength);
+
+        this.io.to(breakoutRoomId).emit("server:roundStart", {
+          roundNo: roomData.roundNo,
+          roundLength,
+        });
+      }, 15 * 1000); // 15 second delay before moving onto next round
+    } else {
+      this.io.to(breakoutRoomId).emit("server:gameEnd", {
+        roundHistory: roomData.roundHistory,
+      });
+    }
+  }
+
+  saveRoundData(breakoutRoomId: string): void {
+    const roomData = this.roomMap.get(breakoutRoomId);
+    if (!roomData) {
+      console.error(`Room data not found for room: ${breakoutRoomId}`);
+      return;
+    }
+
+    // create a new map for the round if it DNE
+    if (!roomData.roundHistory.has(roomData.roundNo)) {
+      roomData.roundHistory.set(roomData.roundNo, new Map());
+    }
+
+    for (let [user, quantity] of roomData.userMoves.entries()) {
+      const roundData = roomData.roundHistory.get(roomData.roundNo);
+      if (roundData) {
+        if (
+          quantity !== undefined &&
+          (typeof quantity === "number" || typeof quantity === "string")
+        ) {
+          // set all required quantities into this array to be sent back to the student at the end of the round
+          if (typeof quantity === "string") {
+            quantity = Number(quantity);
+          }
+          const userEndRoundData: Map<string, number | string> = new Map();
+          userEndRoundData.set("quantity", quantity);
+          userEndRoundData.set(
+            "marketPrice",
+            this.calculateMarketPriceForRoom(breakoutRoomId)
+          );
+          userEndRoundData.set(
+            "profit",
+            this.calculateProfitForFirm(user.userId)
+          );
+          userEndRoundData.set(
+            "monopolyProfit",
+            this.calculateMonopolyProfit()
+          );
+          userEndRoundData.set(
+            "maxProfit",
+            this.calculateMaxProfitForFirm(user.userId)
+          );
+          userEndRoundData.set(
+            "totalQuantity",
+            this.getTotalRoomQuantity(breakoutRoomId)
+          );
+          userEndRoundData.set(
+            "totalQuantity",
+            this.getTotalRoomQuantity(breakoutRoomId)
+          );
+
+          roundData.set(user, userEndRoundData);
+        }
+      }
+    }
   }
 }

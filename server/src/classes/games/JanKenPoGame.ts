@@ -70,6 +70,9 @@ export class JanKenPoGame extends BaseGame {
           userReadyMap: new Map(),
           roundNo: 0,
           roundHistory: new Map(),
+          timerActive: false,
+          timerEndTime: 0,
+          timerInterval: undefined,
         });
       } else {
         this.roomMap.get(tempRoomId)?.users.push(player);

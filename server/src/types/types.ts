@@ -21,7 +21,10 @@ export interface BreakoutRoomData {
   userMoves: Map<Student, string | number>; // student : move
   userReadyMap: Map<Student, boolean>;
   roundNo: number;
-  roundHistory: Map<number, Map<Student, (number | string)[]>>; // roundNo : Student : [quantitative or qualitative values]
+  roundHistory: Map<number, Map<Student, Map<string, number | string>>>; // roundNo : Student : quantity/move name : value
+  timerActive: boolean;
+  timerEndTime: number;
+  timerInterval?: NodeJS.Timeout;
 }
 
 export interface GameConfigs {}
