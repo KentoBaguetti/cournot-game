@@ -122,7 +122,7 @@ export class CournotGame extends BaseGame {
   onPlayerMove(socket: Socket, action: string | number): void {
     const player = this.players.get(socket.userId);
     if (!player) {
-      console.error("Player not found");
+      console.error("Player not found: onPlayerMove()");
       return;
     }
 
@@ -146,7 +146,7 @@ export class CournotGame extends BaseGame {
       return;
     }
 
-    roomData.userMoves.set(player, action);
+    roomData.userMoves.set(player, Number(action));
   }
 
   // send the xyz values to the student so they can do calculations on the frontend
@@ -170,7 +170,9 @@ export class CournotGame extends BaseGame {
   confirmPlayerMove(socket: Socket): void {
     const player = this.players.get(socket.userId);
     if (!player) {
-      console.error(`Player not found for the user id: ${socket.userId}`);
+      console.error(
+        `Player not found for the user id: ${socket.userId}: confirmPlayerMove()`
+      );
       return;
     }
     const breakoutRoomId = (player as Student).getBreakoutRoomId();
@@ -192,7 +194,9 @@ export class CournotGame extends BaseGame {
   unconfirmPlayerMove(socket: Socket): void {
     const player = this.players.get(socket.userId);
     if (!player) {
-      console.error(`Player not found for the user id: ${socket.userId}`);
+      console.error(
+        `Player not found for the user id: ${socket.userId}: unconfirmPlayerMove()`
+      );
       return;
     }
     const breakoutRoomId = (player as Student).getBreakoutRoomId();
@@ -228,7 +232,8 @@ export class CournotGame extends BaseGame {
       console.error(`Room data not found for room ${breakoutRoomId}`);
       return;
     }
-    roomData.userMoves.set(player as Student, action);
+    console.log(`Setting player move: ${action} and type: ${typeof action}`);
+    roomData.userMoves.set(player as Student, Number(action));
   }
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -240,7 +245,9 @@ export class CournotGame extends BaseGame {
   sendCournotData(socket: Socket): void {
     const player = this.players.get(socket.userId);
     if (!player) {
-      console.error(`Player not found for the user id: ${socket.userId}`);
+      console.error(
+        `Player not found for the user id: ${socket.userId}: sendCournotData()`
+      );
       return;
     }
 
@@ -296,7 +303,7 @@ export class CournotGame extends BaseGame {
     const player = this.players.get(socket.userId);
 
     if (!player) {
-      console.error("Player not found");
+      console.error("Player not found: returnAllPlayerMoves()");
       return;
     }
 
@@ -387,7 +394,7 @@ export class CournotGame extends BaseGame {
   calculateProfitForFirm(userId: string): number {
     const player = this.players.get(userId);
     if (!player) {
-      console.error("Player not found");
+      console.error("Player not found: calculateProfitForFirm()");
       return 0;
     }
     const breakoutRoomId = (player as Student).getBreakoutRoomId();
@@ -402,9 +409,15 @@ export class CournotGame extends BaseGame {
     }
     const totalQuantity: number[] =
       this.getRoomQuantitiesAsArray(breakoutRoomId);
+
+    console.log(`User Moves: ${JSON.stringify(roomData.userMoves)}`);
+
     const firmQuantity = roomData.userMoves.get(player as Student);
     if (typeof firmQuantity !== "number") {
       console.error("Firm quantity not found");
+      console.log(
+        `Firm quantity: ${firmQuantity} and type: ${typeof firmQuantity}`
+      );
       return 0;
     }
     const profit: number = profitFunction(
@@ -455,7 +468,7 @@ export class CournotGame extends BaseGame {
   calculateMaxProfitForFirm(userId: string): number {
     const player = this.players.get(userId);
     if (!player) {
-      console.error("Player not found");
+      console.error("Player not found: calculateMaxProfitForFirm()");
       return 0;
     }
     const breakoutRoomId = (player as Student).getBreakoutRoomId();
@@ -539,18 +552,25 @@ export class CournotGame extends BaseGame {
 
     roomData.userMoves.clear();
 
-    // notify students
-    this.io.to(breakoutRoomId).emit("server:roundEnd", {
+    // notify all students in the breakout room of room specifc data (market specific)
+    this.io.to(breakoutRoomId).emit("server:roomRoundEnd", {
       roundNo: roomData.roundNo - 1,
       nextRoundNo: roomData.roundNo,
       marketPrice: this.calculateMarketPriceForRoom(breakoutRoomId),
       roundHistory: roomData.roundHistory,
       totalProfit: this.calculateTotalProfit(breakoutRoomId),
       monopolyProfit: this.calculateMonopolyProfit(),
-      maxProfit: this.calculateMaxProfitForFirm(breakoutRoomId),
       totalQuantity: this.getTotalRoomQuantity(breakoutRoomId),
       individualProductCost: (this.gameConfigs as CournotGameConfigs).z,
     });
+
+    // send user specific data back to each individual student
+    for (const user of roomData.users) {
+      const userProfit = this.calculateProfitForFirm(user.userId);
+      this.io.to(user.getSocket().id).emit("server:userRoundEnd", {
+        userProfit,
+      });
+    }
 
     const maxRounds = (this.gameConfigs as CournotGameConfigs).maxRounds;
 

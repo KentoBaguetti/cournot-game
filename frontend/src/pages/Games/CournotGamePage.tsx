@@ -47,9 +47,14 @@ export default function CournotGamePage() {
       setZ(data.z);
     });
 
+    socket.on("server:userRoundEnd", ({ userProfit }) => {
+      setUserProfit(userProfit);
+    });
+
     // cleanup
     return () => {
       socket.off("server:cournotInfo");
+      socket.off("server:userRoundEnd");
     };
   }, [socket, userQuantity, x, isReady, recievedGameData]);
 
