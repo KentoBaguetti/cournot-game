@@ -549,6 +549,7 @@ export class CournotGame extends BaseGame {
       monopolyProfit: this.calculateMonopolyProfit(),
       maxProfit: this.calculateMaxProfitForFirm(breakoutRoomId),
       totalQuantity: this.getTotalRoomQuantity(breakoutRoomId),
+      individualProductCost: (this.gameConfigs as CournotGameConfigs).z,
     });
 
     const maxRounds = (this.gameConfigs as CournotGameConfigs).maxRounds;

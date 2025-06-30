@@ -175,7 +175,7 @@ export default function CreateCournotGamePage() {
                   htmlFor="z"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Z
+                  Cost per Product (z)
                 </label>
                 <div className="relative rounded-md shadow-sm">
                   <input

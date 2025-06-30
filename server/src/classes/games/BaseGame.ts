@@ -254,7 +254,9 @@ export abstract class BaseGame {
     return 0;
   }
 
+  ////////////////////////////////////////////////////////////
   // timer methods
+  ////////////////////////////////////////////////////////////
 
   startRoundTimer(breakoutRoomId: string, durationMinutes: number): void {
     const roomData = this.roomMap.get(breakoutRoomId);

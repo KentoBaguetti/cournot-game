@@ -43,7 +43,7 @@ export interface CournotGameConfigs extends GameConfigs {
   maxPlayersPerRoom: number;
   maxRounds: number;
   roundLength: number;
-  x: number;
-  y: number;
-  z: number;
+  x: number; // TODO: idfk what this is ask kasper
+  y: number; // sunk cost
+  z: number; // cost per product
 }
