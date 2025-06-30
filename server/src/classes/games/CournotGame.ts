@@ -232,8 +232,19 @@ export class CournotGame extends BaseGame {
       console.error(`Room data not found for room ${breakoutRoomId}`);
       return;
     }
-    console.log(`Setting player move: ${action} and type: ${typeof action}`);
-    roomData.userMoves.set(player as Student, Number(action));
+    if (player instanceof Student) {
+      console.log(`Setting player move: ${action} and type: ${typeof action}`);
+      roomData.userMoves.set(player as Student, Number(action));
+      // TODO: userMoves is not being set correctly
+      // console.log(
+      //   "Room Data userMoves:",
+      //   Array.from(roomData.userMoves.entries()).map(([student, move]) => ({
+      //     studentId: student.userId,
+      //     nickname: student.getNickname(),
+      //     move,
+      //   }))
+      // );
+    }
   }
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -410,8 +421,6 @@ export class CournotGame extends BaseGame {
     const totalQuantity: number[] =
       this.getRoomQuantitiesAsArray(breakoutRoomId);
 
-    console.log(`User Moves: ${JSON.stringify(roomData.userMoves)}`);
-
     const firmQuantity = roomData.userMoves.get(player as Student);
     if (typeof firmQuantity !== "number") {
       console.error("Firm quantity not found");
@@ -550,8 +559,6 @@ export class CournotGame extends BaseGame {
       roomData.userReadyMap.set(user, false);
     }
 
-    roomData.userMoves.clear();
-
     // notify all students in the breakout room of room specifc data (market specific)
     this.io.to(breakoutRoomId).emit("server:roomRoundEnd", {
       roundNo: roomData.roundNo - 1,
@@ -587,9 +594,12 @@ export class CournotGame extends BaseGame {
       }, 15 * 1000); // 15 second delay before moving onto next round
     } else {
       this.io.to(breakoutRoomId).emit("server:gameEnd", {
+        msg: "Game Ended",
         roundHistory: roomData.roundHistory,
       });
     }
+
+    roomData.userMoves.clear();
   }
 
   saveRoundData(breakoutRoomId: string): void {

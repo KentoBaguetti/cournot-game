@@ -11,6 +11,10 @@ export default function CournotGamePage() {
   const [userProfit, setUserProfit] = useState<number>(0);
   const [isReady, setIsReady] = useState<boolean>(false);
   const [recievedGameData, setRecievedGameData] = useState<boolean>(false);
+  const [roundNo, setRoundNo] = useState<number>(1);
+  const [timeRemaining, setTimeRemaining] = useState<number>(0);
+  const [minutes, setMinutes] = useState<number>(0);
+  const [seconds, setSeconds] = useState<number>(0);
   const [x, setX] = useState<number>(0);
   const [y, setY] = useState<number>(0);
   const [z, setZ] = useState<number>(0);
@@ -51,12 +55,33 @@ export default function CournotGamePage() {
       setUserProfit(userProfit);
     });
 
+    socket.on("server:roundStart", ({ roundNo }) => {
+      setRoundNo(roundNo);
+    });
+
+    socket.on("server:timerUpdate", ({ remainingTime }) => {
+      setTimeRemaining(remainingTime);
+      const [minutes, seconds] = parseTimeRemaining(remainingTime);
+      setMinutes(minutes);
+      setSeconds(seconds);
+    });
+
     // cleanup
     return () => {
       socket.off("server:cournotInfo");
       socket.off("server:userRoundEnd");
+      socket.off("server:roundStart");
+      socket.off("server:timerUpdate");
     };
-  }, [socket, userQuantity, x, isReady, recievedGameData]);
+  }, [
+    socket,
+    userQuantity,
+    x,
+    isReady,
+    recievedGameData,
+    roundNo,
+    timeRemaining,
+  ]);
 
   const handleNumberInput =
     (setFunction: (value: number) => void) =>
@@ -67,10 +92,22 @@ export default function CournotGamePage() {
       }
     };
 
+  // parse the remaining seconds into minutes and seconds
+  const parseTimeRemaining = (remainingTime: number): [number, number] => {
+    const minutes = Math.floor(remainingTime / 60);
+    const seconds = remainingTime % 60;
+    return [minutes, seconds];
+  };
+
   return (
     <Layout showHeader={true} title="Cournot Game">
       <div className="">
         <div>Cournot game page</div>
+        <p>Round: {roundNo}</p>
+        <p>Time Remaining Raw: {timeRemaining}</p>
+        <p>
+          Time Remaining: {minutes}:{seconds.toString().padStart(2, "0")}
+        </p>
         <p>x: {x}</p>
         <p>y: {y}</p>
         <p>z: {z}</p>
