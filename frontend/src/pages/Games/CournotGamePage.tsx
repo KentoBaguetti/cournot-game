@@ -12,6 +12,11 @@ export default function CournotGamePage() {
   const [isReady, setIsReady] = useState<boolean>(false);
   const [recievedGameData, setRecievedGameData] = useState<boolean>(false);
   const [roundNo, setRoundNo] = useState<number>(1);
+  const [roundHistory, setRoundHistory] = useState<number[]>([]);
+  const [totalProfit, setTotalProfit] = useState<number>(0);
+  const [monopolyProfit, setMonopolyProfit] = useState<number>(0);
+  const [totalQuantity, setTotalQuantity] = useState<number>(0);
+  const [individualProductCost, setIndividualProductCost] = useState<number>(0);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [minutes, setMinutes] = useState<number>(0);
   const [seconds, setSeconds] = useState<number>(0);
@@ -66,12 +71,30 @@ export default function CournotGamePage() {
       setSeconds(seconds);
     });
 
+    socket.on(
+      "server:roomRoundEnd",
+      ({
+        roundHistory,
+        totalProfit,
+        monopolyProfit,
+        totalQuantity,
+        individualProductCost,
+      }) => {
+        setRoundHistory(roundHistory);
+        setTotalProfit(totalProfit);
+        setMonopolyProfit(monopolyProfit);
+        setTotalQuantity(totalQuantity);
+        setIndividualProductCost(individualProductCost);
+      }
+    );
+
     // cleanup
     return () => {
       socket.off("server:cournotInfo");
       socket.off("server:userRoundEnd");
       socket.off("server:roundStart");
       socket.off("server:timerUpdate");
+      socket.off("server:roomRoundEnd");
     };
   }, [
     socket,
@@ -132,6 +155,14 @@ export default function CournotGamePage() {
         >
           {isReady ? "Unconfirm" : "Confirm"}
         </Button>
+      </div>
+      <div>
+        <h3>Room specific data</h3>
+        {/* <p>Round History: {roundHistory.join(", ")}</p> */}
+        <p>Total Profit: {totalProfit}</p>
+        <p>Monopoly Profit: {monopolyProfit}</p>
+        <p>Total Quantity: {totalQuantity}</p>
+        <p>Individual Product Cost: {individualProductCost}</p>
       </div>
     </Layout>
   );
