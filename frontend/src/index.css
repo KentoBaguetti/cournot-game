@@ -18,3 +18,38 @@
     font-weight: 700;
   }
 }
+
+/* Custom slider styles */
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Add blue theme styles */
+.blue-gradient {
+  background: linear-gradient(to right bottom, #3b82f6, #1e40af);
+}
+
+.blue-gradient-light {
+  background: linear-gradient(to right bottom, #93c5fd, #3b82f6);
+}
+
+.blue-shadow {
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
+}
