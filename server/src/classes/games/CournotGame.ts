@@ -74,7 +74,7 @@ export class CournotGame extends BaseGame {
           users: [player],
           userMoves: new Map(),
           userReadyMap: new Map(),
-          roundNo: 0,
+          roundNo: 1,
           roundHistory: new Map(),
           timerActive: false,
           timerEndTime: 0,
@@ -581,7 +581,7 @@ export class CournotGame extends BaseGame {
 
     const maxRounds = (this.gameConfigs as CournotGameConfigs).maxRounds;
 
-    if (roomData.roundNo < maxRounds) {
+    if (roomData.roundNo < maxRounds + 1) {
       setTimeout(() => {
         const roundLength = (this.gameConfigs as CournotGameConfigs)
           .roundLength;
