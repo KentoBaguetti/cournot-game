@@ -17,23 +17,31 @@ interface RoundHistoryItem {
 export default function CournotGamePage() {
   const socket = useSocket();
 
-  const [userQuantity, setUserQuantity] = useState<number>(0);
+  // values from the backend
   const [marketPrice, setMarketPrice] = useState<number>(0);
   const [userProfit, setUserProfit] = useState<number>(0);
-  const [isReady, setIsReady] = useState<boolean>(false);
   const [recievedGameData, setRecievedGameData] = useState<boolean>(false);
   const [roundNo, setRoundNo] = useState<number>(1);
   const [prevRoundNo, setPrevRoundNo] = useState<number>(0);
   const [totalQuantity, setTotalQuantity] = useState<number>(0);
-  const [individualProductCost, setIndividualProductCost] = useState<number>(0);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [minutes, setMinutes] = useState<number>(0);
   const [seconds, setSeconds] = useState<number>(0);
-  const [x, setX] = useState<number>(0);
-  const [simulatedQuantity, setSimulatedQuantity] = useState<number>(1);
   const [totalProductionQuantity, setTotalProductionQuantity] =
     useState<number>(0);
   const [numberOfFirms, setNumberOfFirms] = useState<number>(0);
+
+  // game config data
+  const [x, setX] = useState<number>(0);
+  const [individualProductCost, setIndividualProductCost] = useState<number>(0);
+
+  // data set by the usr
+  const [simulatedQuantity, setSimulatedQuantity] = useState<number>(1);
+  const [userQuantity, setUserQuantity] = useState<number>(0);
+  const [isReady, setIsReady] = useState<boolean>(false);
+  const [sendReadyFlag, setSendReadyFlag] = useState<boolean>(false);
+
+  // modals
   const [showEndModal, setShowEndModal] = useState<boolean>(false);
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
   const [roundHistory, setRoundHistory] = useState<RoundHistoryItem[]>([]);
@@ -49,12 +57,9 @@ export default function CournotGamePage() {
     }
 
     // emits
-    if (userQuantity && isReady) {
+    if (userQuantity && isReady && sendReadyFlag) {
       socket.emit("player:move", { action: userQuantity });
-    }
-
-    if (!isReady) {
-      socket.emit("player:unready");
+      setSendReadyFlag(false);
     }
 
     if (!recievedGameData) {
@@ -136,6 +141,7 @@ export default function CournotGamePage() {
     recievedGameData,
     roundNo,
     timeRemaining,
+    sendReadyFlag,
   ]);
 
   // parse the remaining seconds into minutes and seconds
@@ -147,7 +153,7 @@ export default function CournotGamePage() {
 
   const handleSubmitProduction = () => {
     setIsReady(!isReady);
-    console.log(userQuantity);
+    setSendReadyFlag(true);
   };
 
   const handleNextRound = () => {

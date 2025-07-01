@@ -270,7 +270,7 @@ export abstract class BaseGame {
       clearInterval(roomData.timerInterval);
     }
 
-    //const endTime = Date.now() + durationMinutes * 60 * 1000;
+    // const endTime = Date.now() + durationMinutes * 60 * 1000;
     const endTime = Date.now() + 10 * 1000; // 10 seconds for testing
     roomData.timerEndTime = endTime;
     roomData.timerActive = true;

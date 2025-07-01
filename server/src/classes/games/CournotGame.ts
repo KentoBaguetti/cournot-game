@@ -209,29 +209,8 @@ export class CournotGame extends BaseGame {
   }
 
   ///////////////////////////////////////////////////////////////////////////////
-  // unconfirm a player's move
+  // set the player's move
   ///////////////////////////////////////////////////////////////////////////////
-  unconfirmPlayerMove(socket: Socket): void {
-    const player = this.players.get(socket.userId);
-    if (!player) {
-      console.error(
-        `Player not found for the user id: ${socket.userId}: unconfirmPlayerMove()`
-      );
-      return;
-    }
-    const breakoutRoomId = (player as Student).getBreakoutRoomId();
-    if (!breakoutRoomId) {
-      console.error(`Breakout room not found for room: ${breakoutRoomId}`);
-      return;
-    }
-    const roomData = this.roomMap.get(breakoutRoomId);
-    if (!roomData) {
-      console.error(`Room data not found for room: ${breakoutRoomId}`);
-      return;
-    }
-    roomData.userReadyMap.set(player as Student, false);
-  }
-
   setPlayerMove(socket: Socket, action: string | number): void {
     const player = this.players.get(socket.userId);
     if (!player) {

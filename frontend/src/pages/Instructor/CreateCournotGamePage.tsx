@@ -9,12 +9,12 @@ export default function CreateCournotGamePage() {
   const socket = useSocket();
   const navigate = useNavigate();
 
-  const [roundLength, setRoundLength] = useState<number>(0);
-  const [maxPlayersPerRoom, setMaxPlayersPerRoom] = useState<number>(0);
-  const [maxRounds, setMaxRounds] = useState<number>(0);
-  const [x, setX] = useState<number>(0);
-  const [y, setY] = useState<number>(0);
-  const [z, setZ] = useState<number>(0);
+  const [roundLength, setRoundLength] = useState<number>(5);
+  const [maxPlayersPerRoom, setMaxPlayersPerRoom] = useState<number>(10);
+  const [maxRounds, setMaxRounds] = useState<number>(5);
+  const [x, setX] = useState<number>(100);
+  const [y, setY] = useState<number>(20);
+  const [z, setZ] = useState<number>(5);
 
   useEffect(() => {
     if (!socket) return;
