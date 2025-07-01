@@ -10,7 +10,7 @@ interface RoundHistoryItem {
   totalProduction: number;
   yourProduction: number;
   marketPrice: number;
-  costPerBarrel: number;
+  costPerKasper: number;
   yourProfit: number;
 }
 
@@ -28,11 +28,11 @@ export default function CournotGamePage() {
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [minutes, setMinutes] = useState<number>(0);
   const [seconds, setSeconds] = useState<number>(0);
-  const [x, setX] = useState<number>(30);
+  const [x, setX] = useState<number>(0);
   const [simulatedQuantity, setSimulatedQuantity] = useState<number>(1);
   const [totalProductionQuantity, setTotalProductionQuantity] =
-    useState<number>(15);
-  const [numberOfFirms, setNumberOfFirms] = useState<number>(2);
+    useState<number>(0);
+  const [numberOfFirms, setNumberOfFirms] = useState<number>(0);
   const [showEndModal, setShowEndModal] = useState<boolean>(false);
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
   const [roundHistory] = useState<RoundHistoryItem[]>([
@@ -42,7 +42,7 @@ export default function CournotGamePage() {
       totalProduction: 14,
       yourProduction: 5,
       marketPrice: 16,
-      costPerBarrel: 6,
+      costPerKasper: 6,
       yourProfit: 50,
     },
     {
@@ -50,7 +50,7 @@ export default function CournotGamePage() {
       totalProduction: 9,
       yourProduction: 0,
       marketPrice: 21,
-      costPerBarrel: 6,
+      costPerKasper: 6,
       yourProfit: 0,
     },
   ]);
@@ -159,7 +159,7 @@ export default function CournotGamePage() {
     return Math.max(0, x - totalMarketProduction);
   };
 
-  const simulatedPrice = calculateMarketPrice(x, individualProductCost);
+  const simulatedPrice = calculateMarketPrice(x, simulatedQuantity);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 relative overflow-hidden">
@@ -286,7 +286,7 @@ export default function CournotGamePage() {
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold mb-2">Your Production</h2>
               <div className="text-6xl font-bold mb-4">
-                Barrel: {userQuantity}
+                Kasper: {userQuantity}
               </div>
             </div>
 
@@ -334,7 +334,7 @@ export default function CournotGamePage() {
                 </h3>
                 <p className="text-white/80 mb-4">
                   You chose to produce{" "}
-                  <span className="font-bold">{userQuantity}</span> Barrels
+                  <span className="font-bold">{userQuantity}</span> Kaspers
                 </p>
                 <div className="bg-white/20 rounded-xl p-4">
                   <p className="text-sm">Waiting for other players...</p>
@@ -355,7 +355,7 @@ export default function CournotGamePage() {
             {/* Market Simulator */}
             <div className="bg-white rounded-2xl p-6 shadow-lg mb-6">
               <h3 className="text-lg font-medium text-gray-800 mb-4">
-                Barrel Price Calculator
+                Kasper Price Calculator
               </h3>
 
               <div className="grid grid-cols-2 gap-4 mb-6">
@@ -364,7 +364,7 @@ export default function CournotGamePage() {
                     Market Production
                   </div>
                   <div className="text-3xl font-bold text-blue-900">
-                    {individualProductCost}
+                    {simulatedQuantity}
                   </div>
                 </div>
 
@@ -379,7 +379,7 @@ export default function CournotGamePage() {
               <div className="space-y-4">
                 <p className="text-sm text-gray-600">
                   Adjust the total market production to see how it affects the
-                  barrel price.
+                  kasper price.
                 </p>
 
                 <div className="flex items-center justify-between mb-2">
@@ -388,7 +388,7 @@ export default function CournotGamePage() {
                 </div>
 
                 <Slider
-                  value={individualProductCost}
+                  value={simulatedQuantity}
                   onChange={setSimulatedQuantity}
                   min={1}
                   max={30}
@@ -505,7 +505,7 @@ export default function CournotGamePage() {
                         <td className="py-4 px-4">{round.totalProduction}</td>
                         <td className="py-4 px-4">{round.yourProduction}</td>
                         <td className="py-4 px-4">${round.marketPrice}</td>
-                        <td className="py-4 px-4">${round.costPerBarrel}</td>
+                        <td className="py-4 px-4">${round.costPerKasper}</td>
                         <td className="py-4 px-4">${round.yourProfit}</td>
                       </tr>
                     ))}
