@@ -30,6 +30,7 @@ export default function CournotGamePage() {
   const [totalProductionQuantity, setTotalProductionQuantity] =
     useState<number>(0);
   const [numberOfFirms, setNumberOfFirms] = useState<number>(0);
+  const [isRoundTimerFlag, setIsRoundTimerFlag] = useState<boolean>(false);
 
   // game config data
   const [x, setX] = useState<number>(0);
@@ -119,11 +120,16 @@ export default function CournotGamePage() {
       setUserQuantity(0);
     });
 
-    socket.on("server:timerUpdate", ({ remainingTime }) => {
+    socket.on("server:timerUpdate", ({ remainingTime, roundTimer }) => {
       setTimeRemaining(remainingTime);
       const [minutes, seconds] = parseTimeRemaining(remainingTime);
       setMinutes(minutes);
       setSeconds(seconds);
+      if (roundTimer) {
+        setIsRoundTimerFlag(true);
+      } else {
+        setIsRoundTimerFlag(false);
+      }
     });
 
     // cleanup
@@ -253,6 +259,7 @@ export default function CournotGamePage() {
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
+                {!isRoundTimerFlag ? <span>Round Begins in:</span> : null}
                 <span>{formatTime(minutes, seconds)}</span>
               </div>
             </div>

@@ -108,7 +108,7 @@ export class CournotGame extends BaseGame {
 
       const roundLength = (this.gameConfigs as CournotGameConfigs).roundLength;
 
-      this.startRoundTimer(breakoutRoomId, roundLength);
+      this.startRoundTimer(breakoutRoomId, roundLength, true);
 
       this.io.to(breakoutRoomId).emit("server:roundStart", {
         roundNo: roomData.roundNo,
@@ -581,13 +581,14 @@ export class CournotGame extends BaseGame {
       setTimeout(() => {
         const roundLength = (this.gameConfigs as CournotGameConfigs)
           .roundLength;
-        this.startRoundTimer(breakoutRoomId, roundLength);
+        this.startRoundTimer(breakoutRoomId, roundLength, true);
 
         this.io.to(breakoutRoomId).emit("server:roundStart", {
           roundNo: roomData.roundNo,
           roundLength,
         });
       }, 15 * 1000); // 15 second delay before moving onto next round
+      this.startRoundTimer(breakoutRoomId, 0.25, false);
     } else {
       this.io.to(breakoutRoomId).emit("server:gameEnd", {
         msg: "Game Ended",

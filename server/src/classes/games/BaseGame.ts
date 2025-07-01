@@ -258,7 +258,11 @@ export abstract class BaseGame {
   // timer methods
   ////////////////////////////////////////////////////////////
 
-  startRoundTimer(breakoutRoomId: string, durationMinutes: number): void {
+  startRoundTimer(
+    breakoutRoomId: string,
+    durationMinutes: number,
+    roundTimer: boolean
+  ): void {
     const roomData = this.roomMap.get(breakoutRoomId);
     if (!roomData) {
       console.error(`Room data not found for room: ${breakoutRoomId}`);
@@ -270,34 +274,63 @@ export abstract class BaseGame {
       clearInterval(roomData.timerInterval);
     }
 
-    // const endTime = Date.now() + durationMinutes * 60 * 1000;
-    const endTime = Date.now() + 10 * 1000; // 10 seconds for testing
+    let endTime = 0;
+    if (roundTimer) {
+      endTime = Date.now() + durationMinutes * 60 * 1000;
+    } else {
+      endTime = Date.now() + 15 * 1000;
+    }
+
     roomData.timerEndTime = endTime;
     roomData.timerActive = true;
 
     // inital broadcast of timer
-    this.broadcastTimerUpdate(breakoutRoomId);
 
-    const interval = setInterval(() => {
-      const remainingTime = Math.max(
-        0,
-        Math.floor((endTime - Date.now()) / 1000)
-      );
+    if (roundTimer) {
+      this.broadcastTimerUpdate(breakoutRoomId, roundTimer);
 
-      // console.log(`Remaining time: ${remainingTime}`);
+      const interval = setInterval(() => {
+        const remainingTime = Math.max(
+          0,
+          Math.floor((endTime - Date.now()) / 1000)
+        );
 
-      this.broadcastTimerUpdate(breakoutRoomId);
+        // console.log(`Remaining time: ${remainingTime}`);
 
-      if (remainingTime <= 0) {
-        this.endRoundTimer(breakoutRoomId);
-      }
-    }, 1000);
+        this.broadcastTimerUpdate(breakoutRoomId, roundTimer);
 
-    roomData.timerInterval = interval;
+        if (remainingTime <= 0) {
+          this.endRoundTimer(breakoutRoomId);
+        }
+      }, 1000);
+
+      roomData.timerInterval = interval;
+    } else {
+      this.intermediateRoundTimer(breakoutRoomId, false);
+
+      const interval = setInterval(() => {
+        const remainingTime = Math.max(
+          0,
+          Math.floor((endTime - Date.now()) / 1000)
+        );
+
+        this.intermediateRoundTimer(breakoutRoomId, false);
+
+        if (remainingTime <= 0) {
+          if (roomData.timerInterval) {
+            clearInterval(roomData.timerInterval);
+            roomData.timerInterval = undefined;
+          }
+          this.broadcastTimerUpdate(breakoutRoomId, false);
+        }
+      }, 1000);
+
+      roomData.timerInterval = interval;
+    }
   }
 
   // emit timer update to the breakout room
-  broadcastTimerUpdate(breakoutRoomId: string): void {
+  broadcastTimerUpdate(breakoutRoomId: string, roundTimer: boolean): void {
     const roomData = this.roomMap.get(breakoutRoomId);
     if (!roomData) {
       console.error(`Room data not found for room: ${breakoutRoomId}`);
@@ -313,6 +346,27 @@ export abstract class BaseGame {
     this.io.to(breakoutRoomId).emit("server:timerUpdate", {
       remainingTime,
       active: roomData.timerActive,
+      roundTimer,
+    });
+  }
+
+  intermediateRoundTimer(breakoutRoomId: string, roundTimer: boolean): void {
+    const roomData = this.roomMap.get(breakoutRoomId);
+    if (!roomData) {
+      console.error(`Room data not found for room: ${breakoutRoomId}`);
+      return;
+    }
+
+    const remainingTime = Math.max(
+      0,
+      Math.floor((roomData.timerEndTime - Date.now()) / 1000)
+    );
+
+    // broadcast timer update to all students in the breakout room
+    this.io.to(breakoutRoomId).emit("server:timerUpdate", {
+      remainingTime,
+      active: roomData.timerActive,
+      roundTimer,
     });
   }
 
@@ -332,7 +386,7 @@ export abstract class BaseGame {
     roomData.timerActive = false;
 
     // broadcast final timer update
-    this.broadcastTimerUpdate(breakoutRoomId);
+    this.broadcastTimerUpdate(breakoutRoomId, true);
 
     // handle end of round
     this.handleRoundEnd(breakoutRoomId);
