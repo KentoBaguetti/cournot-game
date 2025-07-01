@@ -284,7 +284,7 @@ export abstract class BaseGame {
         Math.floor((endTime - Date.now()) / 1000)
       );
 
-      console.log(`Remaining time: ${remainingTime}`);
+      // console.log(`Remaining time: ${remainingTime}`);
 
       this.broadcastTimerUpdate(breakoutRoomId);
 
