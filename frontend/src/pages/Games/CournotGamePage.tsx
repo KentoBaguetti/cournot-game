@@ -85,8 +85,7 @@ export default function CournotGamePage() {
       setX(data.x);
       setIndividualProductCost(data.z);
       setNumberOfFirms(data.numberOfFirms);
-      setTotalProductionQuantity(data.totalProductionQuantity);
-      // Initialize simulated quantity to 1
+      setTotalProductionQuantity(Math.round(data.totalProductionQuantity));
       setSimulatedQuantity(1);
     });
 
@@ -165,8 +164,9 @@ export default function CournotGamePage() {
   const simulatedPrice = calculateMarketPrice(x, simulatedQuantity);
 
   // Use a safe default value for max production in case totalProductionQuantity is 0
-  const maxProductionForSimulation =
-    totalProductionQuantity > 0 ? totalProductionQuantity : x > 0 ? x : 30;
+  const maxProductionForSimulation = Math.round(
+    totalProductionQuantity > 0 ? totalProductionQuantity : x > 0 ? x : 30
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 relative overflow-hidden">
@@ -271,7 +271,7 @@ export default function CournotGamePage() {
                 </div>
               </div>
               <div className="text-3xl font-bold text-gray-800">
-                {totalProductionQuantity}
+                {Math.round(totalProductionQuantity / numberOfFirms)}
               </div>
             </div>
             <div className="text-center">
@@ -307,7 +307,9 @@ export default function CournotGamePage() {
                   value={userQuantity}
                   onChange={setUserQuantity}
                   min={0}
-                  max={Math.min(x, totalProductionQuantity)}
+                  max={Math.round(
+                    Math.min(x, totalProductionQuantity / numberOfFirms)
+                  )}
                   className="mb-8"
                 />
 
@@ -399,7 +401,7 @@ export default function CournotGamePage() {
                 <Slider
                   value={simulatedQuantity}
                   onChange={setSimulatedQuantity}
-                  min={1}
+                  min={0}
                   max={maxProductionForSimulation}
                 />
               </div>
