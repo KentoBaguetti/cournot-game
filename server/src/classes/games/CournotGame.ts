@@ -76,6 +76,7 @@ export class CournotGame extends BaseGame {
           userReadyMap: new Map(),
           roundNo: 1,
           roundHistory: new Map(),
+          roomHistory: new Map(),
           timerActive: false,
           timerEndTime: 0,
           timerInterval: undefined,
@@ -578,23 +579,20 @@ export class CournotGame extends BaseGame {
       roomData.userReadyMap.set(user, false);
     }
 
-    // notify all students in the breakout room of room specifc data (market specific)
-    this.io.to(breakoutRoomId).emit("server:roomRoundEnd", {
-      roundNo: roomData.roundNo - 1,
-      nextRoundNo: roomData.roundNo,
-      marketPrice: this.calculateMarketPriceForRoom(breakoutRoomId),
-      roundHistory: roomData.roundHistory,
-      totalProfit: this.calculateTotalProfit(breakoutRoomId),
-      monopolyProfit: this.calculateMonopolyProfit(),
-      totalQuantity: this.getTotalRoomQuantity(breakoutRoomId),
-      individualProductCost: (this.gameConfigs as CournotGameConfigs).z,
-    });
-
-    // send user specific data back to each individual student
+    // send data to each user
     for (const user of roomData.users) {
       const userProfit = this.calculateProfitForFirm(user.userId);
       this.io.to(user.getSocket().id).emit("server:userRoundEnd", {
         userProfit,
+        userQuantity: roomData.userMoves.get(user),
+        roundNo: roomData.roundNo - 1,
+        nextRoundNo: roomData.roundNo,
+        marketPrice: this.calculateMarketPriceForRoom(breakoutRoomId),
+        roomHistory: roomData.roomHistory,
+        totalProfit: this.calculateTotalProfit(breakoutRoomId),
+        monopolyProfit: this.calculateMonopolyProfit(),
+        totalQuantity: this.getTotalRoomQuantity(breakoutRoomId),
+        individualProductCost: (this.gameConfigs as CournotGameConfigs).z,
       });
     }
 
@@ -621,6 +619,10 @@ export class CournotGame extends BaseGame {
     roomData.userMoves.clear();
   }
 
+  /**
+   * Data that needs to be saved for each round:
+   * Round, Total Production, Your production, market price, cost per unit, your profit
+   */
   saveRoundData(breakoutRoomId: string): void {
     const roomData = this.roomMap.get(breakoutRoomId);
     if (!roomData) {
@@ -633,6 +635,30 @@ export class CournotGame extends BaseGame {
       roomData.roundHistory.set(roomData.roundNo, new Map());
     }
 
+    // create a new map for the room if it DNE
+    if (!roomData.roomHistory.has(roomData.roundNo)) {
+      roomData.roomHistory.set(roomData.roundNo, new Map());
+    }
+
+    // set for the entire room
+    const roomEndRoundData: Map<string, number | string> = new Map();
+    roomEndRoundData.set(
+      "totalQuantity",
+      this.getTotalRoomQuantity(breakoutRoomId)
+    );
+    roomEndRoundData.set(
+      "marketPrice",
+      this.calculateMarketPriceForRoom(breakoutRoomId)
+    );
+    roomEndRoundData.set(
+      "costPerUnit",
+      (this.gameConfigs as CournotGameConfigs).z
+    );
+
+    roomEndRoundData.set("monopolyProfit", this.calculateMonopolyProfit());
+
+    roomData.roomHistory.set(roomData.roundNo, roomEndRoundData);
+
     for (let [user, quantity] of roomData.userMoves.entries()) {
       const roundData = roomData.roundHistory.get(roomData.roundNo);
       if (roundData) {
@@ -644,33 +670,9 @@ export class CournotGame extends BaseGame {
           if (typeof quantity === "string") {
             quantity = Number(quantity);
           }
+          // set for individual users
           const userEndRoundData: Map<string, number | string> = new Map();
-          userEndRoundData.set("quantity", quantity);
-          userEndRoundData.set(
-            "marketPrice",
-            this.calculateMarketPriceForRoom(breakoutRoomId)
-          );
-          userEndRoundData.set(
-            "profit",
-            this.calculateProfitForFirm(user.userId)
-          );
-          userEndRoundData.set(
-            "monopolyProfit",
-            this.calculateMonopolyProfit()
-          );
-          userEndRoundData.set(
-            "maxProfit",
-            this.calculateMaxProfitForFirm(user.userId)
-          );
-          userEndRoundData.set(
-            "totalQuantity",
-            this.getTotalRoomQuantity(breakoutRoomId)
-          );
-          userEndRoundData.set(
-            "totalQuantity",
-            this.getTotalRoomQuantity(breakoutRoomId)
-          );
-
+          userEndRoundData.set("move", quantity);
           roundData.set(user, userEndRoundData);
         }
       }

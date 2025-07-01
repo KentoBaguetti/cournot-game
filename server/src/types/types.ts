@@ -21,7 +21,8 @@ export interface BreakoutRoomData {
   userMoves: Map<Student, string | number>; // student : move
   userReadyMap: Map<Student, boolean>;
   roundNo: number;
-  roundHistory: Map<number, Map<Student, Map<string, number | string>>>; // roundNo : Student : quantity/move name : value
+  roundHistory: Map<number, Map<Student, Map<string, number | string>>>; // stored info for each user roundNo : Student : quantity/move name : value
+  roomHistory: Map<number, Map<string, number | string>>; // stored info for each room roundNo : total production, market price, cost per unit, your profit
   timerActive: boolean;
   timerEndTime: number;
   timerInterval?: NodeJS.Timeout;

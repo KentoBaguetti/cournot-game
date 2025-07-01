@@ -23,6 +23,7 @@ export default function CournotGamePage() {
   const [isReady, setIsReady] = useState<boolean>(false);
   const [recievedGameData, setRecievedGameData] = useState<boolean>(false);
   const [roundNo, setRoundNo] = useState<number>(1);
+  const [prevRoundNo, setPrevRoundNo] = useState<number>(0);
   const [totalQuantity, setTotalQuantity] = useState<number>(0);
   const [individualProductCost, setIndividualProductCost] = useState<number>(0);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
@@ -35,25 +36,7 @@ export default function CournotGamePage() {
   const [numberOfFirms, setNumberOfFirms] = useState<number>(0);
   const [showEndModal, setShowEndModal] = useState<boolean>(false);
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
-  const [roundHistory] = useState<RoundHistoryItem[]>([
-    // TEMP: Sample data for history
-    {
-      round: 1,
-      totalProduction: 14,
-      yourProduction: 5,
-      marketPrice: 16,
-      costPerBarrel: 6,
-      yourProfit: 50,
-    },
-    {
-      round: 2,
-      totalProduction: 9,
-      yourProduction: 0,
-      marketPrice: 21,
-      costPerBarrel: 6,
-      yourProfit: 0,
-    },
-  ]);
+  const [roundHistory, setRoundHistory] = useState<RoundHistoryItem[]>([]);
 
   useEffect(() => {
     if (!socket) {
@@ -89,10 +72,41 @@ export default function CournotGamePage() {
       setSimulatedQuantity(1);
     });
 
-    socket.on("server:userRoundEnd", ({ userProfit }) => {
-      setUserProfit(userProfit);
-      setShowEndModal(true);
-    });
+    socket.on(
+      "server:userRoundEnd",
+      ({
+        userProfit,
+        roundNo,
+        totalQuantity,
+        individualProductCost,
+        marketPrice,
+        userQuantity,
+      }) => {
+        setUserProfit(userProfit);
+        setUserQuantity(userQuantity);
+        setTotalQuantity(totalQuantity);
+        setPrevRoundNo(roundNo);
+
+        setRoundHistory((prevHistory) => {
+          const roundExists = prevHistory.some(
+            (item) => item.round === roundNo
+          );
+          if (roundExists) return prevHistory;
+
+          const newHistoryItem: RoundHistoryItem = {
+            round: roundNo,
+            totalProduction: totalQuantity,
+            yourProduction: userQuantity,
+            marketPrice: marketPrice,
+            costPerBarrel: individualProductCost,
+            yourProfit: userProfit,
+          };
+
+          return [...prevHistory, newHistoryItem];
+        });
+        setShowEndModal(true);
+      }
+    );
 
     socket.on("server:roundStart", ({ roundNo }) => {
       setRoundNo(roundNo);
@@ -107,21 +121,12 @@ export default function CournotGamePage() {
       setSeconds(seconds);
     });
 
-    socket.on(
-      "server:roomRoundEnd",
-      ({ totalQuantity, individualProductCost }) => {
-        setTotalQuantity(totalQuantity);
-        setIndividualProductCost(individualProductCost);
-      }
-    );
-
     // cleanup
     return () => {
       socket.off("server:cournotInfo");
       socket.off("server:userRoundEnd");
       socket.off("server:roundStart");
       socket.off("server:timerUpdate");
-      socket.off("server:roomRoundEnd");
     };
   }, [
     socket,
@@ -424,7 +429,7 @@ export default function CournotGamePage() {
         isOpen={showEndModal}
         onClose={() => setShowEndModal(false)}
         roundData={{
-          roundNumber: roundNo,
+          roundNumber: prevRoundNo,
           totalProduction: totalQuantity,
           yourProduction: userQuantity,
           marketPrice: marketPrice,
