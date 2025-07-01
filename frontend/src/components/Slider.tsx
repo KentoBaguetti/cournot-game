@@ -96,7 +96,7 @@ export const Slider: React.FC<SliderProps> = ({
         />
 
         {/* Value labels */}
-        <div className="absolute top-8 left-0 right-0 flex justify-between text-xs text-gray-600">
+        <div className="absolute top-8 left-0 right-0 flex justify-between text-xs text-white">
           <span>{min}</span>
           <span>{max}</span>
         </div>

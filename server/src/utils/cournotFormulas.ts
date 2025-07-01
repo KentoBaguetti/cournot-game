@@ -56,7 +56,8 @@ const maxProfitFunction = (
   quantities: number[]
 ): number => {
   const qSum = calculateQuantitySum(quantities);
-  return (y + qSum - x) / (2 * z - 2);
+  // negate the result
+  return (y + qSum - x) / (-1 * 2 * z - 2);
 };
 
 const calculateMaxMonopolyQuantity = (
@@ -64,7 +65,8 @@ const calculateMaxMonopolyQuantity = (
   y: number,
   z: number
 ): number => {
-  return (y - x) / (2 * z - 2);
+  // negate the result
+  return (y - x) / (-1 * 2 * z - 2);
 };
 
 export {

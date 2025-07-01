@@ -270,8 +270,8 @@ export abstract class BaseGame {
       clearInterval(roomData.timerInterval);
     }
 
-    // const endTime = Date.now() + durationMinutes * 60 * 1000;
-    const endTime = Date.now() + 10 * 1000; // 10 seconds for testing
+    const endTime = Date.now() + durationMinutes * 60 * 1000;
+    //const endTime = Date.now() + 10 * 1000; // 10 seconds for testing
     roomData.timerEndTime = endTime;
     roomData.timerActive = true;
 
@@ -284,7 +284,7 @@ export abstract class BaseGame {
         Math.floor((endTime - Date.now()) / 1000)
       );
 
-      console.log(`Remaining time: ${remainingTime}`);
+      // console.log(`Remaining time: ${remainingTime}`);
 
       this.broadcastTimerUpdate(breakoutRoomId);
 
