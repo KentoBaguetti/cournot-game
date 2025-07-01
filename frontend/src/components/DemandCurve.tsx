@@ -50,7 +50,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
           <div className="flex items-center space-x-2 mr-3">
             <div className="w-3 h-3 rounded-full bg-blue-300 border-2 border-blue-600"></div>
             <span className="text-xs text-blue-800">
-              Barrels: {simulatedQuantity}
+              Kaspers: {simulatedQuantity}
             </span>
           </div>
           <div className="bg-blue-100 px-3 py-1 rounded-xl">
@@ -264,7 +264,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
       </svg>
 
       <div className="mt-4 text-xs text-gray-500 text-center">
-        The chart shows how barrel price changes with total market production
+        The chart shows how Kasper price changes with total market production
       </div>
     </div>
   );
