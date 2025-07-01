@@ -44,7 +44,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
     <div className="bg-white rounded-2xl p-6 shadow-lg">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-medium text-gray-800">
-          Barrel Price Chart
+          Kasper Price Chart
         </h3>
         <div className="flex items-center">
           <div className="flex items-center space-x-2 mr-3">
@@ -129,7 +129,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
           className="text-xs fill-gray-600 font-medium"
           transform={`rotate(-90 15 ${height / 2})`}
         >
-          Barrel Price ($)
+          Kasper Price ($)
         </text>
 
         {/* Tick marks */}
