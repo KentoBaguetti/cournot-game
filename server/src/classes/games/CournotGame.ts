@@ -151,14 +151,33 @@ export class CournotGame extends BaseGame {
 
   // send the xyz values to the student so they can do calculations on the frontend
   sendGameInfoToStudent(socket: Socket): void {
+    const player = this.players.get(socket.userId);
+    if (!player) {
+      console.error("Player not found: sendGameInfoToStudent()");
+      return;
+    }
+    const breakoutRoomId = (player as Student).getBreakoutRoomId();
+    if (!breakoutRoomId) {
+      console.error("Breakout room not found: sendGameInfoToStudent()");
+      return;
+    }
+    const roomData = this.roomMap.get(breakoutRoomId);
+    if (!roomData) {
+      console.error("Room data not found: sendGameInfoToStudent()");
+      return;
+    }
+
+    const numberOfFirms = roomData.users.length;
+    const totalProductionQuantity = this.calculateMonopolyQuantity();
     const x = (this.gameConfigs as CournotGameConfigs).x;
     const y = (this.gameConfigs as CournotGameConfigs).y;
     const z = (this.gameConfigs as CournotGameConfigs).z;
-
     socket.emit("server:cournotInfo", {
       x,
       y,
       z,
+      numberOfFirms,
+      totalProductionQuantity,
     });
 
     console.log(`sending game data: ${x}, ${y}, ${z}`);

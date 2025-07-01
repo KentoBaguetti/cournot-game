@@ -24,14 +24,15 @@ export default function CournotGamePage() {
   const [recievedGameData, setRecievedGameData] = useState<boolean>(false);
   const [roundNo, setRoundNo] = useState<number>(1);
   const [totalQuantity, setTotalQuantity] = useState<number>(0);
-  const [individualProductCost, setIndividualProductCost] = useState<number>(6); // TEMP: Will come from backend
+  const [individualProductCost, setIndividualProductCost] = useState<number>(0);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [minutes, setMinutes] = useState<number>(0);
   const [seconds, setSeconds] = useState<number>(0);
-  const [x, setX] = useState<number>(30); // TEMP: Will come from backend
+  const [x, setX] = useState<number>(30);
   const [simulatedQuantity, setSimulatedQuantity] = useState<number>(1);
-  const [maxProduction] = useState<number>(15); // TEMP: Will come from backend
-  const [numberOfFirms] = useState<number>(2); // TEMP: Will come from backend
+  const [totalProductionQuantity, setTotalProductionQuantity] =
+    useState<number>(15);
+  const [numberOfFirms, setNumberOfFirms] = useState<number>(2);
   const [showEndModal, setShowEndModal] = useState<boolean>(false);
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
   const [roundHistory] = useState<RoundHistoryItem[]>([
@@ -82,9 +83,9 @@ export default function CournotGamePage() {
     socket.on("server:cournotInfo", (data) => {
       console.log("cournot info", data);
       setX(data.x);
-      // TODO: Update these when backend sends them
-      // setNumberOfFirms(data.numberOfFirms);
-      // setMaxProduction(data.maxProduction);
+      setIndividualProductCost(data.z);
+      setNumberOfFirms(data.numberOfFirms);
+      setTotalProductionQuantity(data.totalProductionQuantity);
       // Initialize simulated quantity to 1
       setSimulatedQuantity(1);
     });
@@ -158,7 +159,7 @@ export default function CournotGamePage() {
     return Math.max(0, x - totalMarketProduction);
   };
 
-  const simulatedPrice = calculateMarketPrice(x, simulatedQuantity);
+  const simulatedPrice = calculateMarketPrice(x, individualProductCost);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 relative overflow-hidden">
@@ -263,7 +264,7 @@ export default function CournotGamePage() {
                 </div>
               </div>
               <div className="text-3xl font-bold text-gray-800">
-                {maxProduction}
+                {totalProductionQuantity}
               </div>
             </div>
             <div className="text-center">
@@ -299,7 +300,7 @@ export default function CournotGamePage() {
                   value={userQuantity}
                   onChange={setUserQuantity}
                   min={0}
-                  max={Math.min(x, maxProduction)}
+                  max={Math.min(x, totalProductionQuantity)}
                   className="mb-8"
                 />
 
@@ -363,7 +364,7 @@ export default function CournotGamePage() {
                     Market Production
                   </div>
                   <div className="text-3xl font-bold text-blue-900">
-                    {simulatedQuantity}
+                    {individualProductCost}
                   </div>
                 </div>
 
@@ -387,7 +388,7 @@ export default function CournotGamePage() {
                 </div>
 
                 <Slider
-                  value={simulatedQuantity}
+                  value={individualProductCost}
                   onChange={setSimulatedQuantity}
                   min={1}
                   max={30}
@@ -398,7 +399,7 @@ export default function CournotGamePage() {
             {/* Demand Curve */}
             <DemandCurve
               simulatedQuantity={simulatedQuantity}
-              maxProduction={30}
+              maxProduction={totalProductionQuantity}
               x={x}
               calculateMarketPrice={calculateMarketPrice}
             />
