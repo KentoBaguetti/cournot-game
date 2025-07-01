@@ -43,16 +43,18 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
   return (
     <div className="bg-white rounded-2xl p-6 shadow-lg">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium text-gray-800">Price Calculator</h3>
+        <h3 className="text-lg font-medium text-gray-800">
+          Barrel Price Chart
+        </h3>
         <div className="flex items-center">
           <div className="flex items-center space-x-2 mr-3">
-            <div className="w-3 h-3 rounded-full bg-blue-300 border-2 border-blue-600"></div>
-            <span className="text-xs text-blue-800">
-              Sim: {simulatedQuantity}
+            <div className="w-3 h-3 rounded-full bg-teal-300 border-2 border-teal-600"></div>
+            <span className="text-xs text-teal-800">
+              Barrels: {simulatedQuantity}
             </span>
           </div>
-          <div className="bg-blue-100 px-3 py-1 rounded-xl">
-            <span className="text-xs text-blue-800 whitespace-nowrap">
+          <div className="bg-teal-100 px-3 py-1 rounded-xl">
+            <span className="text-xs text-teal-800 whitespace-nowrap">
               P={x}-Q
             </span>
           </div>
@@ -62,7 +64,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
       <svg
         width={width}
         height={height}
-        className="border rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 mx-auto"
+        className="border rounded-lg bg-gradient-to-br from-orange-50 to-orange-100 mx-auto"
         viewBox={`0 0 ${width} ${height}`}
         preserveAspectRatio="xMidYMid meet"
       >
@@ -106,7 +108,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
         <polyline
           points={points.join(" ")}
           fill="none"
-          stroke="#1e40af"
+          stroke="#0d9488"
           strokeWidth="3"
           className="drop-shadow-sm"
         />
@@ -118,7 +120,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
           textAnchor="middle"
           className="text-xs fill-gray-600 font-medium"
         >
-          Quantity
+          Total Market Production
         </text>
         <text
           x={15}
@@ -127,7 +129,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
           className="text-xs fill-gray-600 font-medium"
           transform={`rotate(-90 15 ${height / 2})`}
         >
-          Price ($)
+          Barrel Price ($)
         </text>
 
         {/* Tick marks */}
@@ -209,7 +211,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
             y1={simulatedY}
             x2={simulatedX}
             y2={height - padding}
-            stroke="#93c5fd"
+            stroke="#5eead4"
             strokeWidth="1"
             strokeDasharray="5,5"
           />
@@ -218,7 +220,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
             y1={simulatedY}
             x2={padding}
             y2={simulatedY}
-            stroke="#93c5fd"
+            stroke="#5eead4"
             strokeWidth="1"
             strokeDasharray="5,5"
           />
@@ -228,8 +230,8 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
             cx={simulatedX}
             cy={simulatedY}
             r="6"
-            fill="#93c5fd"
-            stroke="#2563eb"
+            fill="#5eead4"
+            stroke="#0d9488"
             strokeWidth="2"
             className="drop-shadow-lg"
           />
@@ -240,7 +242,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
               x={simulatedX}
               y={height - padding + 15}
               textAnchor="middle"
-              className="text-xs font-medium fill-blue-600"
+              className="text-xs font-medium fill-teal-600"
             >
               {simulatedQuantity}
             </text>
@@ -249,10 +251,10 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
           {/* Only show price label if not near max or min price (to avoid overlap with axis labels) */}
           {!isPriceNearMax && !isPriceNearMin && (
             <text
-              x={padding - 5}
+              x={padding - 10}
               y={simulatedY}
               textAnchor="end"
-              className="text-xs font-medium fill-blue-600"
+              className="text-xs font-medium fill-teal-600"
               dominantBaseline="middle"
             >
               ${simulatedPrice}
@@ -260,6 +262,10 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
           )}
         </>
       </svg>
+
+      <div className="mt-4 text-xs text-gray-500 text-center">
+        The chart shows how barrel price changes with total market production
+      </div>
     </div>
   );
 };

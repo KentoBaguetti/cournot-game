@@ -40,7 +40,7 @@ export function EndOfRoundModal({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-blue-300 hover:text-blue-100 transition-colors z-10"
+          className="absolute top-4 right-4 text-orange-300 hover:text-orange-100 transition-colors z-10"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -59,124 +59,138 @@ export function EndOfRoundModal({
         </button>
 
         {/* Header */}
-        <div className="bg-blue-700 text-white p-6">
-          <h2 className="text-2xl font-bold">Round {roundNumber} Results</h2>
-          <p className="text-blue-200 mt-1">
-            Here's how your production decisions performed
-          </p>
+        <div className="bg-orange-700 text-white p-6">
+          <h2 className="text-2xl font-bold">End of Round</h2>
+          <p className="text-orange-200 mt-1">Round {roundNumber} Results</p>
         </div>
 
         {/* Body */}
         <div className="p-6 space-y-6">
           {/* Market Summary */}
-          <div className="bg-blue-50 rounded-xl p-4">
-            <h3 className="text-lg font-medium text-blue-800 mb-2">
-              Market Summary
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-blue-600">Total Production</p>
-                <p className="text-2xl font-bold text-blue-900">
-                  {totalProduction} units
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-blue-600">Market Price</p>
-                <p className="text-2xl font-bold text-blue-900">
-                  ${marketPrice}
-                </p>
-              </div>
+          <div className="grid grid-cols-5 gap-2 text-center">
+            <div className="bg-teal-100 p-3 rounded-lg">
+              <h3 className="text-sm text-teal-800 font-medium">
+                Total
+                <br />
+                Production
+              </h3>
+              <p className="text-2xl font-bold text-teal-900 mt-1">
+                {totalProduction}
+              </p>
+            </div>
+
+            <div className="bg-teal-100 p-3 rounded-lg">
+              <h3 className="text-sm text-teal-800 font-medium">
+                Your
+                <br />
+                Production
+              </h3>
+              <p className="text-2xl font-bold text-teal-900 mt-1">
+                {yourProduction}
+              </p>
+            </div>
+
+            <div className="bg-teal-100 p-3 rounded-lg">
+              <h3 className="text-sm text-teal-800 font-medium">
+                Barrel
+                <br />
+                Price
+              </h3>
+              <p className="text-2xl font-bold text-teal-900 mt-1">
+                ${marketPrice}
+              </p>
+            </div>
+
+            <div className="bg-teal-100 p-3 rounded-lg">
+              <h3 className="text-sm text-teal-800 font-medium">
+                Cost
+                <br />
+                Per Barrel
+              </h3>
+              <p className="text-2xl font-bold text-teal-900 mt-1">
+                ${individualProductCost}
+              </p>
+            </div>
+
+            <div className="bg-teal-100 p-3 rounded-lg">
+              <h3 className="text-sm text-teal-800 font-medium">
+                Your
+                <br />
+                Profit
+              </h3>
+              <p className="text-2xl font-bold text-teal-900 mt-1">
+                ${yourProfit}
+              </p>
             </div>
           </div>
 
-          {/* Your Results */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-800 mb-4">
-              Your Results
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white border border-gray-200 rounded-xl p-4">
-                <p className="text-sm text-gray-500">Your Production</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {yourProduction} units
-                </p>
+          {/* Profit Calculation */}
+          <div className="mt-6 bg-gradient-to-br from-orange-600 to-orange-700 rounded-xl p-6 text-white">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-orange-200">Your Profit</p>
+                <p className="text-4xl font-bold">${yourProfit}</p>
               </div>
-              <div className="bg-white border border-gray-200 rounded-xl p-4">
-                <p className="text-sm text-gray-500">Unit Cost</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  ${individualProductCost}
-                </p>
+              <div
+                className={`p-3 rounded-full ${
+                  yourProfit > 0
+                    ? "bg-green-500"
+                    : yourProfit < 0
+                    ? "bg-red-500"
+                    : "bg-gray-500"
+                }`}
+              >
+                {yourProfit > 0 ? (
+                  <svg
+                    className="w-8 h-8 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 10l7-7m0 0l7 7m-7-7v18"
+                    />
+                  </svg>
+                ) : yourProfit < 0 ? (
+                  <svg
+                    className="w-8 h-8 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-8 h-8 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M20 12H4"
+                    />
+                  </svg>
+                )}
               </div>
             </div>
-
-            {/* Profit */}
-            <div className="mt-4 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6 text-white">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-blue-200">Your Profit</p>
-                  <p className="text-4xl font-bold">${yourProfit}</p>
-                </div>
-                <div
-                  className={`p-3 rounded-full ${
-                    yourProfit > 0
-                      ? "bg-green-500"
-                      : yourProfit < 0
-                      ? "bg-red-500"
-                      : "bg-gray-500"
-                  }`}
-                >
-                  {yourProfit > 0 ? (
-                    <svg
-                      className="w-8 h-8 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 10l7-7m0 0l7 7m-7-7v18"
-                      />
-                    </svg>
-                  ) : yourProfit < 0 ? (
-                    <svg
-                      className="w-8 h-8 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      className="w-8 h-8 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M20 12H4"
-                      />
-                    </svg>
-                  )}
-                </div>
-              </div>
-              <div className="mt-4 text-sm text-blue-200">
-                <p>Profit = Production × (Market Price - Unit Cost)</p>
-                <p className="mt-1">
-                  ${yourProfit} = {yourProduction} × (${marketPrice} - $
-                  {individualProductCost})
-                </p>
-              </div>
+            <div className="mt-4 text-sm text-orange-200">
+              <p>Profit = Production × (Market Price - Unit Cost)</p>
+              <p className="mt-1">
+                ${yourProfit} = {yourProduction} × (${marketPrice} - $
+                {individualProductCost})
+              </p>
             </div>
           </div>
         </div>
@@ -187,7 +201,7 @@ export function EndOfRoundModal({
             onClick={onNextRound}
             variant="primary"
             size="lg"
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-orange-600 hover:bg-orange-700"
           >
             {isLastRound ? "See Final Results" : "Next Round"}
           </Button>
