@@ -161,23 +161,23 @@ export default function CournotGamePage() {
   const simulatedPrice = calculateMarketPrice(x, simulatedQuantity);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-100 to-orange-200 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 relative overflow-hidden">
       {/* Background elements - oil rig silhouettes */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute left-10 top-20 w-32 h-32 bg-orange-500/20 transform rotate-12"></div>
-        <div className="absolute right-20 top-32 w-24 h-24 bg-orange-500/20 transform -rotate-12"></div>
-        <div className="absolute left-1/3 bottom-20 w-28 h-28 bg-orange-500/20 transform rotate-6"></div>
+        <div className="absolute left-10 top-20 w-32 h-32 bg-blue-500/20 transform rotate-12"></div>
+        <div className="absolute right-20 top-32 w-24 h-24 bg-blue-500/20 transform -rotate-12"></div>
+        <div className="absolute left-1/3 bottom-20 w-28 h-28 bg-blue-500/20 transform rotate-6"></div>
       </div>
 
       {/* Header */}
-      <div className="relative z-10 bg-orange-900 text-white">
+      <div className="relative z-10 bg-blue-800 text-white">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
-              <div className="bg-orange-800 rounded-xl px-4 py-2">
+              <div className="bg-blue-700 rounded-xl px-4 py-2">
                 <h1 className="text-2xl font-bold">Oil Production</h1>
               </div>
-              <div className="text-orange-200">Round {roundNo}</div>
+              <div className="text-blue-200">Round {roundNo}</div>
               {/* Connection Status */}
               <div
                 className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -281,7 +281,7 @@ export default function CournotGamePage() {
 
         <div className="grid grid-cols-2 gap-8">
           {/* Left Panel - Production Control */}
-          <div className="bg-gradient-to-br from-orange-700 to-orange-800 rounded-3xl p-8 text-white shadow-2xl">
+          <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl p-8 text-white shadow-2xl">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold mb-2">Your Production</h2>
               <div className="text-6xl font-bold mb-4">
@@ -307,7 +307,7 @@ export default function CournotGamePage() {
                   onClick={handleSubmitProduction}
                   variant="success"
                   size="lg"
-                  className="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-4 text-xl"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 text-xl"
                   disabled={timeRemaining === 0 || !socket}
                 >
                   {!socket ? "Disconnected" : "Produce"}
@@ -358,18 +358,18 @@ export default function CournotGamePage() {
               </h3>
 
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-teal-100 rounded-xl p-4 text-center">
-                  <div className="text-sm text-teal-800 mb-1">
+                <div className="bg-blue-100 rounded-xl p-4 text-center">
+                  <div className="text-sm text-blue-800 mb-1">
                     Market Production
                   </div>
-                  <div className="text-3xl font-bold text-teal-900">
+                  <div className="text-3xl font-bold text-blue-900">
                     {simulatedQuantity}
                   </div>
                 </div>
 
-                <div className="bg-teal-100 rounded-xl p-4 text-center">
-                  <div className="text-sm text-teal-800 mb-1">Market Price</div>
-                  <div className="text-3xl font-bold text-teal-900">
+                <div className="bg-blue-100 rounded-xl p-4 text-center">
+                  <div className="text-sm text-blue-800 mb-1">Market Price</div>
+                  <div className="text-3xl font-bold text-blue-900">
                     ${simulatedPrice}
                   </div>
                 </div>
@@ -448,7 +448,7 @@ export default function CournotGamePage() {
             </button>
 
             {/* Header */}
-            <div className="bg-orange-700 text-white p-6">
+            <div className="bg-blue-700 text-white p-6">
               <div className="flex items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -466,7 +466,7 @@ export default function CournotGamePage() {
                 </svg>
                 <h2 className="text-2xl font-bold">Round History</h2>
               </div>
-              <p className="text-orange-200 mt-1">
+              <p className="text-blue-200 mt-1">
                 View your performance across all rounds
               </p>
             </div>
@@ -476,23 +476,23 @@ export default function CournotGamePage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-orange-100">
-                      <th className="py-3 px-4 text-left text-orange-700 rounded-l-lg">
+                    <tr className="bg-blue-100">
+                      <th className="py-3 px-4 text-left text-blue-700 rounded-l-lg">
                         Round
                       </th>
-                      <th className="py-3 px-4 text-left text-orange-700">
+                      <th className="py-3 px-4 text-left text-blue-700">
                         Total Production
                       </th>
-                      <th className="py-3 px-4 text-left text-orange-700">
+                      <th className="py-3 px-4 text-left text-blue-700">
                         Your Production
                       </th>
-                      <th className="py-3 px-4 text-left text-orange-700">
+                      <th className="py-3 px-4 text-left text-blue-700">
                         Barrel Price
                       </th>
-                      <th className="py-3 px-4 text-left text-orange-700">
+                      <th className="py-3 px-4 text-left text-blue-700">
                         Cost Per Barrel
                       </th>
-                      <th className="py-3 px-4 text-left text-orange-700 rounded-r-lg">
+                      <th className="py-3 px-4 text-left text-blue-700 rounded-r-lg">
                         Your Profit
                       </th>
                     </tr>
@@ -534,7 +534,7 @@ export default function CournotGamePage() {
               <Button
                 onClick={() => setShowHistoryModal(false)}
                 variant="primary"
-                className="bg-orange-600 hover:bg-orange-700"
+                className="bg-blue-600 hover:bg-blue-700"
               >
                 Close
               </Button>

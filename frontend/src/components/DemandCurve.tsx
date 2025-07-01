@@ -48,13 +48,13 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
         </h3>
         <div className="flex items-center">
           <div className="flex items-center space-x-2 mr-3">
-            <div className="w-3 h-3 rounded-full bg-teal-300 border-2 border-teal-600"></div>
-            <span className="text-xs text-teal-800">
+            <div className="w-3 h-3 rounded-full bg-blue-300 border-2 border-blue-600"></div>
+            <span className="text-xs text-blue-800">
               Barrels: {simulatedQuantity}
             </span>
           </div>
-          <div className="bg-teal-100 px-3 py-1 rounded-xl">
-            <span className="text-xs text-teal-800 whitespace-nowrap">
+          <div className="bg-blue-100 px-3 py-1 rounded-xl">
+            <span className="text-xs text-blue-800 whitespace-nowrap">
               P={x}-Q
             </span>
           </div>
@@ -64,7 +64,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
       <svg
         width={width}
         height={height}
-        className="border rounded-lg bg-gradient-to-br from-orange-50 to-orange-100 mx-auto"
+        className="border rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 mx-auto"
         viewBox={`0 0 ${width} ${height}`}
         preserveAspectRatio="xMidYMid meet"
       >
@@ -108,7 +108,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
         <polyline
           points={points.join(" ")}
           fill="none"
-          stroke="#0d9488"
+          stroke="#1e40af"
           strokeWidth="3"
           className="drop-shadow-sm"
         />
@@ -211,7 +211,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
             y1={simulatedY}
             x2={simulatedX}
             y2={height - padding}
-            stroke="#5eead4"
+            stroke="#93c5fd"
             strokeWidth="1"
             strokeDasharray="5,5"
           />
@@ -220,7 +220,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
             y1={simulatedY}
             x2={padding}
             y2={simulatedY}
-            stroke="#5eead4"
+            stroke="#93c5fd"
             strokeWidth="1"
             strokeDasharray="5,5"
           />
@@ -230,8 +230,8 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
             cx={simulatedX}
             cy={simulatedY}
             r="6"
-            fill="#5eead4"
-            stroke="#0d9488"
+            fill="#93c5fd"
+            stroke="#2563eb"
             strokeWidth="2"
             className="drop-shadow-lg"
           />
@@ -242,7 +242,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
               x={simulatedX}
               y={height - padding + 15}
               textAnchor="middle"
-              className="text-xs font-medium fill-teal-600"
+              className="text-xs font-medium fill-blue-600"
             >
               {simulatedQuantity}
             </text>
@@ -254,7 +254,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
               x={padding - 10}
               y={simulatedY}
               textAnchor="end"
-              className="text-xs font-medium fill-teal-600"
+              className="text-xs font-medium fill-blue-600"
               dominantBaseline="middle"
             >
               ${simulatedPrice}
