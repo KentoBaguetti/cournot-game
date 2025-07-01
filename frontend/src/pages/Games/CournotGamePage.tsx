@@ -175,7 +175,7 @@ export default function CournotGamePage() {
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
               <div className="bg-blue-700 rounded-xl px-4 py-2">
-                <h1 className="text-2xl font-bold">Oil Production</h1>
+                <h1 className="text-2xl font-bold">Kasper Production</h1>
               </div>
               <div className="text-blue-200">Round {roundNo}</div>
               {/* Connection Status */}
@@ -249,7 +249,7 @@ export default function CournotGamePage() {
             <div className="text-center">
               <div className="bg-blue-100 rounded-xl p-3 mb-2">
                 <div className="text-sm text-blue-600 font-medium">
-                  Per Barrel Cost
+                  Per Kasper Cost
                 </div>
               </div>
               <div className="text-3xl font-bold text-gray-800">
@@ -269,7 +269,7 @@ export default function CournotGamePage() {
             <div className="text-center">
               <div className="bg-blue-100 rounded-xl p-3 mb-2">
                 <div className="text-sm text-blue-600 font-medium">
-                  Total Companies
+                  Total Firms
                 </div>
               </div>
               <div className="text-3xl font-bold text-gray-800">
@@ -487,10 +487,10 @@ export default function CournotGamePage() {
                         Your Production
                       </th>
                       <th className="py-3 px-4 text-left text-blue-700">
-                        Barrel Price
+                        Kasper Price
                       </th>
                       <th className="py-3 px-4 text-left text-blue-700">
-                        Cost Per Barrel
+                        Cost Per Kasper
                       </th>
                       <th className="py-3 px-4 text-left text-blue-700 rounded-r-lg">
                         Your Profit
