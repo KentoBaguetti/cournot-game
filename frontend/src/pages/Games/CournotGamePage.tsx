@@ -539,22 +539,6 @@ export default function CournotGamePage() {
                         <td className="py-4 px-4">${round.yourProfit}</td>
                       </tr>
                     ))}
-                    {/* Add placeholder rows for future rounds */}
-                    {[...Array(5 - roundHistory.length)].map((_, index) => (
-                      <tr
-                        key={`placeholder-${index}`}
-                        className="border-b border-gray-100"
-                      >
-                        <td className="py-4 px-4">
-                          {roundHistory.length + index + 1}
-                        </td>
-                        <td className="py-4 px-4">-</td>
-                        <td className="py-4 px-4">-</td>
-                        <td className="py-4 px-4">-</td>
-                        <td className="py-4 px-4">-</td>
-                        <td className="py-4 px-4">-</td>
-                      </tr>
-                    ))}
                   </tbody>
                 </table>
               </div>
