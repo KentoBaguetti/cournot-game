@@ -11,5 +11,5 @@ Games:
 Some equations used: <br><br>
 
 $$
-P(Q) = a - b \sum_{i=1}^{n} Q_i
+P(Q) = x - y \sum_{i=1}^{n} Q_i
 $$
