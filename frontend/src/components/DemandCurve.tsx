@@ -4,6 +4,7 @@ interface DemandCurveProps {
   simulatedQuantity: number;
   maxProduction: number;
   x: number;
+  perUnitCost: number;
   calculateMarketPrice: (x: number, totalProduction: number) => number;
 }
 
@@ -11,6 +12,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
   simulatedQuantity,
   maxProduction,
   x,
+  perUnitCost,
   calculateMarketPrice,
 }) => {
   const width = 300;
@@ -20,37 +22,38 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
   // Calculate points for the demand curve
   const points: string[] = [];
   for (let q = 0; q <= maxProduction; q += 1) {
-    const price = calculateMarketPrice(x, q);
+    const price = calculateMarketPrice(perUnitCost, q);
     const plotX = padding + (q / maxProduction) * (width - 2 * padding);
-    const plotY = height - padding - (price / x) * (height - 2 * padding);
+    const plotY =
+      height - padding - (price / perUnitCost) * (height - 2 * padding);
     points.push(`${plotX},${plotY}`);
   }
 
   // Simulated point
-  const simulatedPrice = calculateMarketPrice(x, simulatedQuantity);
+  const simulatedPrice = calculateMarketPrice(perUnitCost, simulatedQuantity);
   const simulatedX =
     padding + (simulatedQuantity / maxProduction) * (width - 2 * padding);
   const simulatedY =
-    height - padding - (simulatedPrice / x) * (height - 2 * padding);
+    height - padding - (simulatedPrice / perUnitCost) * (height - 2 * padding);
 
   // Check if simulated is near origin
   const isSimulatedNearOrigin = simulatedQuantity < maxProduction * 0.05;
 
   // Check if price is near max or min to avoid label overlap with axis labels
-  const isPriceNearMax = simulatedPrice > x * 0.85;
-  const isPriceNearMin = simulatedPrice < x * 0.15;
+  const isPriceNearMax = simulatedPrice > perUnitCost * 0.85;
+  const isPriceNearMin = simulatedPrice < perUnitCost * 0.15;
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-lg">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-medium text-gray-800">
-          Kasper Price Chart
+          Barrel Price Chart
         </h3>
         <div className="flex items-center">
           <div className="flex items-center space-x-2 mr-3">
             <div className="w-3 h-3 rounded-full bg-blue-300 border-2 border-blue-600"></div>
             <span className="text-xs text-blue-800">
-              Kaspers: {simulatedQuantity}
+              Barrels: {simulatedQuantity}
             </span>
           </div>
           <div className="bg-blue-100 px-3 py-1 rounded-xl">
@@ -129,7 +132,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
           className="text-xs fill-gray-600 font-medium"
           transform={`rotate(-90 15 ${height / 2})`}
         >
-          Kasper Price ($)
+          Barrel Price ($)
         </text>
 
         {/* Tick marks */}
@@ -182,7 +185,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
           className="text-xs fill-gray-600"
           dominantBaseline="middle"
         >
-          ${x}
+          ${perUnitCost}
         </text>
 
         <line
@@ -264,7 +267,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
       </svg>
 
       <div className="mt-4 text-xs text-gray-500 text-center">
-        The chart shows how Kasper price changes with total market production
+        The chart shows how barrel price changes with total market production
       </div>
     </div>
   );
