@@ -33,7 +33,26 @@ import { parseRoomId, generateJoinCode } from "./src/utils/utils";
 // server vars
 //////////////////////////////////////////////////////////////////
 
+// Force production mode if not explicitly set to development
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = "production";
+}
+
+console.log("Current NODE_ENV:", process.env.NODE_ENV);
+
 const app: Express = express();
+
+// Define allowed origins
+const allowedOrigins = [
+  "https://cuhkgameplatform.online",
+  "https://cournot-game.vercel.app",
+  "https://cournot-game-frontend.vercel.app",
+  "http://localhost:5173",
+];
+
+console.log(`Running in ${process.env.NODE_ENV} mode`);
+console.log(`CORS allowed origins:`, allowedOrigins);
+
 app.use(
   // express cors
   cors({
@@ -42,6 +61,7 @@ app.use(
         ? "https://cournot-game.vercel.app"
         : "http://localhost:5173",
     methods: ["GET", "POST"],
+
     credentials: true,
   })
 );
@@ -75,6 +95,27 @@ const roomStore: Map<string, RoomData> = new Map(); // rooms : set of all player
 //////////////////////////////////////////////////////////////////
 server.listen(PORT, () => {
   console.log(`Server running on port: ${PORT}`);
+});
+
+// Add explicit OPTIONS handler for CORS preflight requests
+app.options("*", (req, res) => {
+  const origin = req.headers.origin;
+
+  // Check if the origin is allowed
+  if (process.env.NODE_ENV === "production") {
+    if (origin && allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin);
+    } else {
+      res.header("Access-Control-Allow-Origin", "http://localhost:5173"); // Fallback
+    }
+  } else {
+    res.header("Access-Control-Allow-Origin", "*");
+  }
+
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.status(200).end();
 });
 
 // Root endpoint
@@ -191,12 +232,28 @@ app.get("/game/getGames", isAuthenticated, (req, res) => {
 
 // authentication middleware for socket.io connections
 io.use((socket, next) => {
-  const token = socket.handshake.auth.token;
+  // Try to get token from auth field first (backward compatibility)
+  let token = socket.handshake.auth.token;
+
+  // If no token in auth, try to get from cookies
+  if (!token && socket.handshake.headers.cookie) {
+    const cookies = socket.handshake.headers.cookie
+      .split(";")
+      .map((cookie) => cookie.trim())
+      .reduce((acc, cookie) => {
+        const [key, value] = cookie.split("=");
+        acc[key] = value;
+        return acc;
+      }, {} as Record<string, string>);
+
+    token = cookies.auth_token;
+  }
 
   if (!token) {
     console.error("No token provided for socket connection");
     return next(new Error("No token provided for socket connection"));
   }
+
   const userData = verifyJwtToken(token);
 
   if (userData instanceof Error || !userData) {
