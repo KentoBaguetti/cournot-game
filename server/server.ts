@@ -43,15 +43,15 @@ console.log("Current NODE_ENV:", process.env.NODE_ENV);
 const app: Express = express();
 
 // Define allowed origins
-const allowedOrigins = [
-  "https://cuhkgameplatform.online",
-  "https://cournot-game.vercel.app",
-  "https://cournot-game-frontend.vercel.app",
-  "http://localhost:5173",
-];
+// const allowedOrigins = [
+//   "https://cuhkgameplatform.online",
+//   "https://cournot-game.vercel.app",
+//   "https://cournot-game-frontend.vercel.app",
+//   "http://localhost:5173",
+// ];
 
-console.log(`Running in ${process.env.NODE_ENV} mode`);
-console.log(`CORS allowed origins:`, allowedOrigins);
+// console.log(`Running in ${process.env.NODE_ENV} mode`);
+// console.log(`CORS allowed origins:`, allowedOrigins);
 
 app.use(
   // express cors
@@ -98,25 +98,25 @@ server.listen(PORT, () => {
 });
 
 // Add explicit OPTIONS handler for CORS preflight requests
-app.options("*", (req, res) => {
-  const origin = req.headers.origin;
+// app.options("*", (req, res) => {
+//   const origin = req.headers.origin;
 
-  // Check if the origin is allowed
-  if (process.env.NODE_ENV === "production") {
-    if (origin && allowedOrigins.includes(origin)) {
-      res.header("Access-Control-Allow-Origin", origin);
-    } else {
-      res.header("Access-Control-Allow-Origin", "http://localhost:5173"); // Fallback
-    }
-  } else {
-    res.header("Access-Control-Allow-Origin", "*");
-  }
+//   // Check if the origin is allowed
+//   if (process.env.NODE_ENV === "production") {
+//     if (origin && allowedOrigins.includes(origin)) {
+//       res.header("Access-Control-Allow-Origin", origin);
+//     } else {
+//       res.header("Access-Control-Allow-Origin", "http://localhost:5173"); // Fallback
+//     }
+//   } else {
+//     res.header("Access-Control-Allow-Origin", "*");
+//   }
 
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.status(200).end();
-});
+//   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+//   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+//   res.header("Access-Control-Allow-Credentials", "true");
+//   res.status(200).end();
+// });
 
 // Root endpoint
 app.get("/", (req, res) => {
