@@ -4,7 +4,7 @@ const config = {
   //apiUrl: import.meta.env.VITE_API_URL || "http://localhost:3001",
   apiUrl:
     import.meta.env.VITE_NODE_ENV === "production"
-      ? "https://cournot-game.vercel.app"
+      ? "https://cuhkgameplatform.online"
       : "http://localhost:3001",
 };
 
