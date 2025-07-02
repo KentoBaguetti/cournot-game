@@ -56,7 +56,21 @@ console.log(`CORS allowed origins:`, allowedOrigins);
 app.use(
   // express cors
   cors({
-    origin: process.env.NODE_ENV === "production" ? allowedOrigins : "*",
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl requests)
+      if (!origin) return callback(null, true);
+
+      if (process.env.NODE_ENV === "production") {
+        if (allowedOrigins.indexOf(origin) !== -1) {
+          callback(null, origin);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      } else {
+        // In development, allow all origins
+        callback(null, true);
+      }
+    },
     methods: ["GET", "POST", "OPTIONS"],
     credentials: true,
   })
@@ -68,7 +82,21 @@ const server = createServer(app); // low level access server to allow for websoc
 const io = new Server(server, {
   connectionStateRecovery: {},
   cors: {
-    origin: process.env.NODE_ENV === "production" ? allowedOrigins : "*",
+    origin: function (origin, callback) {
+      // Allow requests with no origin
+      if (!origin) return callback(null, true);
+
+      if (process.env.NODE_ENV === "production") {
+        if (allowedOrigins.indexOf(origin) !== -1) {
+          callback(null, origin);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      } else {
+        // In development, allow all origins
+        callback(null, true);
+      }
+    },
     methods: ["GET", "POST", "OPTIONS"],
     credentials: true, // Important for cookies
   },
@@ -91,7 +119,25 @@ server.listen(PORT, () => {
 });
 
 // Add explicit OPTIONS handler for CORS preflight requests
-app.options("*", cors());
+app.options("*", (req, res) => {
+  const origin = req.headers.origin;
+
+  // Check if the origin is allowed
+  if (process.env.NODE_ENV === "production") {
+    if (origin && allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin);
+    } else {
+      res.header("Access-Control-Allow-Origin", "http://localhost:5173"); // Fallback
+    }
+  } else {
+    res.header("Access-Control-Allow-Origin", "*");
+  }
+
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.status(200).end();
+});
 
 // Root endpoint
 app.get("/", (req, res) => {
