@@ -33,19 +33,41 @@ import { parseRoomId, generateJoinCode } from "./src/utils/utils";
 // server vars
 //////////////////////////////////////////////////////////////////
 
+// Force production mode if not explicitly set to development
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = "production";
+}
+
+console.log("Current NODE_ENV:", process.env.NODE_ENV);
+
 const app: Express = express();
+
+// Define allowed origins
+const allowedOrigins = [
+  "https://cuhkgameplatform.online",
+  "https://cournot-game.vercel.app",
+  "https://cournot-game-frontend.vercel.app",
+  "http://localhost:5173",
+];
+
+console.log(`Running in ${process.env.NODE_ENV} mode`);
+console.log(`CORS allowed origins:`, allowedOrigins);
+
 app.use(
   // express cors
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? [
-            "https://cuhkgameplatform.online",
-            "https://cournot-game.vercel.app",
-            "https://cournot-game-frontend.vercel.app",
-          ]
-        : "http://localhost:5173",
-    methods: ["GET", "POST"],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl requests)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        console.log("CORS blocked origin:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "OPTIONS"],
     credentials: true,
   })
 );
@@ -56,15 +78,18 @@ const server = createServer(app); // low level access server to allow for websoc
 const io = new Server(server, {
   connectionStateRecovery: {},
   cors: {
-    origin:
-      process.env.NODE_ENV === "production"
-        ? [
-            "https://cuhkgameplatform.online",
-            "https://cournot-game.vercel.app",
-            "https://cournot-game-frontend.vercel.app",
-          ]
-        : "http://localhost:5173",
-    methods: ["GET", "POST"],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl requests)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        console.log("Socket.IO CORS blocked origin:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "OPTIONS"],
     credentials: true, // Important for cookies
   },
 });
@@ -84,6 +109,9 @@ const roomStore: Map<string, RoomData> = new Map(); // rooms : set of all player
 server.listen(PORT, () => {
   console.log(`Server running on port: ${PORT}`);
 });
+
+// Add explicit OPTIONS handler for CORS preflight requests
+app.options("*", cors());
 
 // Root endpoint
 app.get("/", (req, res) => {
@@ -199,12 +227,28 @@ app.get("/game/getGames", isAuthenticated, (req, res) => {
 
 // authentication middleware for socket.io connections
 io.use((socket, next) => {
-  const token = socket.handshake.auth.token;
+  // Try to get token from auth field first (backward compatibility)
+  let token = socket.handshake.auth.token;
+
+  // If no token in auth, try to get from cookies
+  if (!token && socket.handshake.headers.cookie) {
+    const cookies = socket.handshake.headers.cookie
+      .split(";")
+      .map((cookie) => cookie.trim())
+      .reduce((acc, cookie) => {
+        const [key, value] = cookie.split("=");
+        acc[key] = value;
+        return acc;
+      }, {} as Record<string, string>);
+
+    token = cookies.auth_token;
+  }
 
   if (!token) {
     console.error("No token provided for socket connection");
     return next(new Error("No token provided for socket connection"));
   }
+
   const userData = verifyJwtToken(token);
 
   if (userData instanceof Error || !userData) {

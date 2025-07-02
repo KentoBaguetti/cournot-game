@@ -48,12 +48,13 @@ const verifyJwtToken = (token: string): UserTokenData | Error | null => {
 const setTokenCookie = (res: Response, userData: UserTokenData) => {
   const token = generateJwtToken(userData);
 
+  console.log("Setting auth_token cookie with secure=true, sameSite=none");
+
   // Set HTTP-only cookie that expires when the JWT expires
   res.cookie("auth_token", token, {
     httpOnly: true,
-    // secure: process.env.NODE_ENV === "production", // Only use secure in production
-    secure: true,
-    sameSite: "none",
+    secure: true, // Required for cross-site cookies with SameSite=None
+    sameSite: "none", // Required for cross-domain requests
     maxAge: 60 * 60 * 1000, // 1 hour in milliseconds (matching JWT expiry)
   });
 
@@ -91,7 +92,6 @@ const updateTokenRoom = (
 const clearTokenCookie = (res: Response) => {
   res.clearCookie("auth_token", {
     httpOnly: true,
-    // secure: process.env.NODE_ENV === "production",
     secure: true,
     sameSite: "none",
   });
