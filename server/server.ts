@@ -56,17 +56,7 @@ console.log(`CORS allowed origins:`, allowedOrigins);
 app.use(
   // express cors
   cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps, curl requests)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        console.log("CORS blocked origin:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: process.env.NODE_ENV === "production" ? allowedOrigins : "*",
     methods: ["GET", "POST", "OPTIONS"],
     credentials: true,
   })
@@ -78,17 +68,7 @@ const server = createServer(app); // low level access server to allow for websoc
 const io = new Server(server, {
   connectionStateRecovery: {},
   cors: {
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps, curl requests)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        console.log("Socket.IO CORS blocked origin:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: process.env.NODE_ENV === "production" ? allowedOrigins : "*",
     methods: ["GET", "POST", "OPTIONS"],
     credentials: true, // Important for cookies
   },
