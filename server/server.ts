@@ -37,7 +37,14 @@ const app: Express = express();
 app.use(
   // express cors
   cors({
-    origin: "http://localhost:5173",
+    origin:
+      process.env.NODE_ENV === "production"
+        ? [
+            "https://cuhkgameplatform.online",
+            "https://cournot-game.vercel.app",
+            "https://cournot-game-frontend.vercel.app",
+          ]
+        : "http://localhost:5173",
     methods: ["GET", "POST"],
     credentials: true,
   })
@@ -49,7 +56,14 @@ const server = createServer(app); // low level access server to allow for websoc
 const io = new Server(server, {
   connectionStateRecovery: {},
   cors: {
-    origin: "http://localhost:5173", // frontend port (vite)
+    origin:
+      process.env.NODE_ENV === "production"
+        ? [
+            "https://cuhkgameplatform.online",
+            "https://cournot-game.vercel.app",
+            "https://cournot-game-frontend.vercel.app",
+          ]
+        : "http://localhost:5173",
     methods: ["GET", "POST"],
     credentials: true, // Important for cookies
   },

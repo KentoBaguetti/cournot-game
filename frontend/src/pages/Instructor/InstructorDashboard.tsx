@@ -5,6 +5,7 @@ import type { Game } from "../../types";
 import { Layout } from "../../components/Layout";
 import { Card } from "../../components/Card";
 import { Button } from "../../components/Button";
+import config from "../../config";
 
 export default function InstructorDashboard() {
   const [instructorName, setInstructorName] = useState("");
@@ -18,14 +19,14 @@ export default function InstructorDashboard() {
       try {
         setIsLoading(true);
         // Fetch instructor name
-        const meResponse = await axios.get("http://localhost:3001/auth/me", {
+        const meResponse = await axios.get(`${config.apiUrl}/auth/me`, {
           withCredentials: true,
         });
         setInstructorName(meResponse.data.user.username);
 
         // Fetch available games
         const gamesResponse = await axios.get(
-          "http://localhost:3001/game/getGames",
+          `${config.apiUrl}/game/getGames`,
           { withCredentials: true }
         );
         setGames(gamesResponse.data.games);

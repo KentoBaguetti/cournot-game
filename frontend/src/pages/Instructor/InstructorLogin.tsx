@@ -5,6 +5,7 @@ import { Layout } from "../../components/Layout";
 import { Card } from "../../components/Card";
 import { Input } from "../../components/Input";
 import { Button } from "../../components/Button";
+import config from "../../config";
 
 export default function InstructorLogin() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export default function InstructorLogin() {
     try {
       // sets the token as a cookie, no response needed so far
       await axios.post(
-        "http://localhost:3001/auth/login",
+        `${config.apiUrl}/auth/login`,
         {
           username,
           roomId: "", // roomId is empty when the user logs in

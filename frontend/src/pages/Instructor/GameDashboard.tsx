@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Layout } from "../../components/Layout";
 import { Card } from "../../components/Card";
 import { Button } from "../../components/Button";
+import config from "../../config";
 
 /**
  * Use axios+express for less common data retrievals such as game name and configs, things that might not change a lot
@@ -43,7 +44,7 @@ export default function GameDashboard() {
   // initial mounts
   useEffect(() => {
     const getBasicGameInfo = async () => {
-      const authmeRes = await axios.get("http://localhost:3001/auth/me", {
+      const authmeRes = await axios.get(`${config.apiUrl}/auth/me`, {
         withCredentials: true,
       });
       setHostName(authmeRes.data.user.username);

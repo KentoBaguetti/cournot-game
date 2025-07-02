@@ -5,6 +5,7 @@ import { Layout } from "../../components/Layout";
 import { Card } from "../../components/Card";
 import { Input } from "../../components/Input";
 import { Button } from "../../components/Button";
+import config from "../../config";
 
 export default function StudentJoin() {
   const [username, setUsername] = useState("");
@@ -21,7 +22,7 @@ export default function StudentJoin() {
     try {
       // Authenticate to get JWT
       await axios.post(
-        "http://localhost:3001/auth/login",
+        `${config.apiUrl}/auth/login`,
         {
           username,
           roomId: code,

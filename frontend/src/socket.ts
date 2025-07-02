@@ -7,6 +7,7 @@ import React, {
   useState,
   useEffect,
 } from "react";
+import config from "./config";
 
 export const SocketContext = createContext<Socket | null>(null);
 
@@ -22,7 +23,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     let isMounted = true;
 
     const fetchTokenData = async () => {
-      const response = await axios.get("http://localhost:3001/auth/token", {
+      const response = await axios.get(`${config.apiUrl}/auth/token`, {
         withCredentials: true,
       });
       const token = response.data.token;
@@ -34,7 +35,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         const token = await fetchTokenData();
         if (!isMounted) return;
 
-        const socket = io("http://localhost:3001", {
+        const socket = io(config.apiUrl, {
           auth: {
             token: token,
           },
