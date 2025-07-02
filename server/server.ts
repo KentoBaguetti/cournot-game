@@ -54,14 +54,16 @@ const app: Express = express();
 // console.log(`CORS allowed origins:`, allowedOrigins);
 
 app.use(
-  // express cors
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? "https://cournot-game.vercel.app"
+        ? [
+            "https://cournot-game.vercel.app",
+            "https://cournot-game-o9z142l8n-kentaro-barnes-projects.vercel.app",
+            "https://cuhkgameplatform.online",
+          ]
         : "http://localhost:5173",
-    methods: ["GET", "POST"],
-
+    methods: ["GET", "POST", "OPTIONS"],
     credentials: true,
   })
 );
@@ -74,10 +76,14 @@ const io = new Server(server, {
   cors: {
     origin:
       process.env.NODE_ENV === "production"
-        ? "https://cournot-game.vercel.app"
+        ? [
+            "https://cournot-game.vercel.app",
+            "https://cournot-game-o9z142l8n-kentaro-barnes-projects.vercel.app",
+            "https://cuhkgameplatform.online",
+          ]
         : "http://localhost:5173",
-    methods: ["GET", "POST"],
-    credentials: true, // Important for cookies
+    methods: ["GET", "POST", "OPTIONS"],
+    credentials: true,
   },
 });
 
@@ -98,25 +104,26 @@ server.listen(PORT, () => {
 });
 
 // Add explicit OPTIONS handler for CORS preflight requests
-// app.options("*", (req, res) => {
-//   const origin = req.headers.origin;
+app.options("*", (req, res) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    "https://cournot-game.vercel.app",
+    "https://cournot-game-o9z142l8n-kentaro-barnes-projects.vercel.app",
+    "https://cuhkgameplatform.online",
+    "http://localhost:5173",
+  ];
 
-//   // Check if the origin is allowed
-//   if (process.env.NODE_ENV === "production") {
-//     if (origin && allowedOrigins.includes(origin)) {
-//       res.header("Access-Control-Allow-Origin", origin);
-//     } else {
-//       res.header("Access-Control-Allow-Origin", "http://localhost:5173"); // Fallback
-//     }
-//   } else {
-//     res.header("Access-Control-Allow-Origin", "*");
-//   }
-
-//   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-//   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-//   res.header("Access-Control-Allow-Credentials", "true");
-//   res.status(200).end();
-// });
+  // Check if the origin is allowed
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.status(200).end();
+  } else {
+    res.status(403).end();
+  }
+});
 
 // Root endpoint
 app.get("/", (req, res) => {
