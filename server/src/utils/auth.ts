@@ -4,6 +4,12 @@ import jwt from "jsonwebtoken";
 import { jwtDecode } from "jwt-decode";
 import { Response, Request, NextFunction } from "express";
 
+//////////////////////////////////////////////////////////////////
+// vars and types
+//////////////////////////////////////////////////////////////////
+
+const isProduction = process.env.NODE_ENV === "production";
+
 interface UserTokenData {
   userId: string;
   username: string;
@@ -51,7 +57,6 @@ const setTokenCookie = (res: Response, userData: UserTokenData) => {
   // Set HTTP-only cookie that expires when the JWT expires
   res.cookie("auth_token", token, {
     httpOnly: true,
-    // secure: process.env.NODE_ENV === "production", // Only use secure in production
     secure: true,
     sameSite: "none",
     maxAge: 60 * 60 * 1000, // 1 hour in milliseconds (matching JWT expiry)
@@ -91,7 +96,6 @@ const updateTokenRoom = (
 const clearTokenCookie = (res: Response) => {
   res.clearCookie("auth_token", {
     httpOnly: true,
-    // secure: process.env.NODE_ENV === "production",
     secure: true,
     sameSite: "none",
   });

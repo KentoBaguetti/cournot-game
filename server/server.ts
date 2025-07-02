@@ -39,11 +39,7 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? [
-            "https://cuhkgameplatform.online",
-            "https://cournot-game.vercel.app",
-            "https://cournot-game-frontend.vercel.app",
-          ]
+        ? "https://cournot-game.vercel.app"
         : "http://localhost:5173",
     methods: ["GET", "POST"],
     credentials: true,
@@ -58,11 +54,7 @@ const io = new Server(server, {
   cors: {
     origin:
       process.env.NODE_ENV === "production"
-        ? [
-            "https://cuhkgameplatform.online",
-            "https://cournot-game.vercel.app",
-            "https://cournot-game-frontend.vercel.app",
-          ]
+        ? "https://cournot-game.vercel.app"
         : "http://localhost:5173",
     methods: ["GET", "POST"],
     credentials: true, // Important for cookies
