@@ -44,7 +44,7 @@ app.use(
 );
 app.use(express.json()); // express middleware for jsons
 app.use(cookieParser()); // Add cookie parser middleware
-const PORT: number = parseInt(process.env.PORT || "3001"); // TODO: add an env variable
+const PORT: number = parseInt(process.env.PORT || "3001");
 const server = createServer(app); // low level access server to allow for websocket connections
 const io = new Server(server, {
   connectionStateRecovery: {},
