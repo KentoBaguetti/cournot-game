@@ -38,12 +38,11 @@ if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = "production";
 }
 
-console.log("Current NODE_ENV:", process.env.NODE_ENV);
+if (process.env.NODE_ENV === "dev") {
+  console.log("Current NODE_ENV:", process.env.NODE_ENV);
+}
 
 const app: Express = express();
-
-// console.log(`Running in ${process.env.NODE_ENV} mode`);
-// console.log(`CORS allowed origins:`, allowedOrigins);
 
 app.use(
   cors({
