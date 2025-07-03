@@ -1,16 +1,21 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 interface LayoutProps {
   children: React.ReactNode;
   showHeader?: boolean;
   title?: string;
+  navigateTo?: string;
 }
 
 export const Layout: React.FC<LayoutProps> = ({
   children,
   showHeader = true,
   title = "Cournot Game",
+  navigateTo = "/",
 }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {showHeader && (
@@ -18,7 +23,10 @@ export const Layout: React.FC<LayoutProps> = ({
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                <div
+                  className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center cursor-pointer"
+                  onClick={() => navigate(navigateTo)}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="w-6 h-6 text-white"
