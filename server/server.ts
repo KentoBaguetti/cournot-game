@@ -246,7 +246,16 @@ app.get("/game/getGames", isAuthenticated, (req, res) => {
 
 // endpoint to check all running game instances in the server
 app.get("/auth/games", (req, res) => {
-  const games = gameManager.getGames();
+  const gamesMap = gameManager.getGames();
+
+  const games = Array.from(gamesMap.values()).map((game) => {
+    return {
+      roomId: game.roomId,
+      players: game.players.size,
+    };
+  });
+
+  res.json({ games });
 });
 
 //////////////////////////////////////////////////////////////////
