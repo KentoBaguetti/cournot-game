@@ -33,13 +33,12 @@ import { parseRoomId, generateJoinCode } from "./src/utils/utils";
 // server vars
 //////////////////////////////////////////////////////////////////
 
+// flag to check if the server is running in development mode
+const isDev = process.env.NODE_ENV === "dev";
+
 // Force production mode if not explicitly set to development
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = "production";
-}
-
-if (process.env.NODE_ENV === "dev") {
-  console.log("Current NODE_ENV:", process.env.NODE_ENV);
 }
 
 const app: Express = express();
@@ -299,18 +298,24 @@ io.use((socket, next) => {
   if (persistedRoomId) {
     // Use the persisted room ID (most up-to-date)
     socket.roomId = persistedRoomId;
-    console.log(`Using persisted roomId for ${username}: ${persistedRoomId}`);
+    if (isDev) {
+      console.log(`Using persisted roomId for ${username}: ${persistedRoomId}`);
+    }
   } else if (tokenRoomId) {
     // Use the room ID from token as fallback
     socket.roomId = tokenRoomId;
-    console.log(`Using token roomId for ${username}: ${tokenRoomId}`);
+    if (isDev) {
+      console.log(`Using token roomId for ${username}: ${tokenRoomId}`);
+    }
 
     // Store this room ID for future reconnections
     socketManager.userRooms.set(userId, tokenRoomId);
   } else {
     // No room information available
     socket.roomId = "";
-    console.log(`No room information available for ${username}`);
+    if (isDev) {
+      console.log(`No room information available for ${username}`);
+    }
   }
 
   next();
@@ -355,7 +360,9 @@ io.on("connection", (socket: Socket) => {
         gameConfigs
       );
 
-      console.log(`Game Configs:\n${JSON.stringify(gameConfigs, null, 2)}`);
+      if (isDev) {
+        console.log(`Game Configs:\n${JSON.stringify(gameConfigs, null, 2)}`);
+      }
 
       // apply the server socket manaager to the game
       game.setSocketManager(socketManager);
@@ -409,7 +416,9 @@ io.on("connection", (socket: Socket) => {
 
       // emit back to the room host the gameRoom id - this way we keep all the logic on the backend, don't want to have the code be generated on the frontend
       socket.emit("game:gameCreated", { roomId: mainRoomId });
-      console.log("Emitted back to the host");
+      if (isDev) {
+        console.log("Emitted back to the host");
+      }
     }
   );
 
@@ -558,10 +567,6 @@ io.on("connection", (socket: Socket) => {
       io.to(socket.roomId).emit("server-message", msg);
       console.log(`Emitting to room ${socket.roomId}`);
     }
-  });
-
-  socket.on("client-message", (msg) => {
-    console.log(`########### client response: ${msg}`);
   });
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,10 +1,14 @@
 // abstract class
+import * as dotenv from "dotenv";
+dotenv.config();
 import { Server, Socket } from "socket.io";
 import { Student } from "../users/Student";
 import { Instructor } from "../users/Instructor";
 import { SocketManager } from "../../socket/SocketManager";
 import { BreakoutRoomData } from "../../types/types";
 import { GameConfigs } from "../../types/types";
+
+const isDev = process.env.NODE_ENV === "dev";
 
 /**
  *

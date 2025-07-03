@@ -181,7 +181,7 @@ export class CournotGame extends BaseGame {
       totalProductionQuantity,
     });
 
-    console.log(`sending game data: ${x}, ${y}, ${z}`);
+    // console.log(`sending game data: ${x}, ${y}, ${z}`);
   }
 
   ///////////////////////////////////////////////////////////////////////////////
