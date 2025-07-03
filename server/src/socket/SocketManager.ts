@@ -49,7 +49,9 @@ export class SocketManager {
     const userId = this.connections.get(socket.id);
 
     if (userId) {
-      console.log(`Socket "${socket.id}" disconnected (User: ${userId})`);
+      console.log(
+        `Socket "${socket.id}" disconnected (User: ${userId}). Coming from handleDisconnection()`
+      );
 
       // Remove socket connection but keep user data for potential reconnection
       this.connections.delete(socket.id);
@@ -113,8 +115,38 @@ export class SocketManager {
           );
           this.userStore.delete(userId);
           this.userRooms.delete(userId);
+          const game = this.gameManager.getGame(roomId);
+          if (game) {
+            game.players.delete(userId);
+            game.playerCount--;
+          }
+
+          // console.log("--------------------------------");
+          // console.log(`removed user ${userId} from userStore and userRooms`);
+          // console.log(
+          //   `user map: ${JSON.stringify(
+          //     Object.fromEntries(this.userStore),
+          //     null,
+          //     2
+          //   )}`
+          // );
+          // console.log(
+          //   `socket store: ${JSON.stringify(
+          //     Object.fromEntries(this.connections),
+          //     null,
+          //     2
+          //   )}`
+          // );
+          // console.log(
+          //   `user rooms: ${JSON.stringify(
+          //     Object.fromEntries(this.userRooms),
+          //     null,
+          //     2
+          //   )}`
+          // );
+          // console.log("--------------------------------");
         }
-      }, 5 * 60 * 1000); // 5 min timeout callback func
+      }, 10 * 1000); // 5 min timeout callback func
     } else {
       console.log(`Socket "${socket.id}" disconnected (Unknown user)`);
     }
