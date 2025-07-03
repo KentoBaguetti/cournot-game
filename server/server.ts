@@ -42,14 +42,6 @@ console.log("Current NODE_ENV:", process.env.NODE_ENV);
 
 const app: Express = express();
 
-// Define allowed origins
-// const allowedOrigins = [
-//   "https://cuhkgameplatform.online",
-//   "https://cournot-game.vercel.app",
-//   "https://cournot-game-frontend.vercel.app",
-//   "http://localhost:5173",
-// ];
-
 // console.log(`Running in ${process.env.NODE_ENV} mode`);
 // console.log(`CORS allowed origins:`, allowedOrigins);
 
@@ -58,7 +50,6 @@ app.use(
     origin: function (origin, callback) {
       const allowedOrigins = [
         "https://cournot-game.vercel.app",
-        "https://cournot-game-o9z142l8n-kentaro-barnes-projects.vercel.app",
         "https://cuhkgameplatform.online",
       ];
 
@@ -90,7 +81,6 @@ const io = new Server(server, {
     origin: function (origin, callback) {
       const allowedOrigins = [
         "https://cournot-game.vercel.app",
-        "https://cournot-game-o9z142l8n-kentaro-barnes-projects.vercel.app",
         "https://cuhkgameplatform.online",
       ];
 
