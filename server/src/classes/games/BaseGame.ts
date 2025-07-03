@@ -58,8 +58,8 @@ export abstract class BaseGame {
   //////////////////////////////////////////////////////////////
   // basic abstract methods for every game
   //////////////////////////////////////////////////////////////
-  abstract onPlayerMove(socket: Socket, action: string): void;
   abstract sendOpponentMove(socket: Socket): void;
+  abstract setPlayerMove(socket: Socket, action: string): void;
 
   //////////////////////////////////////////////////////////////
   // concrete methods
@@ -240,7 +240,6 @@ export abstract class BaseGame {
 
   // test methods
   sendMoveToOpponent(socket: Socket): void {}
-  setPlayerMove(socket: Socket, action: string): void {}
   getOpponentMove(socket: Socket): string | undefined {
     return;
   }

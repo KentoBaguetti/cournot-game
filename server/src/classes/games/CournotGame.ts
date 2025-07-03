@@ -117,39 +117,6 @@ export class CournotGame extends BaseGame {
     }
   }
 
-  ///////////////////////////////////////////////////////////////////////////////
-  // on player move, set the player's move, and set the move in the breakout room
-  ///////////////////////////////////////////////////////////////////////////////
-  onPlayerMove(socket: Socket, action: string | number): void {
-    const player = this.players.get(socket.userId);
-    if (!player) {
-      console.error("Player not found: onPlayerMove()");
-      return;
-    }
-
-    if (player instanceof Instructor) {
-      console.error("Instructors can not move");
-      return;
-    }
-
-    // this doesnt matter - should refactor codebase to remove the userMove property from the player class
-    player.setUserMove(action);
-
-    const breakoutRoomId = (player as Student).getBreakoutRoomId();
-    if (!breakoutRoomId) {
-      console.error("Breakout room not found");
-      return;
-    }
-
-    const roomData = this.roomMap.get(breakoutRoomId);
-    if (!roomData) {
-      console.error("Room data not found");
-      return;
-    }
-
-    roomData.userMoves.set(player, Number(action));
-  }
-
   // send the xyz values to the student so they can do calculations on the frontend
   sendGameInfoToStudent(socket: Socket): void {
     const player = this.players.get(socket.userId);

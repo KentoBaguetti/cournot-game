@@ -57,7 +57,10 @@ export class SocketManager {
       // If the user was in a room, update the player list
       const roomId = socket.roomId;
       if (roomId) {
-        const game = this.gameManager.getGame(roomId);
+        // Get the main room ID if this is a breakout room
+        const mainRoomId = roomId.includes("_") ? roomId.split("_")[0] : roomId;
+        const game = this.gameManager.getGame(mainRoomId);
+
         if (game) {
           // Mark player as disconnected
           const player = game.players.get(userId);
@@ -75,6 +78,23 @@ export class SocketManager {
                 playerName: player.getNickname(),
                 isReady: false,
               });
+            }
+
+            // Check if all players in the game are disconnected
+            let allDisconnected = true;
+            for (const [pid, p] of game.players.entries()) {
+              if (!p.isDisconnected()) {
+                allDisconnected = false;
+                break;
+              }
+            }
+
+            // If all players are disconnected, remove the game
+            if (allDisconnected) {
+              console.log(
+                `All players disconnected from game in room ${mainRoomId}, removing game`
+              );
+              this.gameManager.removeGame(mainRoomId);
             }
           }
         }

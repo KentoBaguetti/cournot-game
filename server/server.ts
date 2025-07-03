@@ -239,8 +239,6 @@ app.get("/auth/token", (req, res) => {
 // send the different games to the frontend (just the names for now, those will be used to create the games)
 app.get("/game/getGames", isAuthenticated, (req, res) => {
   const games = {
-    testgame: ["testGame", "Test Game"],
-    jankenpo: ["jankenpo", "JanKenPo"],
     cournot: ["cournot", "Cournot Game"],
   };
   res.json({ games });
@@ -528,12 +526,13 @@ io.on("connection", (socket: Socket) => {
       return;
     }
 
-    const game: BaseGame | undefined = gameManager.getGame(roomId);
+    const mainRoomId = roomId.length > 6 ? roomId.split("_")[0] : roomId;
+    const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
     if (game) {
       game.onPlayerDisconnect(socket, userId);
 
       // Update room data
-      const room = roomStore.get(roomId);
+      const room = roomStore.get(mainRoomId);
       room?.players.delete(userId);
 
       // update the socket instance
@@ -542,7 +541,25 @@ io.on("connection", (socket: Socket) => {
       console.log(`User ${userData.nickname} left game in room ${roomId}`);
 
       // Broadcast updated player list to all clients in the room
-      io.to(roomId).emit("server:listUsers", game.getPlayers());
+      io.to(mainRoomId).emit("server:listUsers", game.getPlayers());
+
+      // Check if the game has any connected players
+      let hasConnectedPlayers = false;
+      for (const [pid, player] of game.players.entries()) {
+        if (!player.isDisconnected()) {
+          hasConnectedPlayers = true;
+          break;
+        }
+      }
+
+      // If no connected players, remove the game
+      if (!hasConnectedPlayers) {
+        console.log(
+          `No connected players left in game ${mainRoomId}, removing game`
+        );
+        gameManager.removeGame(mainRoomId);
+        roomStore.delete(mainRoomId);
+      }
     } else {
       console.log(`Game with room id "${roomId}" does not exist`);
     }
