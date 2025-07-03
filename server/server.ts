@@ -123,7 +123,6 @@ app.options("*", (req, res) => {
   const origin = req.headers.origin;
   const allowedOrigins = [
     "https://cournot-game.vercel.app",
-    "https://cournot-game-o9z142l8n-kentaro-barnes-projects.vercel.app",
     "https://cuhkgameplatform.online",
     "http://localhost:5173",
   ];
