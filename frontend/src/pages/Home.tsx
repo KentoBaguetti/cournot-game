@@ -15,14 +15,14 @@ export default function Home() {
   };
 
   return (
-    <Layout showHeader={true} title="Goon City Simulator">
+    <Layout showHeader={true} title="Kaspers Game">
       <div className="max-w-6xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Welcome to the Kasper Ku Gooning Game
+            Welcome to Kaspers Game
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Programmed by Kasker Ku and co.
+            Kaspers game (Built by Kasper, copyrighted by Kasper)
           </p>
         </div>
 
