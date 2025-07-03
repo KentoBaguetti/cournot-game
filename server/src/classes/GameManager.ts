@@ -15,4 +15,8 @@ export class GameManager {
   removeGame(roomId: string): void {
     this.games.delete(roomId);
   }
+
+  getGames(): Map<string, BaseGame> {
+    return this.games;
+  }
 }

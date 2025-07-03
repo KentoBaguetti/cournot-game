@@ -15,6 +15,8 @@ export class TestGame extends BaseGame {
     maxPlayers: 2,
   };
 
+  setPlayerMove(socket: Socket, action: string): void {}
+
   onPlayerJoin(
     socket: Socket,
     userId: string,

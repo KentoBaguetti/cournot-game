@@ -244,6 +244,11 @@ app.get("/game/getGames", isAuthenticated, (req, res) => {
   res.json({ games });
 });
 
+// endpoint to check all running game instances in the server
+app.get("/auth/games", (req, res) => {
+  const games = gameManager.getGames();
+});
+
 //////////////////////////////////////////////////////////////////
 // socket.io routes + middleware
 //////////////////////////////////////////////////////////////////
