@@ -121,6 +121,11 @@ export class SocketManager {
             game.playerCount--;
           }
 
+          // delete the game after the timeout if the game is empty after the user is removed
+          if (game && game.playerCount === 0) {
+            this.gameManager.removeGame(roomId);
+          }
+
           // console.log("--------------------------------");
           // console.log(`removed user ${userId} from userStore and userRooms`);
           // console.log(
