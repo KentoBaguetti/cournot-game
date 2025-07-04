@@ -1,18 +1,9 @@
 ## My todo list so i remember where i left off
 
-- handle reconnections semi done
-- how to handle game time? have a timer run on the backend and if a timer is reached, force the frontend to continue? eg if a timer runs out, force a "null" player move
-
+- need to handle disconnections better, if a user reconnects to a game, the server should use the same player instance rather than make a new one
+- if the host leaves the game, intentionally, from the game dashboard, the game instance should be deleted
 - refactoring shii (can be later)
 - move express routes into its own file
-- socket.io endpoint bodies should be moved into a separate file as well
-
-- How to handle maintenence?
-
-## creating a game
-
-- hardcode the game page configs for each game for faster building
-- down the line switch to schema-driven pages
 
 ### What tools are being used:
 

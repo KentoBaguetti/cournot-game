@@ -10,32 +10,6 @@ The server uses JWT tokens stored in HTTP-only cookies for secure authentication
 - Tokens automatically expire after 1 hour
 - User sessions can persist across page refreshes and reconnections
 
-## API Endpoints
-
-### Authentication
-
-- `POST /auth/login` - Log in with a username
-
-  - Request body: `{ "username": "string" }`
-  - Response: `{ "success": true, "user": { "userId": "string", "username": "string", "roomId" : "string" } }`
-  - Sets an HTTP-only cookie with the JWT token
-
-- `POST /auth/logout` - Log out the current user
-
-  - Response: `{ "success": true }`
-  - Clears the authentication cookie
-
-- `GET /auth/me` - Check authentication status and get current user info
-
-  - Response if authenticated: `{ "authenticated": true, "user": { "userId": "string", "username": "string" } }`
-  - Response if not authenticated: `{ "authenticated": false }`
-
-  - `GET /auth/token` - expose JWT token
-  - Response if successful: `{ "success": true, "token": "string" }`
-  - Response if not authenticated: `{ "success": false, "error": "string" }`
-
-## Socket.IO Connection
-
 When connecting to the Socket.IO server, the client should include the auth token from the cookie:
 
 ```javascript
@@ -50,12 +24,6 @@ The server will automatically:
 1. Validate the token from the cookie
 2. Associate the socket with the user
 3. Reconnect the user to their previous game room if applicable
-
-## Game Events
-
-- `game:create` - Create a new game room
-- `game:join` - Join an existing game room
-- `game:leave` - Leave a game room
 
 ## Persistent User Sessions
 

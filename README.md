@@ -6,8 +6,6 @@ Games:
 
 - Cournot Competition
 
-## Game to simulate the Economic Cournot Competition between users
-
 Some equations used: <br><br>
 
 $$
