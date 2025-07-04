@@ -15,7 +15,6 @@ import DisplayGameInfoPage from "./pages/Instructor/DisplayGameInfoPage";
 import GameLobby from "./pages/Student/GameLobby";
 
 // create game pages
-import CreateJankenpoGamePage from "./pages/Instructor/CreateJankenpoGamePage";
 import CreateCournotGamePage from "./pages/Instructor/CreateCournotGamePage";
 
 // game pages
@@ -45,15 +44,6 @@ function App() {
           element={
             <SocketProvider>
               <GameDashboard />
-            </SocketProvider>
-          }
-        />
-
-        <Route
-          path="/instructor/create/jankenpo"
-          element={
-            <SocketProvider>
-              <CreateJankenpoGamePage />
             </SocketProvider>
           }
         />
