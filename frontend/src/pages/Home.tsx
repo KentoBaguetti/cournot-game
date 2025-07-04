@@ -15,7 +15,13 @@ export default function Home() {
   };
 
   return (
-    <Layout showHeader={true} title="Kaspers Game">
+    <Layout
+      showHeader={true}
+      title="Kaspers Game"
+      showBackButton={false}
+      showHomeButton={false}
+      withConfirmation={false}
+    >
       <div className="max-w-6xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">

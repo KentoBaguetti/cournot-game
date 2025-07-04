@@ -46,7 +46,13 @@ export default function InstructorDashboard() {
   };
 
   return (
-    <Layout title="Instructor Dashboard" navigateTo="/instructorDashboard">
+    <Layout
+      title="Instructor Dashboard"
+      showBackButton={false}
+      showHomeButton={false}
+      withConfirmation={true}
+      confirmationMessage="Are you sure you want to leave the instructor dashboard?"
+    >
       <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
           <div className="flex items-center justify-between">

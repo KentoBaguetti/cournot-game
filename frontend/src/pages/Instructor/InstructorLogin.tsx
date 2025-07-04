@@ -41,7 +41,12 @@ export default function InstructorLogin() {
   };
 
   return (
-    <Layout title="Instructor Login">
+    <Layout
+      title="Instructor Login"
+      showBackButton={true}
+      showHomeButton={false}
+      withConfirmation={false}
+    >
       <div className="max-w-6xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="max-w-md mx-auto">
           <Card className="text-center">

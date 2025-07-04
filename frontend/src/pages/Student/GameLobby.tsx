@@ -48,7 +48,13 @@ export default function GameLobby() {
   }, [socket, roomCode, navigate]);
 
   return (
-    <Layout title="Game Lobby">
+    <Layout
+      title="Game Lobby"
+      showBackButton={false}
+      showHomeButton={true}
+      withConfirmation={true}
+      confirmationMessage="Are you sure you want to leave the game lobby? You will be removed from the game."
+    >
       <div className="max-w-6xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="max-w-lg mx-auto text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">

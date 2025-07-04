@@ -99,7 +99,15 @@ export default function GameDashboard() {
   };
 
   return (
-    <Layout showHeader={true} title="Game Dashboard">
+    <Layout
+      showHeader={true}
+      title="Game Dashboard"
+      showBackButton={false}
+      navigateLocation="/instructorDashboard"
+      showHomeButton={true}
+      withConfirmation={true}
+      confirmationMessage="Are you sure you want to leave the game dashboard?"
+    >
       <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
           <div className="flex items-center justify-between">
