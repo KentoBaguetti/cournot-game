@@ -16,6 +16,11 @@ export const Layout: React.FC<LayoutProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  const handleNavigate = () => {
+    console.log("navigateTo", navigateTo);
+    navigate(navigateTo);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {showHeader && (
@@ -25,7 +30,7 @@ export const Layout: React.FC<LayoutProps> = ({
               <div className="flex items-center space-x-3">
                 <div
                   className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center cursor-pointer"
-                  onClick={() => navigate(navigateTo)}
+                  onClick={handleNavigate}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
