@@ -146,7 +146,7 @@ app.get("/", (req, res) => {
 
 // Update the token endpoint to use HTTP-only cookies
 app.post("/auth/login", (req, res) => {
-  const { username, roomId } = req.body;
+  const { username, roomId, isHost } = req.body;
 
   if (!username) {
     return res.status(400).json({ error: "Username is required" });
@@ -159,6 +159,7 @@ app.post("/auth/login", (req, res) => {
   const userData: UserTokenData = {
     userId,
     username,
+    isHost,
     roomId,
   };
 
@@ -171,6 +172,7 @@ app.post("/auth/login", (req, res) => {
     user: {
       userId,
       username,
+      isHost,
       roomId,
     },
   });
@@ -215,11 +217,16 @@ app.get("/auth/me", isAuthenticated, (req, res) => {
     return res.status(401).json({ authenticated: false });
   }
 
+  // const isUserHost =
+  // if i want to use the gameManager, id need to update the cookies more often
+  // if i want to use the socketManager, id need to add a isHost field to userData
+
   res.json({
     authenticated: true,
     user: {
       userId: userData.userId,
       username: userData.username,
+      isHost: userData.isHost,
       roomId: userData.roomId,
     },
   });

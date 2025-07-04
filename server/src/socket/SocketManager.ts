@@ -17,7 +17,7 @@ export class SocketManager {
     console.log(`Socket ID "${socket.id}" connected`);
 
     // these fields are set by the middleware
-    const { userId, username, roomId } = socket;
+    const { userId, username, roomId, isHost } = socket;
 
     if (!userId || !username) {
       console.error("Missing userId or username for socket connection");
@@ -26,7 +26,7 @@ export class SocketManager {
     }
 
     // Store user data and connection
-    this.registerUser(socket.id, userId, username, roomId);
+    this.registerUser(socket.id, userId, username, isHost, roomId);
 
     // If user has a lastRoom, try to reconnect them to their game
     const persistedRoomId = this.userRooms.get(userId) || roomId;
@@ -164,6 +164,7 @@ export class SocketManager {
     socketId: string,
     userId: string,
     username: string,
+    isHost: boolean,
     roomId?: string
   ): void {
     // Store connection
@@ -177,6 +178,7 @@ export class SocketManager {
       userData = {
         nickname: username,
         lastRoom: roomId,
+        isHost,
       };
     } else {
       // Existing user, update nickname if needed
@@ -344,5 +346,14 @@ export class SocketManager {
     }
 
     return result;
+  }
+
+  isUserHost(userId: string): boolean {
+    const userData = this.getUserData(userId);
+    if (!userData) {
+      return false;
+    }
+
+    return userData.isHost;
   }
 }

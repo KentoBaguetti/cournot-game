@@ -13,6 +13,7 @@ const isProduction = process.env.NODE_ENV === "production";
 interface UserTokenData {
   userId: string;
   username: string;
+  isHost: boolean;
   roomId?: string;
 }
 

@@ -2,6 +2,7 @@ import { Student } from "../classes/users/Student";
 
 export interface UserData {
   nickname: string;
+  isHost: boolean;
   lastRoom?: string;
 }
 
