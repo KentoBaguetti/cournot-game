@@ -13,8 +13,8 @@ export default function CreateCournotGamePage() {
   const [maxPlayersPerRoom, setMaxPlayersPerRoom] = useState<number>(10);
   const [maxRounds, setMaxRounds] = useState<number>(5);
   const [x, setX] = useState<number>(100);
-  const [y, setY] = useState<number>(20);
-  const [z, setZ] = useState<number>(5);
+  const [y, setY] = useState<number>(0);
+  const [z, setZ] = useState<number>(10);
 
   useEffect(() => {
     if (!socket) return;

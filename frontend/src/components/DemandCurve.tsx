@@ -123,7 +123,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
           textAnchor="middle"
           className="text-xs fill-gray-600 font-medium"
         >
-          Total Market Production
+          Total Market Production (Quantity)
         </text>
         <text
           x={15}
@@ -132,7 +132,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
           className="text-xs fill-gray-600 font-medium"
           transform={`rotate(-90 15 ${height / 2})`}
         >
-          Barrel Price ($)
+          Market Price ($)
         </text>
 
         {/* Tick marks */}
@@ -185,7 +185,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
           className="text-xs fill-gray-600"
           dominantBaseline="middle"
         >
-          ${perUnitCost}
+          ${x}
         </text>
 
         <line
