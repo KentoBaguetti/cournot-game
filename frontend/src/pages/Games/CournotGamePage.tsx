@@ -456,7 +456,7 @@ export default function CournotGamePage() {
       {/* History Modal */}
       {showHistoryModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full overflow-hidden relative">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-5xl w-full overflow-hidden relative">
             {/* Close button */}
             <button
               onClick={() => setShowHistoryModal(false)}
@@ -508,22 +508,22 @@ export default function CournotGamePage() {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-blue-100">
-                      <th className="py-3 px-4 text-left text-blue-700 rounded-l-lg">
+                      <th className="py-4 px-6 text-left text-blue-700 rounded-l-lg">
                         Round
                       </th>
-                      <th className="py-3 px-4 text-left text-blue-700">
+                      <th className="py-4 px-6 text-left text-blue-700">
                         Total Production
                       </th>
-                      <th className="py-3 px-4 text-left text-blue-700">
+                      <th className="py-4 px-6 text-left text-blue-700">
                         Your Production
                       </th>
-                      <th className="py-3 px-4 text-left text-blue-700">
+                      <th className="py-4 px-6 text-left text-blue-700">
                         Market Price
                       </th>
-                      <th className="py-3 px-4 text-left text-blue-700">
+                      <th className="py-4 px-6 text-left text-blue-700">
                         Cost Per Barrel
                       </th>
-                      <th className="py-3 px-4 text-left text-blue-700 rounded-r-lg">
+                      <th className="py-4 px-6 text-left text-blue-700 rounded-r-lg">
                         Your Profit
                       </th>
                     </tr>
@@ -531,12 +531,12 @@ export default function CournotGamePage() {
                   <tbody>
                     {roundHistory.map((round, index) => (
                       <tr key={index} className="border-b border-gray-100">
-                        <td className="py-4 px-4">{round.round}</td>
-                        <td className="py-4 px-4">{round.totalProduction}</td>
-                        <td className="py-4 px-4">{round.yourProduction}</td>
-                        <td className="py-4 px-4">${round.marketPrice}</td>
-                        <td className="py-4 px-4">${round.costPerBarrel}</td>
-                        <td className="py-4 px-4">${round.yourProfit}</td>
+                        <td className="py-4 px-6">{round.round}</td>
+                        <td className="py-4 px-6">{round.totalProduction}</td>
+                        <td className="py-4 px-6">{round.yourProduction}</td>
+                        <td className="py-4 px-6">${round.marketPrice}</td>
+                        <td className="py-4 px-6">${round.costPerBarrel}</td>
+                        <td className="py-4 px-6">${round.yourProfit}</td>
                       </tr>
                     ))}
                   </tbody>

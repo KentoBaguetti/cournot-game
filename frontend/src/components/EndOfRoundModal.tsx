@@ -35,7 +35,7 @@ export function EndOfRoundModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden relative">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden relative">
         {/* Close button */}
         <button
           onClick={onClose}
@@ -66,8 +66,8 @@ export function EndOfRoundModal({
         {/* Body */}
         <div className="p-6 space-y-6">
           {/* Market Summary */}
-          <div className="grid grid-cols-5 gap-2 text-center">
-            <div className="bg-blue-100 p-3 rounded-lg">
+          <div className="grid grid-cols-5 gap-4 text-center">
+            <div className="bg-blue-100 p-4 rounded-lg">
               <h3 className="text-sm text-blue-800 font-medium">
                 Total
                 <br />
@@ -78,7 +78,7 @@ export function EndOfRoundModal({
               </p>
             </div>
 
-            <div className="bg-blue-100 p-3 rounded-lg">
+            <div className="bg-blue-100 p-4 rounded-lg">
               <h3 className="text-sm text-blue-800 font-medium">
                 Your
                 <br />
@@ -89,7 +89,7 @@ export function EndOfRoundModal({
               </p>
             </div>
 
-            <div className="bg-blue-100 p-3 rounded-lg">
+            <div className="bg-blue-100 p-4 rounded-lg">
               <h3 className="text-sm text-blue-800 font-medium">
                 Market
                 <br />
@@ -100,7 +100,7 @@ export function EndOfRoundModal({
               </p>
             </div>
 
-            <div className="bg-blue-100 p-3 rounded-lg">
+            <div className="bg-blue-100 p-4 rounded-lg">
               <h3 className="text-sm text-blue-800 font-medium">
                 Cost
                 <br />
@@ -111,7 +111,7 @@ export function EndOfRoundModal({
               </p>
             </div>
 
-            <div className="bg-blue-100 p-3 rounded-lg">
+            <div className="bg-blue-100 p-4 rounded-lg">
               <h3 className="text-sm text-blue-800 font-medium">
                 Your
                 <br />
