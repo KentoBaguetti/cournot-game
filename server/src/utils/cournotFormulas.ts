@@ -48,8 +48,11 @@ const profitFunction = (
 ): number => {
   const price = priceFunction(x, quantities);
   const cost = costFunction(y, z, quantity);
-  return quantity * price - quantity * cost;
+  console.log(`Price: ${price}, Cost: ${cost}`);
+  console.log(`Profit: ${quantity * price - quantity * cost}`);
+  return quantity * price - cost;
 };
+5;
 
 // the "quantities" array should not contain the quantity of the firm calling the function
 // calculates q_n, where q_n is the quantity of the firm calling the function
