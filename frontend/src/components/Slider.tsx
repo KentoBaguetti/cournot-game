@@ -32,7 +32,7 @@ export const Slider: React.FC<SliderProps> = ({
     const rect = trackRef.current.getBoundingClientRect();
     const clickPosition = (e.clientX - rect.left) / rect.width;
     const newValue =
-      Math.round((clickPosition * (max - min) + min) / step) * step;
+      Math.floor((clickPosition * (max - min) + min) / step) * step;
 
     onChange(Math.min(Math.max(newValue, min), max));
   };
@@ -42,7 +42,7 @@ export const Slider: React.FC<SliderProps> = ({
 
     const rect = trackRef.current.getBoundingClientRect();
     const position = (e.clientX - rect.left) / rect.width;
-    const newValue = Math.round((position * (max - min) + min) / step) * step;
+    const newValue = Math.floor((position * (max - min) + min) / step) * step;
 
     onChange(Math.min(Math.max(newValue, min), max));
   };

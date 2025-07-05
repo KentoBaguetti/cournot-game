@@ -1,3 +1,5 @@
+import { BreakoutRoomData } from "../types/types";
+
 // P(Q) = a - b*Q where Q = summation of Q1, Q2, ..., Qn
 const calculateMarketPrice = (
   a: number,
@@ -28,8 +30,7 @@ const priceFunction = (x: number, quantities: number[]): number => {
 };
 
 const costFunction = (y: number, z: number, quantities: number[]): number => {
-  const qSum = calculateQuantitySum(quantities);
-  return y + z * qSum;
+  return y + z * quantities.length;
 };
 
 // for a firm given that their quantity is the variable "quantity"
@@ -69,6 +70,10 @@ const calculateMaxMonopolyQuantity = (
   return (y - x) / (-1 * 2 * z - 2);
 };
 
+const countNumberOfFirms = (roomData: BreakoutRoomData): number => {
+  return roomData.users.length;
+};
+
 export {
   calculateMarketPrice,
   priceFunction,
@@ -77,4 +82,5 @@ export {
   maxProfitFunction,
   calculateQuantitySum,
   calculateMaxMonopolyQuantity,
+  countNumberOfFirms,
 };

@@ -11,6 +11,7 @@ import {
   priceFunction,
   costFunction,
   calculateMaxMonopolyQuantity,
+  countNumberOfFirms,
 } from "../../utils/cournotFormulas";
 
 export class CournotGame extends BaseGame {
@@ -147,8 +148,8 @@ export class CournotGame extends BaseGame {
       x,
       y,
       z,
-      numberOfFirms,
       totalProductionQuantity,
+      numberOfFirms: countNumberOfFirms(roomData),
     });
 
     // console.log(`sending game data: ${x}, ${y}, ${z}`);

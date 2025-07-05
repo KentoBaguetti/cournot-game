@@ -75,7 +75,7 @@ export default function CournotGamePage() {
       setX(data.x);
       setIndividualProductCost(data.z);
       setNumberOfFirms(data.numberOfFirms);
-      setTotalProductionQuantity(Math.round(data.totalProductionQuantity));
+      setTotalProductionQuantity(numberOfFirms);
       setSimulatedQuantity(1);
     });
 
@@ -182,7 +182,7 @@ export default function CournotGamePage() {
   const simulatedPrice = calculateMarketPrice(x, simulatedQuantity);
 
   // Use a safe default value for max production in case totalProductionQuantity is 0
-  const maxProductionForSimulation = Math.round(
+  const maxProductionForSimulation = Math.floor(
     totalProductionQuantity > 0 ? totalProductionQuantity : x > 0 ? x : 30
   );
 
@@ -294,7 +294,7 @@ export default function CournotGamePage() {
                   </div>
                 </div>
                 <div className="text-3xl font-bold text-gray-800">
-                  {Math.round(totalProductionQuantity / numberOfFirms)}
+                  {Math.floor(totalProductionQuantity / numberOfFirms)}
                 </div>
               </div>
               <div className="text-center">
@@ -330,7 +330,7 @@ export default function CournotGamePage() {
                     value={userQuantity}
                     onChange={setUserQuantity}
                     min={0}
-                    max={Math.round(
+                    max={Math.floor(
                       Math.min(x, totalProductionQuantity / numberOfFirms)
                     )}
                     className="mb-8"
