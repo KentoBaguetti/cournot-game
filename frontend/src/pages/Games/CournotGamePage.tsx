@@ -19,7 +19,6 @@ export default function CournotGamePage() {
   const socket = useSocket();
 
   // values from the backend
-  const [marketPrice, setMarketPrice] = useState<number>(0);
   const [userProfit, setUserProfit] = useState<number>(0);
   const [recievedGameData, setRecievedGameData] = useState<boolean>(false);
   const [roundNo, setRoundNo] = useState<number>(1);
@@ -52,11 +51,6 @@ export default function CournotGamePage() {
   useEffect(() => {
     if (!socket) {
       return;
-    }
-
-    if (userQuantity) {
-      const marketPrice = calculateMarketPrice(x, userQuantity);
-      setMarketPrice(marketPrice);
     }
 
     // emits
