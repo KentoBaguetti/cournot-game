@@ -529,6 +529,10 @@ export class CournotGame extends BaseGame {
       roomData.userReadyMap.set(user, false);
     }
 
+    console.log(
+      `Room market price: ${this.calculateMarketPriceForRoom(breakoutRoomId)}`
+    );
+
     // send data to each user
     for (const user of roomData.users) {
       const userProfit = this.calculateProfitForFirm(user.userId);

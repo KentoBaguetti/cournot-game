@@ -29,8 +29,12 @@ const priceFunction = (x: number, quantities: number[]): number => {
   return x - qSum;
 };
 
-const costFunction = (y: number, z: number, quantities: number[]): number => {
-  return y + z * quantities.length;
+const costFunction = (
+  y: number,
+  z: number,
+  quantityProduced: number
+): number => {
+  return y + z * quantityProduced;
 };
 
 // for a firm given that their quantity is the variable "quantity"
@@ -43,7 +47,7 @@ const profitFunction = (
   quantities: number[]
 ): number => {
   const price = priceFunction(x, quantities);
-  const cost = costFunction(y, z, quantities);
+  const cost = costFunction(y, z, quantity);
   return quantity * price - quantity * cost;
 };
 

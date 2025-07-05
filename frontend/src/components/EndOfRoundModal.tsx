@@ -91,7 +91,7 @@ export function EndOfRoundModal({
 
             <div className="bg-blue-100 p-3 rounded-lg">
               <h3 className="text-sm text-blue-800 font-medium">
-                Barrel
+                Market
                 <br />
                 Price
               </h3>

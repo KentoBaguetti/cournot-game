@@ -12,7 +12,7 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
   simulatedQuantity,
   maxProduction,
   x,
-  perUnitCost,
+  // perUnitCost,
   calculateMarketPrice,
 }) => {
   const width = 300;
@@ -22,26 +22,25 @@ export const DemandCurve: React.FC<DemandCurveProps> = ({
   // Calculate points for the demand curve
   const points: string[] = [];
   for (let q = 0; q <= maxProduction; q += 1) {
-    const price = calculateMarketPrice(perUnitCost, q);
+    const price = calculateMarketPrice(x, q);
     const plotX = padding + (q / maxProduction) * (width - 2 * padding);
-    const plotY =
-      height - padding - (price / perUnitCost) * (height - 2 * padding);
+    const plotY = height - padding - (price / x) * (height - 2 * padding);
     points.push(`${plotX},${plotY}`);
   }
 
   // Simulated point
-  const simulatedPrice = calculateMarketPrice(perUnitCost, simulatedQuantity);
+  const simulatedPrice = calculateMarketPrice(x, simulatedQuantity);
   const simulatedX =
     padding + (simulatedQuantity / maxProduction) * (width - 2 * padding);
   const simulatedY =
-    height - padding - (simulatedPrice / perUnitCost) * (height - 2 * padding);
+    height - padding - (simulatedPrice / x) * (height - 2 * padding);
 
   // Check if simulated is near origin
   const isSimulatedNearOrigin = simulatedQuantity < maxProduction * 0.05;
 
   // Check if price is near max or min to avoid label overlap with axis labels
-  const isPriceNearMax = simulatedPrice > perUnitCost * 0.85;
-  const isPriceNearMin = simulatedPrice < perUnitCost * 0.15;
+  const isPriceNearMax = simulatedPrice > x * 0.85;
+  const isPriceNearMin = simulatedPrice < x * 0.15;
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-lg">
