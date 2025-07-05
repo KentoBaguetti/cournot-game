@@ -141,9 +141,13 @@ export default function CreateCournotGamePage() {
 
               {/* Using formula-container class to prevent duplicate formula display */}
               <div className="formula-container text-center">
-                <BlockMath math={`Price = ${x} - \\sum_{i=1}^{n}q_i`} />
-                <BlockMath math={`Cost = ${y} + ${z} \\sum_{i=1}^{n}q_i`} />
-                <BlockMath math={`Profit = q_iPrice - Cost`} />
+                <BlockMath
+                  math={`Price = \\mathbf{${x}} - \\sum_{i=1}^{n}q_i`}
+                />
+                <BlockMath
+                  math={`Cost_i = \\mathbf{${y}} + (\\mathbf{${z}} \\times q_i)`}
+                />
+                <BlockMath math={`Profit = (q_i \\times Price) - Cost_i`} />
               </div>
 
               <div>
@@ -151,7 +155,7 @@ export default function CreateCournotGamePage() {
                   htmlFor="x"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  X
+                  Demand Intercept (x)
                 </label>
                 <div className="relative rounded-md shadow-sm">
                   <input
@@ -171,7 +175,7 @@ export default function CreateCournotGamePage() {
                   htmlFor="y"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Y
+                  Sunk Cost (y)
                 </label>
                 <div className="relative rounded-md shadow-sm">
                   <input
