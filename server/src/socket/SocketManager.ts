@@ -151,7 +151,7 @@ export class SocketManager {
           // );
           // console.log("--------------------------------");
         }
-      }, 10 * 1000); // 5 min timeout callback func
+      }, 5 * 60 * 1000); // 5 min timeout callback func
     } else {
       console.log(`Socket "${socket.id}" disconnected (Unknown user)`);
     }
