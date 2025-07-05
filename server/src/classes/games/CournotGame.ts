@@ -23,13 +23,16 @@ export class CournotGame extends BaseGame {
   ) {
     super(roomId, io, hostId, gameConfigs);
     const config = gameConfigs as CournotGameConfigs;
+    if (config.y === undefined) {
+      config.y = 0;
+    }
     if (
       !config.maxPlayersPerRoom ||
       !config.roundLength ||
       !config.maxRounds ||
-      !config.x ||
-      !config.y ||
-      !config.z
+      config.x === undefined ||
+      config.y === undefined ||
+      config.z === undefined
     ) {
       throw new Error("Invalid game configs");
     }

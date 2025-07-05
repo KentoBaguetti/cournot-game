@@ -28,9 +28,9 @@ export default function CreateCournotGamePage() {
         roundLength: roundLength || 1,
         maxRounds: maxRounds || 1,
         maxPlayersPerRoom: maxPlayersPerRoom || 1,
-        x: x || 1,
-        y: y || 1,
-        z: z || 1,
+        x: x ?? 1,
+        y: y ?? 0,
+        z: z ?? 1,
       },
     });
     navigate("/instructor/gameDashboard");
