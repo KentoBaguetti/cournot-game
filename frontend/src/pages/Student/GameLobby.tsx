@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useSocket } from "../../socket";
+import { useSocket } from "../../Contexts/socket";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "../../components/Layout";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSocket } from "../../socket";
+import { useSocket } from "../../Contexts/socket";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "../../components/Layout";
 import { Card } from "../../components/Card";

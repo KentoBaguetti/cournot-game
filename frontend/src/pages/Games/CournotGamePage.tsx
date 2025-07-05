@@ -3,7 +3,7 @@ import { Button } from "../../components/Button";
 import { Slider } from "../../components/Slider";
 import { DemandCurve } from "../../components/DemandCurve";
 import { EndOfRoundModal } from "../../components/EndOfRoundModal";
-import { useSocket } from "../../socket";
+import { useSocket } from "../../Contexts/socket";
 import { Layout } from "../../components/Layout";
 
 interface RoundHistoryItem {

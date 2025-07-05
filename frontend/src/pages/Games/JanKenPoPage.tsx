@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSocket } from "../../socket";
+import { useSocket } from "../../Contexts/socket";
 import { Layout } from "../../components/Layout";
 import { Card } from "../../components/Card";
 import { Button } from "../../components/Button";

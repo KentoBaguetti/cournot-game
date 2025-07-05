@@ -1,6 +1,6 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
-import { SocketProvider } from "./socket";
+import { SocketProvider } from "./Contexts/socket";
 import Home from "./pages/Home";
 import StudentJoin from "./pages/Student/StudentJoin";
 import InstructorLogin from "./pages/Instructor/InstructorLogin";

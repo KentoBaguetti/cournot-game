@@ -7,7 +7,7 @@ import React, {
   useState,
   useEffect,
 } from "react";
-import config from "./config";
+import config from "../config";
 
 export const SocketContext = createContext<Socket | null>(null);
 
