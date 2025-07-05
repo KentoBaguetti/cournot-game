@@ -53,3 +53,17 @@
 .blue-shadow {
   box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
 }
+
+/* Fix for KaTeX formula display */
+.formula-container {
+  position: relative;
+}
+
+.formula-container::after {
+  content: none !important;
+}
+
+/* Ensure KaTeX formulas don't have duplicate text */
+.katex-display::after {
+  content: none !important;
+}

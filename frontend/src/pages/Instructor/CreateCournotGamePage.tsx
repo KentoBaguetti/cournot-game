@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Layout } from "../../components/Layout";
 import { Card } from "../../components/Card";
 import { Button } from "../../components/Button";
+import { BlockMath } from "react-katex";
+import "katex/dist/katex.min.css";
 
 export default function CreateCournotGamePage() {
   const socket = useSocket();
@@ -135,6 +137,13 @@ export default function CreateCournotGamePage() {
                 <p className="mt-1 text-sm text-gray-500">
                   Maximum number of players allowed in each breakout room
                 </p>
+              </div>
+
+              {/* Using formula-container class to prevent duplicate formula display */}
+              <div className="formula-container text-center">
+                <BlockMath math={`Price = ${x} - \\sum_{i=1}^{n}q_i`} />
+                <BlockMath math={`Cost = ${y} + ${z} \\sum_{i=1}^{n}q_i`} />
+                <BlockMath math={`Profit = q_iPrice - Cost`} />
               </div>
 
               <div>
