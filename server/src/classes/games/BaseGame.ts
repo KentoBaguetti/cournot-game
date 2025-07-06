@@ -125,6 +125,23 @@ export abstract class BaseGame {
       // Join the socket to the room
       socket.join(this.roomId);
 
+      // Update socket in breakout room data if this is a Student
+      if (player instanceof Student) {
+        const breakoutRoomId = (player as Student).getBreakoutRoomId();
+        if (breakoutRoomId && this.roomMap.has(breakoutRoomId)) {
+          const roomData = this.roomMap.get(breakoutRoomId);
+          if (roomData) {
+            // Update the socket reference in the users array
+            for (let i = 0; i < roomData.users.length; i++) {
+              if (roomData.users[i].userId === userId) {
+                roomData.users[i].updateSocket(socket);
+                break;
+              }
+            }
+          }
+        }
+      }
+
       this.io
         .to(this.roomId)
         .emit("player:reconnect", `Player "${username}" has reconnected`);
@@ -277,15 +294,8 @@ export abstract class BaseGame {
       clearInterval(roomData.timerInterval);
     }
 
-    let endTime = 0;
-    if (roundTimer) {
-      endTime = Date.now() + durationMinutes * 60 * 1000;
-    } else {
-      endTime = Date.now() + 15 * 1000;
-    }
-
     // dev timer: 10 seconds
-    //const endTime = Date.now() + 10 * 1000;
+    const endTime = Date.now() + 10 * 1000;
 
     roomData.timerEndTime = endTime;
     roomData.timerActive = true;
@@ -300,8 +310,6 @@ export abstract class BaseGame {
           0,
           Math.floor((endTime - Date.now()) / 1000)
         );
-
-        // console.log(`Remaining time: ${remainingTime}`);
 
         this.broadcastTimerUpdate(breakoutRoomId, roundTimer);
 

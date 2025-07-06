@@ -3,6 +3,7 @@ import { UserData } from "../types/types";
 import { verifyJwtToken, UserTokenData } from "../utils/auth";
 import { GameManager } from "../classes/GameManager";
 import { parseRoomId } from "../utils/utils";
+import { Student } from "../classes/users/Student";
 
 export class SocketManager {
   public connections: Map<string, string> = new Map(); // socket.id : userId
@@ -91,21 +92,21 @@ export class SocketManager {
             }
 
             // Check if all players in the game are disconnected
-            let allDisconnected = true;
-            for (const [pid, p] of game.players.entries()) {
-              if (!p.isDisconnected()) {
-                allDisconnected = false;
-                break;
-              }
-            }
+            // let allDisconnected = true;
+            // for (const [pid, p] of game.players.entries()) {
+            //   if (!p.isDisconnected()) {
+            //     allDisconnected = false;
+            //     break;
+            //   }
+            // }
 
-            // If all players are disconnected, remove the game
-            if (allDisconnected) {
-              console.log(
-                `All players disconnected from game in room ${mainRoomId}, removing game`
-              );
-              this.gameManager.removeGame(mainRoomId);
-            }
+            // // If all players are disconnected, remove the game
+            // if (allDisconnected) {
+            //   console.log(
+            //     `All players disconnected from game in room ${mainRoomId}, removing game`
+            //   );
+            //   this.gameManager.removeGame(mainRoomId);
+            // }
           }
         }
       }
@@ -243,11 +244,51 @@ export class SocketManager {
 
       if (wasInGame) {
         console.log(`Reconnecting user ${username} to game in room ${roomId}`);
+
+        // Update the player's socket and connection status
         game.onPlayerReconnect(socket, userId, username);
 
         // If this is a breakout room, join that specific room
         if (roomId !== mainRoomId) {
           socket.join(roomId);
+
+          // Get the room data to send current game state
+          const roomData = game.roomMap.get(roomId);
+          if (roomData) {
+            // Send current round information
+            socket.emit("server:roundStart", {
+              roundNo: roomData.roundNo,
+              roundLength: (game.gameConfigs as any).roundLength,
+            });
+
+            // Send timer updates if active
+            if (roomData.timerActive) {
+              const remainingTime = Math.max(
+                0,
+                Math.floor((roomData.timerEndTime - Date.now()) / 1000)
+              );
+              socket.emit("server:timerUpdate", {
+                remainingTime,
+                active: roomData.timerActive,
+                roundTimer: true,
+              });
+            }
+
+            // TODO: this needs to be updated to be universal for all games
+            // For Cournot game, send game-specific info
+            if (game.constructor.name === "CournotGame") {
+              game.sendGameInfoToStudent(socket);
+
+              // If player had made a move in the current round, restore it
+              const player = game.players.get(userId);
+              if (player && player instanceof Student) {
+                const userMove = roomData.userMoves.get(player as Student);
+                if (userMove !== undefined) {
+                  socket.emit("server:moveRestored", { action: userMove });
+                }
+              }
+            }
+          }
         }
 
         // Emit a reconnection event to the client

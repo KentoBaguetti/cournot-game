@@ -129,12 +129,31 @@ export default function CournotGamePage() {
       }
     });
 
+    // Handle reconnection and restore previous move
+    socket.on("server:moveRestored", ({ action }) => {
+      console.log("Restored previous move:", action);
+      setUserQuantity(Number(action));
+      setIsReady(true);
+    });
+
+    // Handle game reconnection event
+    socket.on("game:reconnected", (data) => {
+      console.log("Reconnected to game:", data);
+      // Request game data if needed
+      if (!recievedGameData) {
+        socket.emit("player:getGameData");
+        setRecievedGameData(true);
+      }
+    });
+
     // cleanup
     return () => {
       socket.off("server:cournotInfo");
       socket.off("server:userRoundEnd");
       socket.off("server:roundStart");
       socket.off("server:timerUpdate");
+      socket.off("server:moveRestored");
+      socket.off("game:reconnected");
     };
   }, [
     socket,

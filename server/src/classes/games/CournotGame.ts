@@ -629,4 +629,57 @@ export class CournotGame extends BaseGame {
       }
     }
   }
+
+  async onPlayerReconnect(
+    socket: Socket,
+    userId: string,
+    username: string
+  ): Promise<void> {
+    super.onPlayerReconnect(socket, userId, username);
+
+    const player = this.players.get(userId);
+
+    // If this is a student in a breakout room, we need additional handling
+    if (player instanceof Student) {
+      const breakoutRoomId = (player as Student).getBreakoutRoomId();
+
+      if (breakoutRoomId) {
+        // Make sure the socket joins the breakout room
+        socket.join(breakoutRoomId);
+
+        // Send game info to the reconnected player
+        this.sendGameInfoToStudent(socket);
+
+        // Get room data
+        const roomData = this.roomMap.get(breakoutRoomId);
+        if (roomData) {
+          // Send current round state
+          socket.emit("server:roundStart", {
+            roundNo: roomData.roundNo,
+            roundLength: (this.gameConfigs as CournotGameConfigs).roundLength,
+          });
+
+          // If there's an active timer, send its state
+          if (roomData.timerActive) {
+            const remainingTime = Math.max(
+              0,
+              Math.floor((roomData.timerEndTime - Date.now()) / 1000)
+            );
+
+            socket.emit("server:timerUpdate", {
+              remainingTime,
+              active: roomData.timerActive,
+              roundTimer: true,
+            });
+          }
+
+          // If the player had made a move in the current round, restore it
+          const userMove = roomData.userMoves.get(player as Student);
+          if (userMove !== undefined) {
+            socket.emit("server:moveRestored", { action: userMove });
+          }
+        }
+      }
+    }
+  }
 }

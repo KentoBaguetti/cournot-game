@@ -16,6 +16,15 @@ export interface TokenPayload {
   lastRoom?: string;
 }
 
+export interface PlayerRoundHistoryItem {
+  round: number;
+  totalProduction: number;
+  yourProduction: number;
+  marketPrice: number;
+  costPerBarrel: number;
+  yourProfit: number;
+}
+
 export interface BreakoutRoomData {
   users: Student[]; // since only students will be playing
   userMoves: Map<Student, string | number>; // student : move
@@ -23,6 +32,7 @@ export interface BreakoutRoomData {
   roundNo: number;
   roundHistory: Map<number, Map<Student, Map<string, number | string>>>; // stored info for each user roundNo : Student : quantity/move name : value
   roomHistory: Map<number, Map<string, number | string>>; // stored info for each room roundNo : total production, market price, cost per unit, your profit
+  playerRoundHistory: Map<string, PlayerRoundHistoryItem[]>; // userId : array of round history items
   timerActive: boolean;
   timerEndTime: number;
   timerInterval?: NodeJS.Timeout;
