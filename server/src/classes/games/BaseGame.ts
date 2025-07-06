@@ -294,8 +294,15 @@ export abstract class BaseGame {
       clearInterval(roomData.timerInterval);
     }
 
+    let endTime = 0;
+    if (roundTimer) {
+      endTime = Date.now() + durationMinutes * 60 * 1000;
+    } else {
+      endTime = Date.now() + 15 * 1000;
+    }
+
     // dev timer: 10 seconds
-    const endTime = Date.now() + 10 * 1000;
+    // const endTime = Date.now() + 10 * 1000;
 
     roomData.timerEndTime = endTime;
     roomData.timerActive = true;
