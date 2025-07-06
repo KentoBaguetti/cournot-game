@@ -2,6 +2,7 @@ import { Server, Socket } from "socket.io";
 import { UserData } from "../types/types";
 import { verifyJwtToken, UserTokenData } from "../utils/auth";
 import { GameManager } from "../classes/GameManager";
+import { parseRoomId } from "../utils/utils";
 
 export class SocketManager {
   public connections: Map<string, string> = new Map(); // socket.id : userId
@@ -60,10 +61,17 @@ export class SocketManager {
       const roomId = socket.roomId;
       if (roomId) {
         // Get the main room ID if this is a breakout room
-        const mainRoomId = roomId.includes("_") ? roomId.split("_")[0] : roomId;
+        const mainRoomId = parseRoomId(roomId);
         const game = this.gameManager.getGame(mainRoomId);
 
         if (game) {
+          // send the updated rooms and players to the game dashboard
+          const updatedRoomsAndPlayersObj = game?.listRoomsAndPlayers();
+          this.io
+            .to(mainRoomId)
+            .emit("server:listRoomsAndPlayers", updatedRoomsAndPlayersObj);
+          console.log("SENT UPDATED ROOMS AND PLAYERS TO GAME DASHBOARD");
+
           // Mark player as disconnected
           const player = game.players.get(userId);
           if (player) {
@@ -226,7 +234,7 @@ export class SocketManager {
     roomId: string
   ): void {
     // Handle main room vs breakout room
-    const mainRoomId = roomId.includes("_") ? roomId.split("_")[0] : roomId;
+    const mainRoomId = parseRoomId(roomId);
     const game = this.gameManager.getGame(mainRoomId);
 
     if (game) {
