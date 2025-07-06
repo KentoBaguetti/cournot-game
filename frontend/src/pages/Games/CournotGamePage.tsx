@@ -83,6 +83,7 @@ export default function CournotGamePage() {
         individualProductCost,
         marketPrice,
         userQuantity,
+        history,
       }) => {
         setUserProfit(userProfit);
         setUserQuantity(userQuantity);
@@ -90,26 +91,40 @@ export default function CournotGamePage() {
         setPrevRoundNo(roundNo);
         setRoomMarketPrice(marketPrice);
 
-        setRoundHistory((prevHistory) => {
-          const roundExists = prevHistory.some(
-            (item) => item.round === roundNo
-          );
-          if (roundExists) return prevHistory;
+        // Use history from server if available
+        if (history) {
+          setRoundHistory(history);
+        } else {
+          // Fallback to the old method if server doesn't provide history
+          setRoundHistory((prevHistory) => {
+            const roundExists = prevHistory.some(
+              (item) => item.round === roundNo
+            );
+            if (roundExists) return prevHistory;
 
-          const newHistoryItem: RoundHistoryItem = {
-            round: roundNo,
-            totalProduction: totalQuantity,
-            yourProduction: userQuantity,
-            marketPrice: marketPrice,
-            costPerBarrel: individualProductCost,
-            yourProfit: userProfit,
-          };
+            const newHistoryItem: RoundHistoryItem = {
+              round: roundNo,
+              totalProduction: totalQuantity,
+              yourProduction: userQuantity,
+              marketPrice: marketPrice,
+              costPerBarrel: individualProductCost,
+              yourProfit: userProfit,
+            };
 
-          return [...prevHistory, newHistoryItem];
-        });
+            return [...prevHistory, newHistoryItem];
+          });
+        }
+
         setShowEndModal(true);
       }
     );
+
+    // Handle server sending round history (e.g., after reconnect)
+    socket.on("server:roundHistory", ({ history }) => {
+      if (history && Array.isArray(history)) {
+        setRoundHistory(history);
+      }
+    });
 
     socket.on("server:roundStart", ({ roundNo }) => {
       setRoundNo(roundNo);
@@ -154,6 +169,7 @@ export default function CournotGamePage() {
       socket.off("server:timerUpdate");
       socket.off("server:moveRestored");
       socket.off("game:reconnected");
+      socket.off("server:roundHistory");
     };
   }, [
     socket,

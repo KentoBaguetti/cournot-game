@@ -81,6 +81,7 @@ export class CournotGame extends BaseGame {
           roundNo: 1,
           roundHistory: new Map(),
           roomHistory: new Map(),
+          playerRoundHistory: new Map(),
           timerActive: false,
           timerEndTime: 0,
           timerInterval: undefined,
@@ -532,6 +533,8 @@ export class CournotGame extends BaseGame {
     // send data to each user
     for (const user of roomData.users) {
       const userProfit = this.calculateProfitForFirm(user.userId);
+      const playerHistory = roomData.playerRoundHistory.get(user.userId) || [];
+
       this.io.to(user.getSocket().id).emit("server:userRoundEnd", {
         userProfit,
         userQuantity: roomData.userMoves.get(user),
@@ -543,6 +546,7 @@ export class CournotGame extends BaseGame {
         monopolyProfit: this.calculateMonopolyProfit(),
         totalQuantity: this.getTotalRoomQuantity(breakoutRoomId),
         individualProductCost: (this.gameConfigs as CournotGameConfigs).z,
+        history: playerHistory,
       });
     }
 
@@ -591,21 +595,20 @@ export class CournotGame extends BaseGame {
       roomData.roomHistory.set(roomData.roundNo, new Map());
     }
 
+    // Initialize playerRoundHistory if it doesn't exist
+    if (!roomData.playerRoundHistory) {
+      roomData.playerRoundHistory = new Map();
+    }
+
     // set for the entire room
     const roomEndRoundData: Map<string, number | string> = new Map();
-    roomEndRoundData.set(
-      "totalQuantity",
-      this.getTotalRoomQuantity(breakoutRoomId)
-    );
-    roomEndRoundData.set(
-      "marketPrice",
-      this.calculateMarketPriceForRoom(breakoutRoomId)
-    );
-    roomEndRoundData.set(
-      "costPerUnit",
-      (this.gameConfigs as CournotGameConfigs).z
-    );
+    const totalQuantity = this.getTotalRoomQuantity(breakoutRoomId);
+    const marketPrice = this.calculateMarketPriceForRoom(breakoutRoomId);
+    const costPerUnit = (this.gameConfigs as CournotGameConfigs).z;
 
+    roomEndRoundData.set("totalQuantity", totalQuantity);
+    roomEndRoundData.set("marketPrice", marketPrice);
+    roomEndRoundData.set("costPerUnit", costPerUnit);
     roomEndRoundData.set("monopolyProfit", this.calculateMonopolyProfit());
 
     roomData.roomHistory.set(roomData.roundNo, roomEndRoundData);
@@ -625,6 +628,25 @@ export class CournotGame extends BaseGame {
           const userEndRoundData: Map<string, number | string> = new Map();
           userEndRoundData.set("move", quantity);
           roundData.set(user, userEndRoundData);
+
+          // Calculate user profit
+          const userProfit = this.calculateProfitForFirm(user.userId);
+
+          // Store in playerRoundHistory
+          if (!roomData.playerRoundHistory.has(user.userId)) {
+            roomData.playerRoundHistory.set(user.userId, []);
+          }
+
+          const historyItem = {
+            round: roomData.roundNo,
+            totalProduction: totalQuantity,
+            yourProduction: quantity as number,
+            marketPrice: marketPrice as number,
+            costPerBarrel: costPerUnit as number,
+            yourProfit: userProfit,
+          };
+
+          roomData.playerRoundHistory.get(user.userId)?.push(historyItem);
         }
       }
     }
@@ -677,6 +699,15 @@ export class CournotGame extends BaseGame {
           const userMove = roomData.userMoves.get(player as Student);
           if (userMove !== undefined) {
             socket.emit("server:moveRestored", { action: userMove });
+          }
+
+          // Send the player's round history
+          if (
+            roomData.playerRoundHistory &&
+            roomData.playerRoundHistory.has(userId)
+          ) {
+            const playerHistory = roomData.playerRoundHistory.get(userId) || [];
+            socket.emit("server:roundHistory", { history: playerHistory });
           }
         }
       }
