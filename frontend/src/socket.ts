@@ -13,6 +13,13 @@ export const SocketContext = createContext<Socket | null>(null);
 
 export const useSocket = () => useContext(SocketContext);
 
+export const leaveGame = (socket: Socket | null, roomId: string) => {
+  if (!socket) return;
+
+  socket.emit("game:leave", { roomId });
+  console.log(`Emitted game:leave for room ${roomId}`);
+};
+
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {

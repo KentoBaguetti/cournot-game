@@ -575,39 +575,61 @@ io.on("connection", (socket: Socket) => {
     const mainRoomId = parseRoomId(roomId);
     const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
     if (game) {
-      game.onPlayerDisconnect(socket, userId);
+      // Remove player from game
+      game.onPlayerLeave(socket);
+
+      // Leave the socket room
+      socket.leave(mainRoomId);
+      if (roomId !== mainRoomId) {
+        socket.leave(roomId); // Leave breakout room if applicable
+      }
 
       // Update room data
       const room = roomStore.get(mainRoomId);
-      room?.players.delete(userId);
+      if (room) {
+        room.players.delete(userId);
+      }
 
-      // update the socket instance
+      // Clear the user's room information
+      socketManager.clearUserRoom(userId);
       socket.roomId = "";
+
+      // Update the JWT token to remove room information
+      if (socket.handshake.headers.cookie) {
+        const cookies = socket.handshake.headers.cookie
+          .split(";")
+          .reduce((acc, cookie) => {
+            const [key, value] = cookie.trim().split("=");
+            acc[key] = value;
+            return acc;
+          }, {} as Record<string, string>);
+
+        if (cookies.auth_token) {
+          // Create a mock request and response to update the token
+          const mockReq = {
+            cookies: { auth_token: cookies.auth_token },
+          } as unknown as Request;
+          const mockRes = {
+            cookie: (name: string, value: string, options: any) => {
+              socket.emit("auth:cookie_update", { name, value, options });
+            },
+            clearCookie: () => {},
+          } as unknown as Response;
+
+          updateTokenRoom(mockReq, mockRes, undefined); // Set roomId to undefined
+        }
+      }
 
       console.log(`User ${userData.nickname} left game in room ${roomId}`);
 
       // Broadcast updated player list to all clients in the room
       io.to(mainRoomId).emit("server:listUsers", game.getPlayers());
-
-      // Check if the game has any connected players
-      let hasConnectedPlayers = false;
-      for (const [pid, player] of game.players.entries()) {
-        if (!player.isDisconnected()) {
-          hasConnectedPlayers = true;
-          break;
-        }
-      }
-
-      // If no connected players, remove the game
-      if (!hasConnectedPlayers) {
-        console.log(
-          `No connected players left in game ${mainRoomId}, removing game`
-        );
-        gameManager.removeGame(mainRoomId);
-        roomStore.delete(mainRoomId);
-      }
+      io.to(mainRoomId).emit(
+        "server:listRoomsAndPlayers",
+        game.listRoomsAndPlayers()
+      );
     } else {
-      console.log(`Game with room id "${roomId}" does not exist`);
+      console.log(`Game with room id "${mainRoomId}" does not exist`);
     }
   });
 

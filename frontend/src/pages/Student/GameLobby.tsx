@@ -54,6 +54,8 @@ export default function GameLobby() {
       showHomeButton={true}
       withConfirmation={true}
       confirmationMessage="Are you sure you want to leave the game lobby? You will be removed from the game."
+      roomId={roomCode}
+      leaveGameOnNavigate={true}
     >
       <div className="max-w-6xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="max-w-lg mx-auto text-center mb-8">

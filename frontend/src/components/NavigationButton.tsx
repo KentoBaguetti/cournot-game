@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "./Button";
+import { useSocket, leaveGame } from "../socket";
 
 interface NavigationButtonProps {
   type: "back" | "home";
@@ -10,6 +11,8 @@ interface NavigationButtonProps {
   variant?: "primary" | "secondary" | "success" | "warning" | "danger";
   size?: "sm" | "md" | "lg";
   className?: string;
+  roomId?: string;
+  leaveGameOnNavigate?: boolean;
 }
 
 export const NavigationButton: React.FC<NavigationButtonProps> = ({
@@ -20,13 +23,20 @@ export const NavigationButton: React.FC<NavigationButtonProps> = ({
   variant = "secondary",
   size = "sm",
   className = "",
+  roomId,
+  leaveGameOnNavigate = false,
 }) => {
   const navigate = useNavigate();
+  const socket = useSocket();
 
   const handleNavigation = () => {
     if (withConfirmation) {
       const confirmed = window.confirm(confirmationMessage);
       if (!confirmed) return;
+    }
+
+    if (leaveGameOnNavigate && roomId) {
+      leaveGame(socket, roomId);
     }
 
     if (type === "back") {

@@ -10,6 +10,8 @@ interface LayoutProps {
   showHomeButton?: boolean;
   withConfirmation?: boolean;
   confirmationMessage?: string;
+  roomId?: string;
+  leaveGameOnNavigate?: boolean;
 }
 
 export const Layout: React.FC<LayoutProps> = ({
@@ -21,6 +23,8 @@ export const Layout: React.FC<LayoutProps> = ({
   showHomeButton = true,
   withConfirmation = false,
   confirmationMessage = "Are you sure you want to navigate away from this page?",
+  roomId,
+  leaveGameOnNavigate = false,
 }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
@@ -53,6 +57,8 @@ export const Layout: React.FC<LayoutProps> = ({
                     type="back"
                     withConfirmation={withConfirmation}
                     confirmationMessage={confirmationMessage}
+                    roomId={roomId}
+                    leaveGameOnNavigate={leaveGameOnNavigate}
                   />
                 )}
                 {showHomeButton && (
@@ -61,6 +67,8 @@ export const Layout: React.FC<LayoutProps> = ({
                     withConfirmation={withConfirmation}
                     confirmationMessage={confirmationMessage}
                     navigateLocation={navigateLocation}
+                    roomId={roomId}
+                    leaveGameOnNavigate={leaveGameOnNavigate}
                   />
                 )}
               </div>
