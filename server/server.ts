@@ -225,6 +225,37 @@ app.get("/auth/me", isAuthenticated, (req, res) => {
   });
 });
 
+app.post("/auth/setToken", isAuthenticated, (req, res) => {
+  const token = req.cookies.auth_token;
+  const newRoomId = req.body.roomId;
+
+  if (!token) {
+    return res.status(401).json({ success: false, error: "No token provided" });
+  }
+
+  if (!newRoomId) {
+    return res
+      .status(400)
+      .json({ success: false, error: "No roomId provided" });
+  }
+
+  const userData = verifyJwtToken(token);
+
+  if (!userData || userData instanceof Error) {
+    return res.status(401).json({ success: false, error: "Invalid token" });
+  }
+
+  const cleanUserData: UserTokenData = {
+    userId: userData.userId,
+    username: userData.username,
+    roomId: newRoomId,
+  };
+
+  const newToken = setTokenCookie(res, cleanUserData);
+
+  res.json({ success: true, token: newToken });
+});
+
 // expose the jwt token to the frontend
 app.get("/auth/token", (req, res) => {
   const token = req.cookies.auth_token;
@@ -245,6 +276,7 @@ app.get("/game/getGames", isAuthenticated, (req, res) => {
 });
 
 // endpoint to check all running game instances in the server
+// test endpoint
 app.get("/auth/games", (req, res) => {
   const gamesMap = gameManager.getGames();
 

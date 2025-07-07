@@ -66,13 +66,6 @@ export class SocketManager {
         const game = this.gameManager.getGame(mainRoomId);
 
         if (game) {
-          // send the updated rooms and players to the game dashboard
-          const updatedRoomsAndPlayersObj = game?.listRoomsAndPlayers();
-          this.io
-            .to(mainRoomId)
-            .emit("server:listRoomsAndPlayers", updatedRoomsAndPlayersObj);
-          console.log("SENT UPDATED ROOMS AND PLAYERS TO GAME DASHBOARD");
-
           // Mark player as disconnected
           const player = game.players.get(userId);
           if (player) {
@@ -91,22 +84,12 @@ export class SocketManager {
               });
             }
 
-            // Check if all players in the game are disconnected
-            // let allDisconnected = true;
-            // for (const [pid, p] of game.players.entries()) {
-            //   if (!p.isDisconnected()) {
-            //     allDisconnected = false;
-            //     break;
-            //   }
-            // }
-
-            // // If all players are disconnected, remove the game
-            // if (allDisconnected) {
-            //   console.log(
-            //     `All players disconnected from game in room ${mainRoomId}, removing game`
-            //   );
-            //   this.gameManager.removeGame(mainRoomId);
-            // }
+            // send the updated rooms and players to the game dashboard
+            console.log(`Main room id: ${mainRoomId}`);
+            this.io
+              .to(mainRoomId)
+              .emit("server:listRoomsAndPlayers", game.listRoomsAndPlayers());
+            console.log("SENT UPDATED ROOMS AND PLAYERS TO GAME DASHBOARD");
           }
         }
       }

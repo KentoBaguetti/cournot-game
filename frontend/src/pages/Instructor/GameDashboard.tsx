@@ -63,21 +63,31 @@ export default function GameDashboard() {
     socket.emit("get:listRoomsAndPlayers");
 
     // listeners
-    socket.on("server:listUsers", (data) => {
+    socket.on("server:listUsers", async (data) => {
       setPlayersArr(data);
     });
-    socket.on("game:info", (data) => {
+    socket.on("game:info", async (data) => {
       setRoomCode(data.roomId);
       setGameType(data.gameType);
+      try {
+        const res = await axios.post(
+          `${config.apiUrl}/auth/setToken`,
+          {
+            roomId: data.roomId,
+          },
+          {
+            withCredentials: true,
+          }
+        );
+        console.log(res.data);
+      } catch (error) {
+        console.error("Error setting token:", error);
+      }
     });
     socket.on("server:listRoomsAndPlayers", (data) => {
       console.log(`Type: ${typeof data}`);
       setRoomsAndPlayers(data);
     });
-
-    if (startGame) {
-      console.log("Starting game");
-    }
 
     return () => {
       socket.off("server:listUsers");

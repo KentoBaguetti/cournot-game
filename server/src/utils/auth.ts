@@ -54,8 +54,6 @@ const verifyJwtToken = (token: string): UserTokenData | Error | null => {
 const setTokenCookie = (res: Response, userData: UserTokenData) => {
   const token = generateJwtToken(userData);
 
-  console.log("Setting auth_token cookie with secure=true, sameSite=none");
-
   // Set HTTP-only cookie that expires when the JWT expires
   res.cookie("auth_token", token, {
     httpOnly: true,
