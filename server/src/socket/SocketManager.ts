@@ -117,31 +117,6 @@ export class SocketManager {
           if (game && game.playerCount === 0) {
             this.gameManager.removeGame(roomId);
           }
-
-          // console.log("--------------------------------");
-          // console.log(`removed user ${userId} from userStore and userRooms`);
-          // console.log(
-          //   `user map: ${JSON.stringify(
-          //     Object.fromEntries(this.userStore),
-          //     null,
-          //     2
-          //   )}`
-          // );
-          // console.log(
-          //   `socket store: ${JSON.stringify(
-          //     Object.fromEntries(this.connections),
-          //     null,
-          //     2
-          //   )}`
-          // );
-          // console.log(
-          //   `user rooms: ${JSON.stringify(
-          //     Object.fromEntries(this.userRooms),
-          //     null,
-          //     2
-          //   )}`
-          // );
-          // console.log("--------------------------------");
         }
       }, 5 * 60 * 1000); // 5 min timeout callback func
     } else {
