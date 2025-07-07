@@ -572,7 +572,7 @@ io.on("connection", (socket: Socket) => {
       return;
     }
 
-    const mainRoomId = roomId.length > 6 ? roomId.split("_")[0] : roomId;
+    const mainRoomId = parseRoomId(roomId);
     const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
     if (game) {
       game.onPlayerDisconnect(socket, userId);
