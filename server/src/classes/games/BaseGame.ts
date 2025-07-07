@@ -7,7 +7,7 @@ import { Instructor } from "../users/Instructor";
 import { SocketManager } from "../../socket/SocketManager";
 import { BreakoutRoomData } from "../../types/types";
 import { GameConfigs } from "../../types/types";
-
+import { parseRoomId } from "../../utils/utils";
 const isDev = process.env.NODE_ENV === "dev";
 
 /**
@@ -83,6 +83,7 @@ export abstract class BaseGame {
       .emit("player:connect", `Player "${username}" has connected`);
   }
 
+  // this function is depreciated and should be removed later on
   onPlayerDisconnect(socket: Socket, userId: string): void {
     socket.leave(this.roomId);
     socket.roomId = "";
@@ -112,6 +113,38 @@ export abstract class BaseGame {
         });
       }
     }
+  }
+
+  onPlayerLeave(socket: Socket) {
+    const userId = socket.userId;
+    if (!userId) {
+      console.log(`User "${socket.userId}" has no userId`);
+      return;
+    }
+
+    const player = this.players.get(userId);
+    if (!player) {
+      console.log(`Player "${userId}" not found`);
+      return;
+    }
+
+    this.players.delete(userId);
+    this.playerCount--;
+
+    const breakoutRoomId = (player as Student).getBreakoutRoomId();
+    if (breakoutRoomId) {
+      const roomData = this.roomMap.get(breakoutRoomId);
+      if (!roomData) {
+        console.log(`Room data not found for room: ${breakoutRoomId}`);
+        return;
+      }
+
+      roomData.users.splice(roomData.users.indexOf(player as Student), 1);
+      this.roomMap.set(breakoutRoomId, roomData);
+    }
+
+    socket.leave(this.roomId);
+    socket.roomId = "";
   }
 
   onPlayerReconnect(socket: Socket, userId: string, username: string): void {

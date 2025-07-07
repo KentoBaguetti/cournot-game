@@ -281,17 +281,17 @@ export class SocketManager {
    * Clear user's room information
    */
   clearUserRoom(userId: string): void {
-    // Clear in userData
+    // Remove the room association
+    this.userRooms.delete(userId);
+
+    // Update in userData
     const userData = this.userStore.get(userId);
     if (userData) {
       userData.lastRoom = undefined;
       this.userStore.set(userId, userData);
     }
 
-    // Clear in persisted rooms
-    this.userRooms.delete(userId);
-
-    // Clear in all active sockets for this user
+    // Update all active sockets for this user
     const socketIds = this.getSocketIds(userId);
     for (const socketId of socketIds) {
       const socket = this.io.sockets.sockets.get(socketId);
