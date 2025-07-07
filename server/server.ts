@@ -713,56 +713,7 @@ io.on("connection", (socket: Socket) => {
   });
 
   socket.on("disconnect", () => {
-    // Handle socket disconnection using the SocketManager
-    // console.log("--------------------------------");
-    // console.log(
-    //   `Socket disconnected "${socket.id}". Called the disconnect endpoint`
-    // );
-    // console.log(
-    //   `user map: ${JSON.stringify(
-    //     Object.fromEntries(socketManager.userStore),
-    //     null,
-    //     2
-    //   )}`
-    // );
-    // console.log(
-    //   `socket store: ${JSON.stringify(
-    //     Object.fromEntries(socketManager.connections),
-    //     null,
-    //     2
-    //   )}`
-    // );
-    // console.log(
-    //   `user rooms: ${JSON.stringify(
-    //     Object.fromEntries(socketManager.userRooms),
-    //     null,
-    //     2
-    //   )}`
-    // );
     socketManager.handleDisconnection(socket);
-    // console.log("--------------------------------");
-    // console.log(
-    //   `user map: ${JSON.stringify(
-    //     Object.fromEntries(socketManager.userStore),
-    //     null,
-    //     2
-    //   )}`
-    // );
-    // console.log(
-    //   `socket store: ${JSON.stringify(
-    //     Object.fromEntries(socketManager.connections),
-    //     null,
-    //     2
-    //   )}`
-    // );
-    // console.log(
-    //   `user rooms: ${JSON.stringify(
-    //     Object.fromEntries(socketManager.userRooms),
-    //     null,
-    //     2
-    //   )}`
-    // );
-    // console.log("--------------------------------");
   });
 
   ////////////////////////////////////////////////
