@@ -105,11 +105,15 @@ const clearTokenCookie = (res: Response) => {
 const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
   const token = req.cookies.auth_token;
   if (!token) {
-    return res.status(401).json({ error: "No token found" });
+    return res
+      .status(401)
+      .json({ authenticated: false, error: "No token found" });
   }
   const decodedToken = verifyJwtToken(token);
   if (!decodedToken || decodedToken instanceof Error) {
-    return res.status(401).json({ error: "Invalid token" });
+    return res
+      .status(401)
+      .json({ authenticated: false, error: "Invalid token" });
   }
   next();
 };

@@ -304,6 +304,11 @@ app.post("/auth/checkTokenRoomId", (req, res) => {
   return res.json({ success: true });
 });
 
+// check if the user is authenticated, this endpoint will be used for protected routes
+app.get("/auth/check", isAuthenticated, (req, res) => {
+  res.json({ authenticated: true });
+});
+
 //////////////////////////////////////////////////////////////////
 // socket.io routes + middleware
 //////////////////////////////////////////////////////////////////
