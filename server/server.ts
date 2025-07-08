@@ -290,6 +290,25 @@ app.get("/auth/games", (req, res) => {
   res.json({ games });
 });
 
+app.post("/auth/checkTokenRoomId", (req, res) => {
+  const token = req.cookies.auth_token;
+  const roomId = req.body.roomId;
+  if (!token) {
+    return res.json({ success: false, error: "No token provided" });
+  }
+  const tokenData = verifyJwtToken(token);
+
+  if (!tokenData || tokenData instanceof Error) {
+    return res.json({ success: false, error: "Invalid token" });
+  }
+
+  if (tokenData.roomId !== roomId) {
+    return res.json({ success: false, error: "Room Ids do not match" });
+  }
+
+  return res.json({ success: true });
+});
+
 //////////////////////////////////////////////////////////////////
 // socket.io routes + middleware
 //////////////////////////////////////////////////////////////////
@@ -483,12 +502,12 @@ io.on("connection", (socket: Socket) => {
     }
 
     const username = userData.nickname;
-    const mainRoomId = roomId.length > 6 ? roomId.split("_")[0] : roomId;
+    const mainRoomId = parseRoomId(roomId);
     const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
 
     if (game) {
       // Check if the socket is already in the room to prevent duplicate joins
-      if (socket.rooms.has(mainRoomId)) {
+      if (socket.rooms.has(roomId)) {
         console.log(`Socket ${socket.id} is already in room ${mainRoomId}`);
 
         // Just send the current player list without re-joining

@@ -20,16 +20,29 @@ export default function StudentJoin() {
     setError(null);
 
     try {
-      // Authenticate to get JWT
-      await axios.post(
-        `${config.apiUrl}/auth/login`,
-        {
-          username,
-          roomId: code,
-        },
+      // check for cookie
+      const cookieExists = await axios.post(
+        `${config.apiUrl}/auth/checkTokenRoomId`,
+        { roomId: code },
         { withCredentials: true }
       );
 
+      // Authenticate to get JWT
+
+      // if the cookie does not exist or the room code not not match, set a new token, otherwise dont do shit
+      if (!cookieExists.data.success) {
+        await axios.post(
+          `${config.apiUrl}/auth/login`,
+          {
+            username,
+            roomId: code,
+          },
+          { withCredentials: true }
+        );
+        console.log("cookie DNE");
+      }
+
+      console.log("cookie exists");
       // If we're already in the SocketProvider context, we can navigate directly
       navigate("/student/gameLobby", { state: { roomCode: code } });
     } catch (error) {
