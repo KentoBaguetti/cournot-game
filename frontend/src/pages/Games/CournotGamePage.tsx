@@ -219,7 +219,7 @@ export default function CournotGamePage() {
 
   return (
     <Layout
-      title="Oil Barrel Production"
+      title="Cournot Competition Simulation"
       showBackButton={false}
       showHomeButton={true}
       withConfirmation={true}
@@ -441,8 +441,8 @@ export default function CournotGamePage() {
 
                 <div className="space-y-4">
                   <p className="text-sm text-gray-600">
-                    Adjust the total market production to see how it affects the
-                    market price.
+                    Adjust the total market production of oil barrels to see how
+                    it affects the market price.
                   </p>
 
                   <div className="flex items-center justify-between mb-2">
