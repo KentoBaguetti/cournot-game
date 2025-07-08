@@ -40,6 +40,10 @@ export default function StudentJoin() {
           { withCredentials: true }
         );
         console.log("cookie DNE");
+      } else {
+        await axios.post(`${config.apiUrl}/auth/setToken`, {
+          withCredentials: true,
+        });
       }
 
       console.log("cookie exists");

@@ -233,22 +233,17 @@ app.post("/auth/setToken", isAuthenticated, (req, res) => {
     return res.status(401).json({ success: false, error: "No token provided" });
   }
 
-  if (!newRoomId) {
-    return res
-      .status(400)
-      .json({ success: false, error: "No roomId provided" });
-  }
-
   const userData = verifyJwtToken(token);
 
   if (!userData || userData instanceof Error) {
     return res.status(401).json({ success: false, error: "Invalid token" });
   }
 
+  // only set a new roomId if provided, otherwise, keep the old one and update the token expiry
   const cleanUserData: UserTokenData = {
     userId: userData.userId,
     username: userData.username,
-    roomId: newRoomId,
+    roomId: newRoomId || userData.roomId,
   };
 
   const newToken = setTokenCookie(res, cleanUserData);
