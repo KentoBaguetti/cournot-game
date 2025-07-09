@@ -24,6 +24,7 @@ interface UserTokenData {
   username: string;
   roomId?: string;
   isHost?: boolean; // TODO:will not be used until the db is implemented
+  exp?: number; // Optional expiration time
 }
 
 // Default JWT secret to use if not provided in environment variables
@@ -31,7 +32,11 @@ const DEFAULT_JWT_SECRET = "default_jwt_secret_for_development_only";
 
 const generateJwtToken = (userData: UserTokenData) => {
   const jwtSecret = process.env.JWT_SECRET || DEFAULT_JWT_SECRET;
-  const token = jwt.sign(userData, jwtSecret, {
+
+  // Remove exp property if it exists to avoid conflicts with expiresIn option
+  const { exp, ...userDataWithoutExp } = userData;
+
+  const token = jwt.sign(userDataWithoutExp, jwtSecret, {
     expiresIn: "1h",
   });
   return token;
@@ -78,7 +83,17 @@ const updateTokenRoom = (
   res: Response,
   roomId: string | undefined
 ) => {
-  const token = req.cookies.auth_token;
+  // First try to get token from cookie
+  let token = req.cookies.auth_token;
+
+  // If no token in cookie, check Authorization header
+  if (!token && req.headers.authorization) {
+    const authHeader = req.headers.authorization;
+    if (authHeader.startsWith("Bearer ")) {
+      token = authHeader.substring(7);
+    }
+  }
+
   if (!token) {
     return null;
   }
@@ -89,8 +104,10 @@ const updateTokenRoom = (
   }
 
   // Update the room information
+  // Make sure to create a new object and remove the exp property
+  const { exp, ...userDataWithoutExp } = userData;
   const updatedUserData: UserTokenData = {
-    ...userData,
+    ...userDataWithoutExp,
     roomId,
   };
 
@@ -104,13 +121,24 @@ const clearTokenCookie = (res: Response) => {
 
 // express middleware to check if the user is authenticated
 const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.cookies.auth_token;
+  // First try to get token from cookie
+  let token = req.cookies.auth_token;
+
+  // If no token in cookie, check Authorization header
+  if (!token && req.headers.authorization) {
+    const authHeader = req.headers.authorization;
+    if (authHeader.startsWith("Bearer ")) {
+      token = authHeader.substring(7);
+    }
+  }
+
   if (!token) {
-    console.log("Token not found");
+    console.log("Token not found in cookie or Authorization header");
     return res
       .status(401)
       .json({ authenticated: false, error: "No token found" });
   }
+
   const decodedToken = verifyJwtToken(token);
   if (!decodedToken || decodedToken instanceof Error) {
     console.log("Invalid token");
@@ -118,6 +146,7 @@ const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
       .status(401)
       .json({ authenticated: false, error: "Invalid token" });
   }
+
   console.log("token found user verified");
   next();
 };

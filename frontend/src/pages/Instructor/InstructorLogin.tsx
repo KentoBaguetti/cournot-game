@@ -6,6 +6,7 @@ import { Card } from "../../components/Card";
 import { Input } from "../../components/Input";
 import { Button } from "../../components/Button";
 import config from "../../config";
+import { saveToken } from "../../utils/tokenManager";
 
 export default function InstructorLogin() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export default function InstructorLogin() {
 
     try {
       // sets the token as a cookie, no response needed so far
-      await axios.post(
+      const response = await axios.post(
         `${config.apiUrl}/auth/login`,
         {
           username,
@@ -31,6 +32,26 @@ export default function InstructorLogin() {
           withCredentials: true,
         }
       );
+
+      // Save token to localStorage as backup if available
+      if (response.data && response.data.token) {
+        saveToken(response.data.token);
+      } else {
+        // Get token from cookie API and save to localStorage
+        try {
+          const tokenResponse = await axios.get(`${config.apiUrl}/auth/token`, {
+            withCredentials: true,
+          });
+          if (tokenResponse.data && tokenResponse.data.token) {
+            saveToken(tokenResponse.data.token);
+          }
+        } catch (err) {
+          console.error(
+            "Could not retrieve token for localStorage backup",
+            err
+          );
+        }
+      }
 
       navigate("/instructorDashboard");
     } catch (error) {

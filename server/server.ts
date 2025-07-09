@@ -170,9 +170,10 @@ app.post("/auth/login", (req, res) => {
   // Set the token as an HTTP-only cookie
   const token = setTokenCookie(res, userData);
 
-  // Return user info (but not the token directly)
+  // Return user info and the token for localStorage backup
   res.json({
     success: true,
+    token, // Include token in response for localStorage
     user: {
       userId,
       username,
@@ -267,6 +268,7 @@ app.get("/auth/token", (req, res) => {
     return res.status(401).json({ success: false, error: "No token provided" });
   }
 
+  // Return the token so it can be stored in localStorage as fallback
   res.json({ success: true, token });
 });
 
@@ -323,7 +325,7 @@ app.get("/auth/checkAuth", isAuthenticated, (req, res) => {
 
 // authentication middleware for socket.io connections
 io.use((socket, next) => {
-  // Try to get token from auth field first (backward compatibility)
+  // Try to get token from auth field first (for localStorage fallback)
   let token = socket.handshake.auth.token;
 
   // If no token in auth, try to get from cookies
@@ -337,12 +339,11 @@ io.use((socket, next) => {
         return acc;
       }, {} as Record<string, string>);
 
-    token = cookies.auth_token;
+    token = cookies["auth_token"];
   }
 
   if (!token) {
-    console.error("No token provided for socket connection");
-    return next(new Error("No token provided for socket connection"));
+    return next(new Error("Authentication error: No token provided"));
   }
 
   const userData = verifyJwtToken(token);
