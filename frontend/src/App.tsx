@@ -99,11 +99,9 @@ function App() {
         <Route
           path="/student/gameLobby"
           element={
-            <ProtectedRoute>
-              <SocketProvider>
-                <GameLobby />
-              </SocketProvider>
-            </ProtectedRoute>
+            <SocketProvider>
+              <GameLobby />
+            </SocketProvider>
           }
         />
       </Routes>
