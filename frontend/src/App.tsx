@@ -77,22 +77,18 @@ function App() {
         <Route
           path="/games/jankenpo"
           element={
-            <ProtectedRoute>
-              <SocketProvider>
-                <JanKenPoPage />
-              </SocketProvider>
-            </ProtectedRoute>
+            <SocketProvider>
+              <JanKenPoPage />
+            </SocketProvider>
           }
         />
 
         <Route
           path="/games/cournot"
           element={
-            <ProtectedRoute>
-              <SocketProvider>
-                <CournotGamePage />
-              </SocketProvider>
-            </ProtectedRoute>
+            <SocketProvider>
+              <CournotGamePage />
+            </SocketProvider>
           }
         />
 
