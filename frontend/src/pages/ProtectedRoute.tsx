@@ -27,7 +27,7 @@ export default function ProtectedRoute({
     };
 
     checkAuth();
-  }, []);
+  }, [navigate]);
 
   return authenticated ? children : null;
 }
