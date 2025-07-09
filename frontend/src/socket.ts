@@ -1,4 +1,5 @@
 import { io, Socket } from "socket.io-client";
+import axios from "axios";
 import React, {
   createContext,
   useContext,
@@ -7,7 +8,6 @@ import React, {
   useEffect,
 } from "react";
 import config from "./config";
-import { getToken } from "./utils/tokenManager";
 
 export const SocketContext = createContext<Socket | null>(null);
 
@@ -29,11 +29,18 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     let isMounted = true;
 
+    const fetchTokenData = async () => {
+      const response = await axios.get(`${config.apiUrl}/auth/token`, {
+        withCredentials: true,
+      });
+      const token = response.data.token;
+      return token;
+    };
+
     const initializeSocket = async () => {
       try {
-        // Get token from cookie or localStorage
-        const token = await getToken();
-        if (!token || !isMounted) return;
+        const token = await fetchTokenData();
+        if (!isMounted) return;
 
         const socket = io(config.apiUrl, {
           auth: {
@@ -44,7 +51,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           reconnectionAttempts: Infinity,
           reconnectionDelay: 1000,
           reconnectionDelayMax: 5000,
-          withCredentials: true, // Try cookies first
         });
 
         socketRef.current = socket;
@@ -54,7 +60,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           socket.disconnect();
         };
       } catch (error) {
-        console.error(`Failed to initialize socket: ${error}`);
+        console.error(`Failed to fetch token or initialize socket: ${error}`);
       }
     };
 

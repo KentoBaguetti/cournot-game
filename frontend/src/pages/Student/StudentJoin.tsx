@@ -6,7 +6,6 @@ import { Card } from "../../components/Card";
 import { Input } from "../../components/Input";
 import { Button } from "../../components/Button";
 import config from "../../config";
-import { saveToken } from "../../utils/tokenManager";
 
 export default function StudentJoin() {
   const [username, setUsername] = useState("");
@@ -30,7 +29,7 @@ export default function StudentJoin() {
 
       // if the cookie does not exist or the room code not not match, set a new token, otherwise dont do shit
       if (!cookieExists.data.success) {
-        const response = await axios.post(
+        await axios.post(
           `${config.apiUrl}/auth/login`,
           {
             username,
@@ -38,34 +37,15 @@ export default function StudentJoin() {
           },
           { withCredentials: true }
         );
-
-        // If response contains token, save to localStorage as backup
-        if (response.data && response.data.token) {
-          saveToken(response.data.token);
-        } else {
-          // Get token from cookie API and save to localStorage
-          const tokenResponse = await axios.get(`${config.apiUrl}/auth/token`, {
-            withCredentials: true,
-          });
-          if (tokenResponse.data && tokenResponse.data.token) {
-            saveToken(tokenResponse.data.token);
-          }
-        }
-
         console.log("cookie DNE");
       } else {
-        const response = await axios.post(
+        await axios.post(
           `${config.apiUrl}/auth/setToken`,
           { roomId: code },
           {
             withCredentials: true,
           }
         );
-
-        // Save updated token to localStorage
-        if (response.data && response.data.token) {
-          saveToken(response.data.token);
-        }
       }
 
       console.log("cookie exists");
