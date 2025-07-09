@@ -8,7 +8,16 @@ import { Response, Request, NextFunction } from "express";
 // vars and types
 //////////////////////////////////////////////////////////////////
 
-const isProduction = process.env.NODE_ENV === "production";
+const getCookieOptions = () => {
+  const prod = process.env.NODE_ENV === "production";
+  return {
+    httpOnly: true,
+    secure: prod,
+    sameSite: prod ? "none" : "lax",
+    path: "/",
+    maxAge: 60 * 60 * 1000, // 1 hour in milliseconds
+  } as const;
+};
 
 interface UserTokenData {
   userId: string;
@@ -56,13 +65,7 @@ const setTokenCookie = (res: Response, userData: UserTokenData) => {
   const token = generateJwtToken(userData);
 
   // Set HTTP-only cookie that expires when the JWT expires
-  res.cookie("auth_token", token, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-    path: "/",
-    maxAge: 60 * 60 * 1000, // 1 hour in milliseconds (matching JWT expiry)
-  });
+  res.cookie("auth_token", token, getCookieOptions());
 
   return token;
 };
@@ -96,12 +99,7 @@ const updateTokenRoom = (
 };
 
 const clearTokenCookie = (res: Response) => {
-  res.clearCookie("auth_token", {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-    path: "/",
-  });
+  res.clearCookie("auth_token", getCookieOptions());
 };
 
 // express middleware to check if the user is authenticated
