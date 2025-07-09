@@ -20,7 +20,6 @@ export default function ProtectedRoute({
         });
         setAuthenticated(response.data.authenticated);
       } catch (error) {
-        console.error("Error checking authentication:", error);
         alert("Your session has expired. Please login again."); // TODO: this alert runs twice
         navigate("/");
       }
