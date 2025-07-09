@@ -58,8 +58,9 @@ const setTokenCookie = (res: Response, userData: UserTokenData) => {
   // Set HTTP-only cookie that expires when the JWT expires
   res.cookie("auth_token", token, {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    path: "/",
     maxAge: 60 * 60 * 1000, // 1 hour in milliseconds (matching JWT expiry)
   });
 
@@ -97,8 +98,9 @@ const updateTokenRoom = (
 const clearTokenCookie = (res: Response) => {
   res.clearCookie("auth_token", {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    path: "/",
   });
 };
 
