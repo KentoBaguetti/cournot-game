@@ -1,14 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/Button";
 import { Slider } from "../../components/Slider";
 import { DemandCurve } from "../../components/DemandCurve";
 import { EndOfRoundModal } from "../../components/EndOfRoundModal";
 import { useSocket } from "../../socket";
 import { Layout } from "../../components/Layout";
-import { getToken, saveToken } from "../../utils/tokenManager";
-import axios from "axios";
-import config from "../../config";
 
 interface RoundHistoryItem {
   round: number;
@@ -21,7 +17,6 @@ interface RoundHistoryItem {
 
 export default function CournotGamePage() {
   const socket = useSocket();
-  const navigate = useNavigate();
 
   // values from the backend
   const [userProfit, setUserProfit] = useState<number>(0);
@@ -32,10 +27,11 @@ export default function CournotGamePage() {
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [minutes, setMinutes] = useState<number>(0);
   const [seconds, setSeconds] = useState<number>(0);
+  // const [totalProductionQuantity, setTotalProductionQuantity] =
+  //   useState<number>(0);
   const [numberOfFirms, setNumberOfFirms] = useState<number>(0);
   const [isRoundTimerFlag, setIsRoundTimerFlag] = useState<boolean>(false);
   const [roomMarketPrice, setRoomMarketPrice] = useState<number>(0);
-  const [connectionError, setConnectionError] = useState<string | null>(null);
 
   // game config data
   const [x, setX] = useState<number>(0);
@@ -51,48 +47,6 @@ export default function CournotGamePage() {
   const [showEndModal, setShowEndModal] = useState<boolean>(false);
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
   const [roundHistory, setRoundHistory] = useState<RoundHistoryItem[]>([]);
-
-  // Ensure token is valid on page load and refresh if needed
-  useEffect(() => {
-    const validateAndRefreshToken = async () => {
-      try {
-        // Try to get a fresh token
-        const token = await getToken();
-
-        if (!token) {
-          setConnectionError(
-            "Authentication token not found. Please rejoin the game."
-          );
-          return;
-        }
-
-        // Validate token with the server
-        try {
-          await axios.get(`${config.apiUrl}/auth/me`, {
-            withCredentials: true,
-            headers: {
-              Authorization: token ? `Bearer ${token}` : undefined,
-            },
-          });
-        } catch (error) {
-          console.error("Token validation failed:", error);
-          setConnectionError(
-            "Your session has expired. Redirecting to join page..."
-          );
-
-          // Redirect to join page after a short delay
-          setTimeout(() => {
-            navigate("/student/join");
-          }, 3000);
-        }
-      } catch (error) {
-        console.error("Error validating token:", error);
-        setConnectionError("Authentication error. Please rejoin the game.");
-      }
-    };
-
-    validateAndRefreshToken();
-  }, [navigate]);
 
   useEffect(() => {
     if (!socket) {
@@ -110,33 +64,13 @@ export default function CournotGamePage() {
       setRecievedGameData(true);
     }
 
-    // Handle connection errors
-    socket.on("connect_error", (error) => {
-      console.error("Socket connection error:", error);
-      setConnectionError("Connection error. Attempting to reconnect...");
-    });
-
-    socket.on("disconnect", (reason) => {
-      console.log(`Socket disconnected: ${reason}`);
-      setConnectionError(`Disconnected: ${reason}. Trying to reconnect...`);
-    });
-
-    socket.on("connect", () => {
-      setConnectionError(null);
-
-      // Re-request game data if needed
-      if (!recievedGameData) {
-        socket.emit("player:getGameData");
-        setRecievedGameData(true);
-      }
-    });
-
     //listeners
     socket.on("server:cournotInfo", (data) => {
       console.log("cournot info", data);
       setX(data.x);
       setIndividualProductCost(data.z);
       setNumberOfFirms(data.numberOfFirms);
+      //setTotalProductionQuantity(data.totalProductionQuantity);
       setSimulatedQuantity(1);
     });
 
@@ -220,20 +154,10 @@ export default function CournotGamePage() {
     // Handle game reconnection event
     socket.on("game:reconnected", (data) => {
       console.log("Reconnected to game:", data);
-      setConnectionError(null);
-
       // Request game data if needed
       if (!recievedGameData) {
         socket.emit("player:getGameData");
         setRecievedGameData(true);
-      }
-    });
-
-    // Handle auth events
-    socket.on("auth:cookie_update", ({ name, value }) => {
-      if (name === "auth_token" && value) {
-        console.log("Received token update in game page");
-        saveToken(value);
       }
     });
 
@@ -246,10 +170,6 @@ export default function CournotGamePage() {
       socket.off("server:moveRestored");
       socket.off("game:reconnected");
       socket.off("server:roundHistory");
-      socket.off("connect_error");
-      socket.off("disconnect");
-      socket.off("connect");
-      socket.off("auth:cookie_update");
     };
   }, [
     socket,
@@ -260,7 +180,6 @@ export default function CournotGamePage() {
     roundNo,
     timeRemaining,
     sendReadyFlag,
-    navigate,
   ]);
 
   // parse the remaining seconds into minutes and seconds
@@ -323,12 +242,10 @@ export default function CournotGamePage() {
                 {/* Connection Status */}
                 <div
                   className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    socket && !connectionError
-                      ? "bg-green-500 text-white"
-                      : "bg-red-500 text-white"
+                    socket ? "bg-green-500 text-white" : "bg-red-500 text-white"
                   }`}
                 >
-                  {socket && !connectionError ? "Connected" : "Disconnected"}
+                  {socket ? "Connected" : "Disconnected"}
                 </div>
               </div>
               <div className="flex items-center space-x-4">
@@ -385,30 +302,6 @@ export default function CournotGamePage() {
             </div>
           </div>
         </div>
-
-        {/* Connection Error Alert */}
-        {connectionError && (
-          <div className="relative z-20 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 mx-4 mt-4 rounded shadow-md">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-red-500"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm">{connectionError}</p>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Main content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
