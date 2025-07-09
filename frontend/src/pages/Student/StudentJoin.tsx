@@ -29,7 +29,7 @@ export default function StudentJoin() {
 
       // if the cookie does not exist or the room code not not match, set a new token, otherwise dont do shit
       if (!cookieExists.data.success) {
-        await axios.post(
+        const loginRes = await axios.post(
           `${config.apiUrl}/auth/login`,
           {
             username,
@@ -37,15 +37,30 @@ export default function StudentJoin() {
           },
           { withCredentials: true }
         );
+
+        if (loginRes.data?.token) {
+          localStorage.setItem("auth_token", loginRes.data.token);
+          axios.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${loginRes.data.token}`;
+        }
+
         console.log("cookie DNE");
       } else {
-        await axios.post(
+        const setTokenRes = await axios.post(
           `${config.apiUrl}/auth/setToken`,
           { roomId: code },
           {
             withCredentials: true,
           }
         );
+
+        if (setTokenRes.data?.token) {
+          localStorage.setItem("auth_token", setTokenRes.data.token);
+          axios.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${setTokenRes.data.token}`;
+        }
       }
 
       console.log("cookie exists");

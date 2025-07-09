@@ -102,15 +102,35 @@ const clearTokenCookie = (res: Response) => {
   res.clearCookie("auth_token", getCookieOptions());
 };
 
+// Helper to get auth token from either cookie or Authorization header (Bearer scheme)
+const getTokenFromRequest = (req: Request): string | undefined => {
+  // Prefer cookie (maintains existing behaviour)
+  if (req.cookies && req.cookies.auth_token) {
+    return req.cookies.auth_token;
+  }
+
+  // Fallback to Authorization header: "Bearer <token>"
+  const authHeader = (req.headers["authorization"] ||
+    req.headers["Authorization"]) as string | undefined;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    return authHeader.slice(7);
+  }
+
+  return undefined;
+};
+
 // express middleware to check if the user is authenticated
 const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.cookies.auth_token;
+  const token = getTokenFromRequest(req);
+
   if (!token) {
-    console.log("Token not found");
+    console.log("Token not found (cookie/header)");
     return res
       .status(401)
       .json({ authenticated: false, error: "No token found" });
   }
+
   const decodedToken = verifyJwtToken(token);
   if (!decodedToken || decodedToken instanceof Error) {
     console.log("Invalid token");
@@ -131,4 +151,5 @@ export {
   clearTokenCookie,
   UserTokenData,
   isAuthenticated,
+  getTokenFromRequest,
 };

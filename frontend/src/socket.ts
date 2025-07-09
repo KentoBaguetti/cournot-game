@@ -29,12 +29,33 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     let isMounted = true;
 
-    const fetchTokenData = async () => {
-      const response = await axios.get(`${config.apiUrl}/auth/token`, {
-        withCredentials: true,
-      });
-      const token = response.data.token;
-      return token;
+    const fetchTokenData = async (): Promise<string | null> => {
+      try {
+        // First try via cookie-based endpoint
+        const response = await axios.get(`${config.apiUrl}/auth/token`, {
+          withCredentials: true,
+        });
+        const token: string = response.data.token;
+
+        // Store/update defaults for subsequent axios requests
+        if (token) {
+          axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        }
+
+        return token;
+      } catch (err) {
+        console.warn("/auth/token failed – falling back to localStorage", err);
+
+        const localToken = localStorage.getItem("auth_token");
+
+        if (localToken) {
+          axios.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${localToken}`;
+        }
+
+        return localToken;
+      }
     };
 
     const initializeSocket = async () => {
@@ -44,7 +65,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
         const socket = io(config.apiUrl, {
           auth: {
-            token: token,
+            token: token || "", // pass empty string if null – server will reject
           },
           autoConnect: true,
           reconnection: true,

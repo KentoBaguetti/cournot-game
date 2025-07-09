@@ -16,8 +16,16 @@ export default function ProtectedRoute({
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        const token = localStorage.getItem("auth_token");
+
+        // ensure axios default header is set (in case of hard refresh)
+        if (token) {
+          axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        }
+
         const response = await axios.get(`${config.apiUrl}/auth/checkAuth`, {
           withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         });
         setAuthenticated(response.data.authenticated);
       } catch (error) {

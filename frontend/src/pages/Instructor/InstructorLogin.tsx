@@ -20,8 +20,8 @@ export default function InstructorLogin() {
     setError(null);
 
     try {
-      // sets the token as a cookie, no response needed so far
-      await axios.post(
+      // sets the token as a cookie and receives token for fallback storage
+      const loginResponse = await axios.post(
         `${config.apiUrl}/auth/login`,
         {
           username,
@@ -31,6 +31,14 @@ export default function InstructorLogin() {
           withCredentials: true,
         }
       );
+
+      // Save token to localStorage (fallback) and set axios default header
+      if (loginResponse.data?.token) {
+        localStorage.setItem("auth_token", loginResponse.data.token);
+        axios.defaults.headers.common[
+          "Authorization"
+        ] = `Bearer ${loginResponse.data.token}`;
+      }
 
       navigate("/instructorDashboard");
     } catch (error) {

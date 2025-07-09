@@ -173,6 +173,7 @@ app.post("/auth/login", (req, res) => {
   // Return user info (but not the token directly)
   res.json({
     success: true,
+    token, // include token for fallback storage (localStorage)
     user: {
       userId,
       username,
@@ -261,7 +262,12 @@ app.post("/auth/setToken", isAuthenticated, (req, res) => {
 
 // expose the jwt token to the frontend
 app.get("/auth/token", (req, res) => {
-  const token = req.cookies.auth_token;
+  const token =
+    req.cookies.auth_token ||
+    (req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer ")
+      ? req.headers.authorization.split(" ")[1]
+      : null);
 
   if (!token) {
     return res.status(401).json({ success: false, error: "No token provided" });
@@ -294,7 +300,12 @@ app.get("/auth/games", (req, res) => {
 });
 
 app.post("/auth/checkTokenRoomId", (req, res) => {
-  const token = req.cookies.auth_token;
+  const token =
+    req.cookies.auth_token ||
+    (req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer ")
+      ? req.headers.authorization.split(" ")[1]
+      : null);
   const roomId = req.body.roomId;
   if (!token) {
     return res.json({ success: false, error: "No token provided" });
