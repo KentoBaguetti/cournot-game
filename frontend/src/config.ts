@@ -6,6 +6,8 @@ const config = {
     import.meta.env.VITE_NODE_ENV === "production"
       ? "https://cuhkgameplatform.online"
       : "http://localhost:3001",
+  // Use relative path for API calls when on the same domain
+  basePath: import.meta.env.VITE_NODE_ENV === "production" ? "/app/" : "/",
 };
 
 export default config;
