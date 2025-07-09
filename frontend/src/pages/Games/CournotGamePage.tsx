@@ -307,7 +307,8 @@ export default function CournotGamePage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
           {/* Key Info Panel */}
           <div className="bg-white rounded-2xl p-6 shadow-lg mb-8">
-            <div className="grid grid-cols-3 gap-4">
+            {/* 3-column layout on medium+ screens, stacked on mobile */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="text-center">
                 <div className="bg-blue-100 rounded-xl p-3 mb-2">
                   <div className="text-sm text-blue-600 font-medium">
@@ -341,7 +342,8 @@ export default function CournotGamePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-8">
+          {/* Two-column layout on desktop, stacked on mobile */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Panel - Production Control */}
             <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl p-8 text-white shadow-2xl">
               <div className="text-center mb-8">
@@ -419,7 +421,7 @@ export default function CournotGamePage() {
                   Market Price Calculator
                 </h3>
 
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                   <div className="bg-blue-100 rounded-xl p-4 text-center">
                     <div className="text-sm text-blue-800 mb-1">
                       Market Production
