@@ -23,7 +23,7 @@ export default function StudentJoin() {
       // check for cookie
       const cookieExists = await axios.post(
         `${config.apiUrl}/auth/checkTokenRoomId`,
-        { roomId: code },
+        { roomId: code.toUpperCase() },
         { withCredentials: true }
       );
 
@@ -33,7 +33,7 @@ export default function StudentJoin() {
           `${config.apiUrl}/auth/login`,
           {
             username,
-            roomId: code,
+            roomId: code.toUpperCase(),
           },
           { withCredentials: true }
         );
@@ -49,7 +49,7 @@ export default function StudentJoin() {
       } else {
         const setTokenRes = await axios.post(
           `${config.apiUrl}/auth/setToken`,
-          { roomId: code },
+          { roomId: code.toUpperCase() },
           {
             withCredentials: true,
           }
@@ -65,7 +65,9 @@ export default function StudentJoin() {
 
       console.log("cookie exists");
       // If we're already in the SocketProvider context, we can navigate directly
-      navigate("/student/gameLobby", { state: { roomCode: code } });
+      navigate("/student/gameLobby", {
+        state: { roomCode: code.toUpperCase() },
+      });
     } catch (error) {
       console.error("Error joining game:", error);
       setError("Failed to join game. Please check your code and try again.");
@@ -122,7 +124,7 @@ export default function StudentJoin() {
 
               <Input
                 label="Game Code"
-                value={code}
+                value={code.toUpperCase()}
                 onChange={setCode}
                 placeholder="Enter game code"
                 required={true}

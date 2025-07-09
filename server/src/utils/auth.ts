@@ -125,7 +125,6 @@ const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
   const token = getTokenFromRequest(req);
 
   if (!token) {
-    console.log("Token not found (cookie/header)");
     return res
       .status(401)
       .json({ authenticated: false, error: "No token found" });
@@ -133,12 +132,14 @@ const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
 
   const decodedToken = verifyJwtToken(token);
   if (!decodedToken || decodedToken instanceof Error) {
-    console.log("Invalid token");
     return res
       .status(401)
       .json({ authenticated: false, error: "Invalid token" });
   }
-  console.log("token found user verified");
+  if (process.env.NODE_ENV !== "production") {
+    console.log("token found user verified");
+  }
+
   next();
 };
 
