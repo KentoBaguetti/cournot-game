@@ -1,17 +1,17 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import { SocketProvider } from "./socket";
+import ProtectedRoute from "./pages/ProtectedRoute";
 import Home from "./pages/Home";
-import StudentJoin from "./pages/Student/StudentJoin";
+
+// instructor pages
 import InstructorLogin from "./pages/Instructor/InstructorLogin";
-
-// non test shit
 import InstructorDashboard from "./pages/Instructor/InstructorDashboard";
-
 import GameDashboard from "./pages/Instructor/GameDashboard";
 import DisplayGameInfoPage from "./pages/Instructor/DisplayGameInfoPage";
 
 // Student pages
+import StudentJoin from "./pages/Student/StudentJoin";
 import GameLobby from "./pages/Student/GameLobby";
 
 // create game pages
@@ -33,63 +33,77 @@ function App() {
         <Route
           path="/instructorDashboard"
           element={
-            <SocketProvider>
-              <InstructorDashboard />
-            </SocketProvider>
+            <ProtectedRoute>
+              <SocketProvider>
+                <InstructorDashboard />
+              </SocketProvider>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/instructor/gameDashboard"
           element={
-            <SocketProvider>
-              <GameDashboard />
-            </SocketProvider>
+            <ProtectedRoute>
+              <SocketProvider>
+                <GameDashboard />
+              </SocketProvider>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/instructor/create/cournot"
           element={
-            <SocketProvider>
-              <CreateCournotGamePage />
-            </SocketProvider>
+            <ProtectedRoute>
+              <SocketProvider>
+                <CreateCournotGamePage />
+              </SocketProvider>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/instructor/displayGameInfo"
           element={
-            <SocketProvider>
-              <DisplayGameInfoPage />
-            </SocketProvider>
+            <ProtectedRoute>
+              <SocketProvider>
+                <DisplayGameInfoPage />
+              </SocketProvider>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/games/jankenpo"
           element={
-            <SocketProvider>
-              <JanKenPoPage />
-            </SocketProvider>
+            <ProtectedRoute>
+              <SocketProvider>
+                <JanKenPoPage />
+              </SocketProvider>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/games/cournot"
           element={
-            <SocketProvider>
-              <CournotGamePage />
-            </SocketProvider>
+            <ProtectedRoute>
+              <SocketProvider>
+                <CournotGamePage />
+              </SocketProvider>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/student/gameLobby"
           element={
-            <SocketProvider>
-              <GameLobby />
-            </SocketProvider>
+            <ProtectedRoute>
+              <SocketProvider>
+                <GameLobby />
+              </SocketProvider>
+            </ProtectedRoute>
           }
         />
       </Routes>

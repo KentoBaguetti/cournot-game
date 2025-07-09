@@ -14,6 +14,7 @@ interface UserTokenData {
   userId: string;
   username: string;
   roomId?: string;
+  isHost?: boolean; // TODO:will not be used until the db is implemented
 }
 
 // Default JWT secret to use if not provided in environment variables
@@ -105,16 +106,19 @@ const clearTokenCookie = (res: Response) => {
 const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
   const token = req.cookies.auth_token;
   if (!token) {
+    console.log("Token not found");
     return res
       .status(401)
       .json({ authenticated: false, error: "No token found" });
   }
   const decodedToken = verifyJwtToken(token);
   if (!decodedToken || decodedToken instanceof Error) {
+    console.log("Invalid token");
     return res
       .status(401)
       .json({ authenticated: false, error: "Invalid token" });
   }
+  console.log("token found user verified");
   next();
 };
 

@@ -146,10 +146,14 @@ app.get("/", (req, res) => {
 
 // Update the token endpoint to use HTTP-only cookies
 app.post("/auth/login", (req, res) => {
-  const { username, roomId } = req.body;
+  const { username, roomId, isHost } = req.body;
 
   if (!username) {
     return res.status(400).json({ error: "Username is required" });
+  }
+
+  if (isHost) {
+    console.log("User is a host, query db"); // return an error if the user is not a host
   }
 
   // Generate a unique user ID if this is a new user
@@ -160,6 +164,7 @@ app.post("/auth/login", (req, res) => {
     userId,
     username,
     roomId,
+    isHost,
   };
 
   // Set the token as an HTTP-only cookie
@@ -172,6 +177,7 @@ app.post("/auth/login", (req, res) => {
       userId,
       username,
       roomId,
+      isHost,
     },
   });
 });
@@ -221,6 +227,7 @@ app.get("/auth/me", isAuthenticated, (req, res) => {
       userId: userData.userId,
       username: userData.username,
       roomId: userData.roomId,
+      isHost: userData.isHost,
     },
   });
 });
@@ -244,6 +251,7 @@ app.post("/auth/setToken", isAuthenticated, (req, res) => {
     userId: userData.userId,
     username: userData.username,
     roomId: newRoomId || userData.roomId,
+    isHost: userData.isHost,
   };
 
   const newToken = setTokenCookie(res, cleanUserData);
@@ -305,7 +313,7 @@ app.post("/auth/checkTokenRoomId", (req, res) => {
 });
 
 // check if the user is authenticated, this endpoint will be used for protected routes
-app.get("/auth/check", isAuthenticated, (req, res) => {
+app.get("/auth/checkAuth", isAuthenticated, (req, res) => {
   res.json({ authenticated: true });
 });
 
