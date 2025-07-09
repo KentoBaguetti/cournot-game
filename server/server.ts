@@ -293,6 +293,7 @@ app.get("/auth/games", (req, res) => {
   res.json({ games });
 });
 
+// this endpoint is to help decide whether to set a new token or just update the expiry
 app.post("/auth/checkTokenRoomId", (req, res) => {
   const token = req.cookies.auth_token;
   const roomId = req.body.roomId;
