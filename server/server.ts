@@ -317,41 +317,6 @@ app.get("/auth/checkAuth", isAuthenticated, (req, res) => {
   res.json({ authenticated: true });
 });
 
-// Endpoint to validate a token from localStorage (for mobile devices)
-app.post("/auth/validateToken", (req, res) => {
-  const { token } = req.body;
-
-  if (!token) {
-    return res.status(400).json({
-      authenticated: false,
-      error: "No token provided",
-    });
-  }
-
-  const userData = verifyJwtToken(token);
-
-  if (!userData || userData instanceof Error) {
-    return res.status(401).json({
-      authenticated: false,
-      error: "Invalid or expired token",
-    });
-  }
-
-  // If the token is valid, set it as a cookie so future requests can use it
-  setTokenCookie(res, userData);
-
-  // Return authentication success
-  return res.json({
-    authenticated: true,
-    user: {
-      userId: userData.userId,
-      username: userData.username,
-      roomId: userData.roomId,
-      isHost: userData.isHost,
-    },
-  });
-});
-
 //////////////////////////////////////////////////////////////////
 // socket.io routes + middleware
 //////////////////////////////////////////////////////////////////

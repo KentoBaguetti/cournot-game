@@ -1,29 +1,10 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
-import { useEffect, useState } from "react";
-
-// Define the type for location state
-interface LocationState {
-  authError?: string;
-}
 
 export default function Home() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [authError, setAuthError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Check if we were redirected with an error message
-    const state = location.state as LocationState;
-    if (state && state.authError) {
-      setAuthError(state.authError);
-
-      // Clear the error from location state after displaying it
-      window.history.replaceState({}, document.title);
-    }
-  }, [location]);
 
   const navigateToStudent = () => {
     navigate("/student");
@@ -50,31 +31,6 @@ export default function Home() {
             Kaspers game (Built by Kasper, copyrighted by Kasper)
           </p>
         </div>
-
-        {authError && (
-          <div className="max-w-4xl mx-auto mb-8">
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="h-5 w-5 text-red-500"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-700">{authError}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           <Card hover={true} className="flex flex-col items-center text-center">
