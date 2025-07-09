@@ -12,4 +12,6 @@ export default defineConfig({
     outDir: "dist",
     sourcemap: true,
   },
+  // Add base path for production builds
+  base: "/app/",
 });

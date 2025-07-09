@@ -10,6 +10,7 @@ import { Server, Socket } from "socket.io";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { v4 as uuidv4 } from "uuid";
+import path from "path";
 
 //////////////////////////////////////////////////////////////////
 // imported modules (not libraries)
@@ -816,4 +817,12 @@ io.on("connection", (socket: Socket) => {
       console.log(`Game with room id "${roomId}" does not exist`);
     }
   });
+});
+
+// Static file serving for React app
+app.use("/app", express.static(path.join(__dirname, "../frontend/dist")));
+
+// Handle React routing
+app.get("/app/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
