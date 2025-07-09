@@ -196,6 +196,17 @@ export abstract class BaseGame {
     return res;
   }
 
+  getPlayerIds(): string[] {
+    const res: string[] = [];
+    for (const [userId, player] of this.players) {
+      // Only add non-disconnected players to the result
+      if (!player.isDisconnected()) {
+        res.push(userId);
+      }
+    }
+    return res;
+  }
+
   getStudentPlayers(): string[] {
     const res: string[] = [];
     for (const [userId, player] of this.players) {

@@ -671,6 +671,28 @@ io.on("connection", (socket: Socket) => {
     }
   });
 
+  socket.on("game:endGame", () => {
+    const mainRoomId = parseRoomId(socket.roomId);
+    const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
+    if (!game) {
+      console.log(`Game with room id "${mainRoomId}" does not exist`);
+      return;
+    }
+
+    const allBreakoutRoomIds: string[] = game.breakoutRoomIds;
+    for (const breakoutRoomId of allBreakoutRoomIds) {
+      io.to(breakoutRoomId).emit("game:end");
+    }
+
+    const allPlayerIds = game.getPlayerIds();
+    for (const id of allPlayerIds) {
+      socketManager.clearUserRoom(id);
+    }
+
+    gameManager.removeGame(mainRoomId);
+    roomStore.delete(mainRoomId);
+  });
+
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   // Game Lobby Socket Endpoints
   ///////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -40,10 +40,16 @@ export default function GameLobby() {
       }
     );
 
+    socket.on("game:end", () => {
+      alert("Game ended. Redirecting to home...");
+      navigate("/");
+    });
+
     // cleanup
     return () => {
       socket.off("server:listUsers");
       socket.off("game:start");
+      socket.off("game:end");
     };
   }, [socket, roomCode, navigate]);
 
