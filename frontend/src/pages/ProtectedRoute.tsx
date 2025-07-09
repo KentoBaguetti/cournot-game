@@ -11,6 +11,7 @@ export default function ProtectedRoute({
   const navigate = useNavigate();
 
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [hasChecked, setHasChecked] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -21,13 +22,23 @@ export default function ProtectedRoute({
         setAuthenticated(response.data.authenticated);
       } catch (error) {
         console.log("Error checking authentication:", error);
-        alert("Your session has expired. Please login again."); // TODO: this alert runs twice
-        navigate("/");
+        setAuthenticated(false);
+      } finally {
+        setHasChecked(true);
       }
     };
 
     checkAuth();
   }, [navigate]);
+
+  if (!hasChecked) {
+    return <div>Loading...</div>;
+  }
+
+  if (authenticated === false) {
+    alert("Your session has expired. Please login again.");
+    navigate("/");
+  }
 
   return authenticated ? children : null;
 }

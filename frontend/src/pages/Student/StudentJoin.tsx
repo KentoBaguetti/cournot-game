@@ -27,8 +27,6 @@ export default function StudentJoin() {
         { withCredentials: true }
       );
 
-      // Authenticate to get JWT
-
       // if the cookie does not exist or the room code not not match, set a new token, otherwise dont do shit
       if (!cookieExists.data.success) {
         await axios.post(
@@ -41,9 +39,13 @@ export default function StudentJoin() {
         );
         console.log("cookie DNE");
       } else {
-        await axios.post(`${config.apiUrl}/auth/setToken`, {
-          withCredentials: true,
-        });
+        await axios.post(
+          `${config.apiUrl}/auth/setToken`,
+          { roomId: code },
+          {
+            withCredentials: true,
+          }
+        );
       }
 
       console.log("cookie exists");
