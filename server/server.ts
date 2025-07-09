@@ -324,21 +324,40 @@ app.get("/auth/checkAuth", isAuthenticated, (req, res) => {
 
 // authentication middleware for socket.io connections
 io.use((socket, next) => {
+  console.log("Socket connection attempt - checking authentication");
+
   // Try to get token from auth field first (backward compatibility)
   let token = socket.handshake.auth.token;
+  console.log("Auth token from handshake:", token ? "Present" : "Not present");
 
   // If no token in auth, try to get from cookies
   if (!token && socket.handshake.headers.cookie) {
-    const cookies = socket.handshake.headers.cookie
-      .split(";")
-      .map((cookie) => cookie.trim())
-      .reduce((acc, cookie) => {
-        const [key, value] = cookie.split("=");
-        acc[key] = value;
-        return acc;
-      }, {} as Record<string, string>);
+    console.log("No token in auth, checking cookies");
+    try {
+      const cookieString = socket.handshake.headers.cookie;
+      console.log("Cookie header:", cookieString);
 
-    token = cookies.auth_token;
+      const cookies = cookieString
+        .split(";")
+        .map((cookie) => cookie.trim())
+        .reduce((acc, cookie) => {
+          const [key, value] = cookie.split("=");
+          if (key && value) {
+            acc[key] = value;
+          }
+          return acc;
+        }, {} as Record<string, string>);
+
+      token = cookies.auth_token;
+      console.log("Token from cookies:", token ? "Found" : "Not found");
+    } catch (err) {
+      console.error("Error parsing cookies:", err);
+    }
+  }
+
+  if (!token && socket.handshake.query && socket.handshake.query.token) {
+    console.log("Using token from query parameter");
+    token = socket.handshake.query.token as string;
   }
 
   if (!token) {
@@ -349,7 +368,10 @@ io.use((socket, next) => {
   const userData = verifyJwtToken(token);
 
   if (userData instanceof Error || !userData) {
-    console.error("Invalid token provided for socket connection");
+    console.error(
+      "Invalid token provided for socket connection:",
+      userData instanceof Error ? userData.message : "Unknown error"
+    );
     return next(
       new Error("Invalid or Expired token provided for socket connection")
     );
@@ -357,6 +379,7 @@ io.use((socket, next) => {
 
   // Extract user information from token
   const { userId, username, roomId: tokenRoomId } = userData;
+  console.log(`User authenticated: ${username} (${userId})`);
 
   // Set basic user information on socket
   socket.userId = userId;

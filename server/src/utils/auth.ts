@@ -15,6 +15,8 @@ interface UserTokenData {
   username: string;
   roomId?: string;
   isHost?: boolean; // TODO:will not be used until the db is implemented
+  exp?: number;
+  iat?: number;
 }
 
 // Default JWT secret to use if not provided in environment variables
@@ -22,7 +24,11 @@ const DEFAULT_JWT_SECRET = "default_jwt_secret_for_development_only";
 
 const generateJwtToken = (userData: UserTokenData) => {
   const jwtSecret = process.env.JWT_SECRET || DEFAULT_JWT_SECRET;
-  const token = jwt.sign(userData, jwtSecret, {
+
+  // destructure the userdata to separate the exp and iat properties
+  const { exp, iat, ...cleanUserData } = userData;
+
+  const token = jwt.sign(cleanUserData, jwtSecret, {
     expiresIn: "1h",
   });
   return token;
@@ -58,9 +64,10 @@ const setTokenCookie = (res: Response, userData: UserTokenData) => {
   // Set HTTP-only cookie that expires when the JWT expires
   res.cookie("auth_token", token, {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    maxAge: 60 * 60 * 1000, // 1 hour in milliseconds (matching JWT expiry)
+    secure: process.env.NODE_ENV === "production", // Only use secure in production
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Use lax in development
+    maxAge: 60 * 60 * 1000, // 1 hour
+    path: "/",
   });
 
   return token;
@@ -97,8 +104,9 @@ const updateTokenRoom = (
 const clearTokenCookie = (res: Response) => {
   res.clearCookie("auth_token", {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    path: "/",
   });
 };
 

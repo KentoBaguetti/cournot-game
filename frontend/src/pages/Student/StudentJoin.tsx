@@ -27,8 +27,6 @@ export default function StudentJoin() {
         { withCredentials: true }
       );
 
-      // Authenticate to get JWT
-
       // if the cookie does not exist or the room code not not match, set a new token, otherwise dont do shit
       if (!cookieExists.data.success) {
         await axios.post(
@@ -39,14 +37,31 @@ export default function StudentJoin() {
           },
           { withCredentials: true }
         );
-        console.log("cookie DNE");
+        console.log("New token created");
       } else {
-        await axios.post(`${config.apiUrl}/auth/setToken`, {
-          withCredentials: true,
-        });
+        await axios.post(
+          `${config.apiUrl}/auth/setToken`,
+          {},
+          { withCredentials: true }
+        );
+        console.log("Token refreshed");
       }
 
-      console.log("cookie exists");
+      // For mobile browsers, also get the token directly and store in localStorage as fallback
+      try {
+        const tokenData = await axios.get(`${config.apiUrl}/auth/token`, {
+          withCredentials: true,
+        });
+
+        if (tokenData.data && tokenData.data.token) {
+          // Store token in localStorage as fallback for mobile browsers
+          localStorage.setItem("game_auth_token", tokenData.data.token);
+          console.log("Token stored in localStorage for fallback");
+        }
+      } catch (tokenError) {
+        console.error("Failed to get token for localStorage:", tokenError);
+      }
+
       // If we're already in the SocketProvider context, we can navigate directly
       navigate("/student/gameLobby", { state: { roomCode: code } });
     } catch (error) {
