@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Layout } from "../../components/Layout";
 import { Card } from "../../components/Card";
 import { Button } from "../../components/Button";
+import { AlertModal } from "../../components/AlertModal";
 
 export default function GameLobby() {
   const socket = useSocket();
@@ -14,6 +15,7 @@ export default function GameLobby() {
   const { roomCode } = location.state;
   const [allPlayers, setAllPlayers] = useState<string[]>([]);
   const [isWaiting, setIsWaiting] = useState(true);
+  const [isAlertModalOpen, setIsAlertModalOpen] = useState<boolean>(false);
   const hasJoinedGame = useRef(false);
   const startGame = useRef(false);
 
@@ -41,8 +43,7 @@ export default function GameLobby() {
     );
 
     socket.on("game:end", () => {
-      alert("Game ended. Redirecting to home...");
-      navigate("/");
+      setIsAlertModalOpen(true);
     });
 
     // cleanup
@@ -63,6 +64,12 @@ export default function GameLobby() {
       roomId={roomCode}
       leaveGameOnNavigate={true}
     >
+      <AlertModal
+        isOpen={isAlertModalOpen}
+        onClose={() => setIsAlertModalOpen(false)}
+        navigateLocation="/"
+        message="Game ended. Redirecting to home..."
+      />
       <div className="max-w-6xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="max-w-lg mx-auto text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
