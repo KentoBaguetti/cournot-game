@@ -23,6 +23,22 @@ export default function GameDashboard() {
   const [roomsAndPlayers, setRoomsAndPlayers] = useState<
     Record<string, string[]>
   >({});
+  const [gameConfigs, setGameConfigs] = useState<
+    Record<string, string | number>
+  >({});
+
+  const variableToEnglishMap = {
+    roundLength: "Round Length (Minutes)",
+    maxRounds: "Max Rounds",
+    maxPlayersPerRoom: "Max number of players per room",
+    x: "Demand Intercept",
+    y: "Sunk Cost",
+    z: "Per Barrel Cost",
+  };
+
+  const gameNameMap = {
+    cournot: "Cournot Competition",
+  };
 
   const handleGameStart = () => {
     if (!socket) return;
@@ -78,6 +94,7 @@ export default function GameDashboard() {
     socket.on("game:info", async (data) => {
       setRoomCode(data.roomId);
       setGameType(data.gameType);
+      setGameConfigs(data.gameConfigs);
       try {
         const res = await axios.post(
           `${config.apiUrl}/auth/setToken`,
@@ -129,7 +146,7 @@ export default function GameDashboard() {
     >
       <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
                 Game Dashboard
@@ -151,11 +168,71 @@ export default function GameDashboard() {
                 variant="primary"
                 onClick={handleNavigateToDisplayGameInfo}
               >
-                Display Game Info
+                Display Join Code
               </Button>
               <Button variant="danger" onClick={handleEndGame}>
                 End Game / Leave
               </Button>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xl font-bold text-gray-800">
+                Game Information
+              </h2>
+              <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                Room Code: {roomCode}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                <h3 className="font-bold text-lg text-gray-700 mb-2">
+                  Game Type
+                </h3>
+                <p className="text-blue-600 font-medium">
+                  {gameNameMap[gameType as keyof typeof gameNameMap] ||
+                    "Not set"}
+                </p>
+              </div>
+
+              {Object.entries(gameConfigs).length > 0 && (
+                <div className="bg-gray-50 rounded-lg p-3 border border-gray-100 md:col-span-2">
+                  <h3 className="font-bold text-lg text-gray-700 mb-2">
+                    Game Configurations
+                  </h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.entries(gameConfigs).map(([key, value]) => (
+                      <div
+                        key={key}
+                        className="flex justify-between bg-white px-3 py-1 rounded-md"
+                      >
+                        <span className="font-medium text-gray-600">
+                          {
+                            variableToEnglishMap[
+                              key as keyof typeof variableToEnglishMap
+                            ]
+                          }
+                          :
+                        </span>
+                        <span className="text-blue-600">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {Object.keys(gameConfigs).length === 0 && (
+                <div className="bg-gray-50 rounded-lg p-3 border border-gray-100 md:col-span-2">
+                  <h3 className="font-medium text-gray-700 mb-2">
+                    Game Configurations
+                  </h3>
+                  <p className="text-gray-500 italic">
+                    No configurations available
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -166,9 +243,6 @@ export default function GameDashboard() {
               <h2 className="text-xl font-bold text-gray-800">
                 Room Information
               </h2>
-              <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                Room Code: {roomCode}
-              </div>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
               <h3 className="font-medium text-gray-700 mb-2">
