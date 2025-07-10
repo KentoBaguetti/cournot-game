@@ -41,6 +41,15 @@ export default function GameDashboard() {
     navigate("/instructor/displayGameInfo");
   };
 
+  // for ending the game and leaving the game (instructor side)
+  const handleEndGame = () => {
+    const confirmed = window.confirm("Do you want to leave and end the game?");
+    if (!confirmed) return;
+    if (!socket) return;
+    socket.emit("game:endGame");
+    navigate("/instructorDashboard");
+  };
+
   // initial mounts
   useEffect(() => {
     const getBasicGameInfo = async () => {
@@ -114,7 +123,7 @@ export default function GameDashboard() {
       title="Game Dashboard"
       showBackButton={false}
       navigateLocation="/instructorDashboard"
-      showHomeButton={true}
+      showHomeButton={false}
       withConfirmation={true}
       confirmationMessage="Are you sure you want to leave the game dashboard?"
     >
@@ -139,10 +148,13 @@ export default function GameDashboard() {
                 {getButtonText()}
               </Button>
               <Button
-                variant="secondary"
+                variant="primary"
                 onClick={handleNavigateToDisplayGameInfo}
               >
                 Display Game Info
+              </Button>
+              <Button variant="danger" onClick={handleEndGame}>
+                End Game / Leave
               </Button>
             </div>
           </div>
