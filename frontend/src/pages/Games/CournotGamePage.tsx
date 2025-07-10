@@ -5,6 +5,7 @@ import { DemandCurve } from "../../components/DemandCurve";
 import { EndOfRoundModal } from "../../components/EndOfRoundModal";
 import { useSocket } from "../../socket";
 import { Layout } from "../../components/Layout";
+import { AlertModal } from "../../components/AlertModal";
 
 interface RoundHistoryItem {
   round: number;
@@ -47,6 +48,7 @@ export default function CournotGamePage() {
   const [showEndModal, setShowEndModal] = useState<boolean>(false);
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
   const [roundHistory, setRoundHistory] = useState<RoundHistoryItem[]>([]);
+  const [isAlertModalOpen, setIsAlertModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (!socket) {
@@ -161,6 +163,10 @@ export default function CournotGamePage() {
       }
     });
 
+    socket.on("game:end", () => {
+      setIsAlertModalOpen(true);
+    });
+
     // cleanup
     return () => {
       socket.off("server:cournotInfo");
@@ -225,6 +231,12 @@ export default function CournotGamePage() {
       withConfirmation={true}
       confirmationMessage="Are you sure you want to leave the game? Your progress will be lost."
     >
+      <AlertModal
+        isOpen={isAlertModalOpen}
+        onClose={() => setIsAlertModalOpen(false)}
+        navigateLocation="/"
+        message="Game ended. Redirecting to home..."
+      />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 relative overflow-hidden">
         {/* Background elements - oil rig silhouettes */}
         <div className="absolute inset-0 opacity-10">
