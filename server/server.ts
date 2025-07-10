@@ -530,7 +530,7 @@ io.on("connection", (socket: Socket) => {
         console.log(`Socket ${socket.id} is already in room ${mainRoomId}`);
 
         // Just send the current player list without re-joining
-        socket.emit("server:listUsers", game.getPlayers());
+        socket.emit("server:listUsers", game.getStudentPlayers());
         return;
       }
 
@@ -661,7 +661,7 @@ io.on("connection", (socket: Socket) => {
       console.log(`User ${userData.nickname} left game in room ${roomId}`);
 
       // Broadcast updated player list to all clients in the room
-      io.to(mainRoomId).emit("server:listUsers", game.getPlayers());
+      io.to(mainRoomId).emit("server:listUsers", game.getStudentPlayers());
       io.to(mainRoomId).emit(
         "server:listRoomsAndPlayers",
         game.listRoomsAndPlayers()
@@ -829,7 +829,7 @@ io.on("connection", (socket: Socket) => {
       });
 
       // Also send the current player list
-      socket.emit("server:listUsers", game.getPlayers());
+      socket.emit("server:listUsers", game.getStudentPlayers());
     } else {
       socket.emit("game:error", { message: "Game not found" });
     }

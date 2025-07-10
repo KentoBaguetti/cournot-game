@@ -101,7 +101,9 @@ export abstract class BaseGame {
         .emit("player:disconnect", `Player "${username}" has disconnected`);
 
       // Also emit updated player list
-      this.io.to(this.roomId).emit("server:listUsers", this.getPlayers());
+      this.io
+        .to(this.roomId)
+        .emit("server:listUsers", this.getStudentPlayers());
 
       // If the player was ready, update their ready status
       if (player.isReady()) {

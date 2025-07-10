@@ -72,7 +72,9 @@ export class SocketManager {
             player.setDisconnected(true);
 
             // Broadcast updated player list
-            this.io.to(roomId).emit("server:listUsers", game.getPlayers());
+            this.io
+              .to(roomId)
+              .emit("server:listUsers", game.getStudentPlayers());
 
             // If the player was ready, update their ready status
             if (player.isReady()) {
