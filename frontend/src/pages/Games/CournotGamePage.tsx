@@ -33,6 +33,8 @@ export default function CournotGamePage() {
   const [numberOfFirms, setNumberOfFirms] = useState<number>(0);
   const [isRoundTimerFlag, setIsRoundTimerFlag] = useState<boolean>(false);
   const [roomMarketPrice, setRoomMarketPrice] = useState<number>(0);
+  const [playerProductionForRound, setPlayerProductionForRound] =
+    useState<number>(0);
 
   // game config data
   const [x, setX] = useState<number>(0);
@@ -92,6 +94,7 @@ export default function CournotGamePage() {
         setTotalQuantity(totalQuantity);
         setPrevRoundNo(roundNo);
         setRoomMarketPrice(marketPrice);
+        setPlayerProductionForRound(userQuantity);
 
         // Use history from server if available
         if (history) {
@@ -493,7 +496,7 @@ export default function CournotGamePage() {
         roundData={{
           roundNumber: prevRoundNo,
           totalProduction: totalQuantity,
-          yourProduction: userQuantity,
+          yourProduction: playerProductionForRound,
           marketPrice: roomMarketPrice,
           individualProductCost: individualProductCost,
           yourProfit: userProfit,
