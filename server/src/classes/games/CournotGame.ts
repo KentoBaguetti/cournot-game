@@ -145,12 +145,14 @@ export class CournotGame extends BaseGame {
     const x = (this.gameConfigs as CournotGameConfigs).x;
     const y = (this.gameConfigs as CournotGameConfigs).y;
     const z = (this.gameConfigs as CournotGameConfigs).z;
+    const maxRounds = (this.gameConfigs as CournotGameConfigs).maxRounds;
     socket.emit("server:cournotInfo", {
       x,
       y,
       z,
       totalProductionQuantity,
       numberOfFirms: countNumberOfFirms(roomData),
+      maxRounds,
     });
 
     // console.log(`sending game data: ${x}, ${y}, ${z}`);

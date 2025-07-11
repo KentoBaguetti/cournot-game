@@ -6,6 +6,7 @@ import { EndOfRoundModal } from "../../components/EndOfRoundModal";
 import { useSocket } from "../../socket";
 import { Layout } from "../../components/Layout";
 import { AlertModal } from "../../components/AlertModal";
+import BasicChart from "../../components/BasicChart";
 
 interface RoundHistoryItem {
   round: number;
@@ -37,6 +38,7 @@ export default function CournotGamePage() {
     useState<number>(0);
   const [playerMoveToZeroAtRoundStart, setPlayerMoveToZeroAtRoundStart] =
     useState<boolean>(false);
+  const [totalProfit, setTotalProfit] = useState<number>(0);
 
   // game config data
   const [x, setX] = useState<number>(0);
@@ -53,6 +55,11 @@ export default function CournotGamePage() {
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
   const [roundHistory, setRoundHistory] = useState<RoundHistoryItem[]>([]);
   const [isAlertModalOpen, setIsAlertModalOpen] = useState<boolean>(false);
+
+  // chart data
+  const [allMarketPrices, setAllMarketPrices] = useState<number[]>([]);
+  const [allTotalProfits, setAllTotalProfits] = useState<number[]>([]);
+  const [chartRounds, setChartRounds] = useState<number[]>([]);
 
   useEffect(() => {
     if (!socket) {
@@ -103,6 +110,10 @@ export default function CournotGamePage() {
         setRoomMarketPrice(marketPrice);
         setPlayerProductionForRound(userQuantity);
         setPlayerMoveToZeroAtRoundStart(false);
+        setTotalProfit(totalProfit);
+        setAllMarketPrices((prev) => [...prev, marketPrice]);
+        setAllTotalProfits((prev) => [...prev, totalProfit]);
+        setChartRounds((prev) => [...prev, roundNo]);
 
         // Use history from server if available
         if (history) {
@@ -495,6 +506,29 @@ export default function CournotGamePage() {
             </div>
           </div>
         </div>
+        {/* Charts Section - using the same background as above */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 pb-8">
+          <h2 className="text-2xl font-bold text-blue-800 mb-6">
+            Market Analytics
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <BasicChart
+              title="Market Price History"
+              yData={allMarketPrices}
+              xData={chartRounds}
+              xLabel="Round Number"
+              yLabel="Market Price ($)"
+            />
+
+            <BasicChart
+              title="Total Market Profit History"
+              yData={allTotalProfits}
+              xData={chartRounds}
+              xLabel="Round Number"
+              yLabel="Total Profit ($)"
+            />
+          </div>
+        </div>
       </div>
 
       {/* End of Round Modal */}
@@ -512,6 +546,30 @@ export default function CournotGamePage() {
         }}
         onNextRound={handleNextRound}
       />
+
+      {/* Charts Section - using the same background as above
+      <div className="relative z-10 max-w-7xl mx-auto px-4 pb-8">
+        <h2 className="text-2xl font-bold text-blue-800 mb-6">
+          Market Analytics
+        </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <BasicChart
+            title="Market Price History"
+            yData={allMarketPrices}
+            xData={chartRounds}
+            xLabel="Round Number"
+            yLabel="Market Price ($)"
+          />
+
+          <BasicChart
+            title="Total Market Profit History"
+            yData={allTotalProfits}
+            xData={chartRounds}
+            xLabel="Round Number"
+            yLabel="Total Profit ($)"
+          />
+        </div>
+      </div> */}
 
       {/* History Modal */}
       {showHistoryModal && (
