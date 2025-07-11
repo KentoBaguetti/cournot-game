@@ -751,7 +751,7 @@ io.on("connection", (socket: Socket) => {
   //   }
   // });
 
-  socket.on("player:move", ({ action }: { action: string }) => {
+  socket.on("player:move", ({ action }: { action: string | number }) => {
     const mainRoomId = parseRoomId(socket.roomId);
     const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
     if (!game) {

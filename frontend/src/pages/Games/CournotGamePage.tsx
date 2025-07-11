@@ -35,6 +35,8 @@ export default function CournotGamePage() {
   const [roomMarketPrice, setRoomMarketPrice] = useState<number>(0);
   const [playerProductionForRound, setPlayerProductionForRound] =
     useState<number>(0);
+  const [playerMoveToZeroAtRoundStart, setPlayerMoveToZeroAtRoundStart] =
+    useState<boolean>(false);
 
   // game config data
   const [x, setX] = useState<number>(0);
@@ -57,9 +59,14 @@ export default function CournotGamePage() {
       return;
     }
 
+    if (!playerMoveToZeroAtRoundStart) {
+      socket.emit("player:move", { action: 0 });
+      setPlayerMoveToZeroAtRoundStart(true);
+    }
+
     // emits
     if (userQuantity && isReady && sendReadyFlag) {
-      socket.emit("player:move", { action: userQuantity });
+      socket.emit("player:move", { action: userQuantity ?? 0 });
       setSendReadyFlag(false);
     }
 
@@ -95,6 +102,7 @@ export default function CournotGamePage() {
         setPrevRoundNo(roundNo);
         setRoomMarketPrice(marketPrice);
         setPlayerProductionForRound(userQuantity);
+        setPlayerMoveToZeroAtRoundStart(false);
 
         // Use history from server if available
         if (history) {
