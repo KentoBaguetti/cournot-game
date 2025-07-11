@@ -646,6 +646,7 @@ export class CournotGame extends BaseGame {
             marketPrice: marketPrice as number,
             costPerBarrel: costPerUnit as number,
             yourProfit: userProfit,
+            totalProfit: this.calculateTotalProfit(breakoutRoomId),
           };
 
           roomData.playerRoundHistory.get(user.userId)?.push(historyItem);
