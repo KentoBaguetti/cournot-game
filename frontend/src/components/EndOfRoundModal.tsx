@@ -11,6 +11,7 @@ interface EndOfRoundModalProps {
     individualProductCost: number;
     yourProfit: number;
     isLastRound: boolean;
+    totalProfit: number;
   };
   onNextRound: () => void;
 }
@@ -31,6 +32,7 @@ export function EndOfRoundModal({
     individualProductCost,
     yourProfit,
     isLastRound,
+    totalProfit,
   } = roundData;
 
   return (
@@ -119,6 +121,16 @@ export function EndOfRoundModal({
               </h3>
               <p className="text-2xl font-bold text-blue-900 mt-1">
                 ${yourProfit}
+              </p>
+            </div>
+            <div className="bg-blue-100 p-4 rounded-lg">
+              <h3 className="text-sm text-blue-800 font-medium">
+                Market
+                <br />
+                Profit
+              </h3>
+              <p className="text-2xl font-bold text-blue-900 mt-1">
+                ${totalProfit}
               </p>
             </div>
           </div>

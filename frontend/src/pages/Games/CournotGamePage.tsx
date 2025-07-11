@@ -15,6 +15,7 @@ interface RoundHistoryItem {
   marketPrice: number;
   costPerBarrel: number;
   yourProfit: number;
+  totalProfit: number;
 }
 
 export default function CournotGamePage() {
@@ -39,6 +40,7 @@ export default function CournotGamePage() {
   const [playerMoveToZeroAtRoundStart, setPlayerMoveToZeroAtRoundStart] =
     useState<boolean>(false);
   const [totalProfit, setTotalProfit] = useState<number>(0);
+  const [maxRounds, setMaxRounds] = useState<number>(0);
 
   // game config data
   const [x, setX] = useState<number>(0);
@@ -90,6 +92,7 @@ export default function CournotGamePage() {
       setNumberOfFirms(data.numberOfFirms);
       //setTotalProductionQuantity(data.totalProductionQuantity);
       setSimulatedQuantity(1);
+      setMaxRounds(data.maxRounds);
     });
 
     socket.on(
@@ -102,6 +105,7 @@ export default function CournotGamePage() {
         marketPrice,
         userQuantity,
         history,
+        totalProfit,
       }) => {
         setUserProfit(userProfit);
         setUserQuantity(userQuantity);
@@ -133,6 +137,7 @@ export default function CournotGamePage() {
               marketPrice: marketPrice,
               costPerBarrel: individualProductCost,
               yourProfit: userProfit,
+              totalProfit: totalProfit,
             };
 
             return [...prevHistory, newHistoryItem];
@@ -542,43 +547,20 @@ export default function CournotGamePage() {
           marketPrice: roomMarketPrice,
           individualProductCost: individualProductCost,
           yourProfit: userProfit,
-          isLastRound: roundNo >= 5,
+          isLastRound: roundNo >= maxRounds,
+          totalProfit: totalProfit,
         }}
         onNextRound={handleNextRound}
       />
 
-      {/* Charts Section - using the same background as above
-      <div className="relative z-10 max-w-7xl mx-auto px-4 pb-8">
-        <h2 className="text-2xl font-bold text-blue-800 mb-6">
-          Market Analytics
-        </h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <BasicChart
-            title="Market Price History"
-            yData={allMarketPrices}
-            xData={chartRounds}
-            xLabel="Round Number"
-            yLabel="Market Price ($)"
-          />
-
-          <BasicChart
-            title="Total Market Profit History"
-            yData={allTotalProfits}
-            xData={chartRounds}
-            xLabel="Round Number"
-            yLabel="Total Profit ($)"
-          />
-        </div>
-      </div> */}
-
       {/* History Modal */}
       {showHistoryModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-2xl max-w-5xl w-full overflow-hidden relative">
             {/* Close button */}
             <button
               onClick={() => setShowHistoryModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
+              className="absolute top-4 right-4 text-blue-300 hover:text-blue-100 transition-colors z-10"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -597,69 +579,93 @@ export default function CournotGamePage() {
             </button>
 
             {/* Header */}
-            <div className="bg-blue-700 text-white p-6">
+            <div className="bg-gradient-to-r from-blue-700 to-blue-600 text-white p-6">
               <div className="flex items-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-8 w-8 mr-3"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <h2 className="text-2xl font-bold">Round History</h2>
+                <div className="bg-white/20 p-2 rounded-lg mr-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-8 w-8"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold">Round History</h2>
+                  <p className="text-blue-200 mt-1">
+                    View your performance across all rounds
+                  </p>
+                </div>
               </div>
-              <p className="text-blue-200 mt-1">
-                View your performance across all rounds
-              </p>
             </div>
 
             {/* Body */}
             <div className="p-6">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto mb-6">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-blue-100">
-                      <th className="py-4 px-6 text-left text-blue-700 rounded-l-lg">
+                    <tr className="bg-gradient-to-r from-blue-600 to-blue-500 text-white">
+                      <th className="py-4 px-6 text-left rounded-tl-lg">
                         Round
                       </th>
-                      <th className="py-4 px-6 text-left text-blue-700">
-                        Total Production
-                      </th>
-                      <th className="py-4 px-6 text-left text-blue-700">
-                        Your Production
-                      </th>
-                      <th className="py-4 px-6 text-left text-blue-700">
-                        Market Price
-                      </th>
-                      <th className="py-4 px-6 text-left text-blue-700">
-                        Cost Per Barrel
-                      </th>
-                      <th className="py-4 px-6 text-left text-blue-700 rounded-r-lg">
-                        Your Profit
+                      <th className="py-4 px-6 text-left">Total Production</th>
+                      <th className="py-4 px-6 text-left">Your Production</th>
+                      <th className="py-4 px-6 text-left">Market Price</th>
+                      <th className="py-4 px-6 text-left">Cost Per Barrel</th>
+                      <th className="py-4 px-6 text-left">Your Profit</th>
+                      <th className="py-4 px-6 text-left rounded-tr-lg">
+                        Market Profit
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     {roundHistory.map((round, index) => (
-                      <tr key={index} className="border-b border-gray-100">
-                        <td className="py-4 px-6">{round.round}</td>
+                      <tr
+                        key={index}
+                        className="border-b border-gray-100 hover:bg-blue-50 transition-colors"
+                      >
+                        <td className="py-4 px-6 font-medium">{round.round}</td>
                         <td className="py-4 px-6">{round.totalProduction}</td>
                         <td className="py-4 px-6">{round.yourProduction}</td>
-                        <td className="py-4 px-6">${round.marketPrice}</td>
+                        <td className="py-4 px-6 font-medium text-blue-700">
+                          ${round.marketPrice}
+                        </td>
                         <td className="py-4 px-6">${round.costPerBarrel}</td>
-                        <td className="py-4 px-6">${round.yourProfit}</td>
+                        <td className="py-4 px-6 font-medium text-blue-700">
+                          ${round.yourProfit}
+                        </td>
+                        <td className="py-4 px-6 font-medium text-blue-700">
+                          ${round.totalProfit}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+
+              {/* Summary Section */}
+              {roundHistory.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-blue-50 rounded-xl p-5">
+                    <h3 className="text-sm text-blue-800 font-medium mb-2">
+                      Your Total Profit
+                    </h3>
+                    <p className="text-3xl font-bold text-blue-900">
+                      $
+                      {roundHistory
+                        .reduce((sum, round) => sum + round.yourProfit, 0)
+                        .toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Footer */}

@@ -206,7 +206,6 @@ export class CournotGame extends BaseGame {
       return;
     }
     if (player instanceof Student) {
-      console.log(`Setting player move: ${action} and type: ${typeof action}`);
       roomData.userMoves.set(player as Student, Number(action));
       // TODO: userMoves is not being set correctly
       // console.log(
@@ -444,6 +443,7 @@ export class CournotGame extends BaseGame {
       const profit = this.calculateProfitForFirm(user.userId);
       totalProfit += profit;
     }
+    console.log(`Total profit: ${totalProfit} no Error`);
     return totalProfit;
   }
 
