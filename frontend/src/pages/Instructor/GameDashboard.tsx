@@ -113,7 +113,13 @@ export default function GameDashboard() {
     socket.on("game:info", async (data) => {
       setRoomCode(data.roomId);
       setGameType(data.gameType);
-      setGameConfigs(data.gameConfigs);
+      setGameConfigs({
+        roundLength: data.gameConfigs.roundLength / 60,
+        maxRounds: data.gameConfigs.maxRounds,
+        maxPlayersPerRoom: data.gameConfigs.maxPlayersPerRoom,
+        x: data.gameConfigs.x,
+        y: data.gameConfigs.y,
+      });
       try {
         const res = await axios.post(
           `${config.apiUrl}/auth/setToken`,
