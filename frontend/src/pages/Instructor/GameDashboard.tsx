@@ -67,8 +67,22 @@ export default function GameDashboard() {
     navigate("/instructorDashboard");
   };
 
+  /**
+   * If gamePaused == false
+   * change state to true, send that truthy value to the server
+   * so the server sees that the game is paused and should stop all timers
+   *
+   * if gamePasued == true
+   * change state to false, send that falsey state to the server
+   * the server sees that the game is no longer paused and should resume all timers
+   *
+   */
   const handlePauseGame = (): void => {
     setGamePaused(!gamePaused);
+
+    if (!socket) return;
+
+    socket.emit("game:pauseButtonClicked", { pauseState: gamePaused });
     return;
   };
 
