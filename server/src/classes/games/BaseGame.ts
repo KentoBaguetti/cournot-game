@@ -459,6 +459,14 @@ export abstract class BaseGame {
     this.handleRoundEnd(breakoutRoomId);
   }
 
+  /**
+   * The pause and resume game functions should affect the timers of all breakout rooms
+   */
+
+  pauseGame(): void {}
+
+  resumeGame(): void {}
+
   handleRoundEnd(breakoutRoomId: string): void {
     const roomData = this.roomMap.get(breakoutRoomId);
     if (!roomData) {

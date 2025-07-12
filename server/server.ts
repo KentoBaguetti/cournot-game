@@ -671,6 +671,29 @@ io.on("connection", (socket: Socket) => {
     }
   });
 
+  socket.on(
+    "game:pauseButtonClicked",
+    ({ pauseState }: { pauseState: boolean }) => {
+      if (!socket.roomId) {
+        console.error(`No room id found for user: ${socket.userId}`);
+        return;
+      }
+      const roomId: string = parseRoomId(socket.roomId);
+
+      const game: BaseGame | undefined = gameManager.getGame(roomId);
+      if (!game) {
+        console.error(`Game with room id "${roomId}" not found`);
+        return;
+      }
+
+      if (pauseState) {
+        game.pauseGame();
+      } else {
+        game.resumeGame();
+      }
+    }
+  );
+
   socket.on("game:endGame", () => {
     const mainRoomId = parseRoomId(socket.roomId);
     const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
