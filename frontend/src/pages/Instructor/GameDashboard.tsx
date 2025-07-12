@@ -26,6 +26,7 @@ export default function GameDashboard() {
   const [gameConfigs, setGameConfigs] = useState<
     Record<string, string | number>
   >({});
+  const [gamePaused, setGamePaused] = useState<boolean>(false);
 
   const variableToEnglishMap = {
     roundLength: "Round Length (Minutes)",
@@ -64,6 +65,11 @@ export default function GameDashboard() {
     if (!socket) return;
     socket.emit("game:endGame");
     navigate("/instructorDashboard");
+  };
+
+  const handlePauseGame = (): void => {
+    setGamePaused(!gamePaused);
+    return;
   };
 
   // initial mounts
@@ -164,8 +170,11 @@ export default function GameDashboard() {
               >
                 {getButtonText()}
               </Button>
+              <Button variant="primary" onClick={handlePauseGame}>
+                {gamePaused ? "Continue Games" : "Pause Games"}
+              </Button>
               <Button
-                variant="primary"
+                variant="secondary"
                 onClick={handleNavigateToDisplayGameInfo}
               >
                 Display Join Code
