@@ -105,6 +105,12 @@ export default function CournotGamePage() {
         history,
         totalProfit,
       }) => {
+        console.log("[userRoundEnd] Received data:", {
+          roundNo,
+          userQuantity,
+          history,
+        });
+
         setUserProfit(userProfit);
         setUserQuantity(userQuantity);
         setTotalQuantity(totalQuantity);
@@ -125,7 +131,9 @@ export default function CournotGamePage() {
             const roundExists = prevHistory.some(
               (item) => item.round === roundNo
             );
-            if (roundExists) return prevHistory;
+            if (roundExists) {
+              return prevHistory;
+            }
 
             const newHistoryItem: RoundHistoryItem = {
               round: roundNo,

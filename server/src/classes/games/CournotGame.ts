@@ -519,6 +519,9 @@ export class CournotGame extends BaseGame {
       roomData.userReadyMap.set(user, false);
     }
 
+    // Save round data before sending to users
+    this.saveRoundData(breakoutRoomId);
+
     // send data to each user
     for (const user of roomData.users) {
       const userProfit = this.calculateProfitForFirm(user.userId);
@@ -544,8 +547,6 @@ export class CournotGame extends BaseGame {
         history: playerHistory,
       });
     }
-
-    this.saveRoundData(breakoutRoomId);
 
     const maxRounds = (this.gameConfigs as CournotGameConfigs).maxRounds;
 
@@ -585,14 +586,24 @@ export class CournotGame extends BaseGame {
       return;
     }
 
+    // Make sure all users have a move set, defaulting to 0 if undefined
+    for (const user of roomData.users) {
+      if (roomData.userMoves.get(user) === undefined) {
+        console.log(
+          `[saveRoundData] Setting default move 0 for user: ${user.userId}`
+        );
+        roomData.userMoves.set(user, 0);
+      }
+    }
+
     // create a new map for the round if it DNE
-    if (!roomData.roundHistory.has(roomData.roundNo)) {
-      roomData.roundHistory.set(roomData.roundNo, new Map());
+    if (!roomData.roundHistory.has(roomData.roundNo - 1)) {
+      roomData.roundHistory.set(roomData.roundNo - 1, new Map());
     }
 
     // create a new map for the room if it DNE
-    if (!roomData.roomHistory.has(roomData.roundNo)) {
-      roomData.roomHistory.set(roomData.roundNo, new Map());
+    if (!roomData.roomHistory.has(roomData.roundNo - 1)) {
+      roomData.roomHistory.set(roomData.roundNo - 1, new Map());
     }
 
     // Initialize playerRoundHistory if it doesn't exist
@@ -611,10 +622,10 @@ export class CournotGame extends BaseGame {
     roomEndRoundData.set("costPerUnit", costPerUnit);
     roomEndRoundData.set("monopolyProfit", this.calculateMonopolyProfit());
 
-    roomData.roomHistory.set(roomData.roundNo, roomEndRoundData);
+    roomData.roomHistory.set(roomData.roundNo - 1, roomEndRoundData);
 
     for (let [user, quantity] of roomData.userMoves.entries()) {
-      const roundData = roomData.roundHistory.get(roomData.roundNo);
+      const roundData = roomData.roundHistory.get(roomData.roundNo - 1);
       if (roundData) {
         if (quantity === undefined) {
           quantity = 0;
@@ -642,7 +653,7 @@ export class CournotGame extends BaseGame {
           }
 
           const historyItem = {
-            round: roomData.roundNo,
+            round: roomData.roundNo - 1,
             totalProduction: totalQuantity,
             yourProduction: quantity as number,
             marketPrice: marketPrice as number,
@@ -709,7 +720,18 @@ export class CournotGame extends BaseGame {
             roomData.playerRoundHistory.has(userId)
           ) {
             const playerHistory = roomData.playerRoundHistory.get(userId) || [];
+            console.log(
+              `[onPlayerReconnect] Sending history for player ${userId}, length: ${playerHistory.length}`
+            );
+            console.log(
+              `[onPlayerReconnect] History:`,
+              JSON.stringify(playerHistory)
+            );
             socket.emit("server:roundHistory", { history: playerHistory });
+          } else {
+            console.log(
+              `[onPlayerReconnect] No history found for player ${userId}`
+            );
           }
         }
       }
