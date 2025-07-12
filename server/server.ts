@@ -764,16 +764,6 @@ io.on("connection", (socket: Socket) => {
   ////////////////////////////////////////////////
   // socket endpoints for the jankenpo game
   ////////////////////////////////////////////////
-  // socket.on("player:move", ({ action }: { action: string }) => {
-  //   console.log("Player:move endpoint hit");
-  //   const mainRoomId = parseRoomId(socket.roomId);
-  //   const game: BaseGame | undefined = gameManager.getGame(mainRoomId);
-  //   if (game) {
-  //     game.onPlayerMove(socket, action);
-  //   } else {
-  //     console.log(`Game with room id "${mainRoomId}" does not exist`);
-  //   }
-  // });
 
   socket.on("player:move", ({ action }: { action: string | number }) => {
     const mainRoomId = parseRoomId(socket.roomId);

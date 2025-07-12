@@ -37,8 +37,6 @@ export default function CournotGamePage() {
   const [roomMarketPrice, setRoomMarketPrice] = useState<number>(0);
   const [playerProductionForRound, setPlayerProductionForRound] =
     useState<number>(0);
-  const [playerMoveToZeroAtRoundStart, setPlayerMoveToZeroAtRoundStart] =
-    useState<boolean>(false);
   const [totalProfit, setTotalProfit] = useState<number>(0);
   const [maxRounds, setMaxRounds] = useState<number>(0);
   const [gamePaused, setGamePaused] = useState<boolean>(false);
@@ -69,10 +67,10 @@ export default function CournotGamePage() {
       return;
     }
 
-    if (!playerMoveToZeroAtRoundStart) {
-      socket.emit("player:move", { action: 0 });
-      setPlayerMoveToZeroAtRoundStart(true);
-    }
+    // if (!playerMoveToZeroAtRoundStart) {
+    //   socket.emit("player:move", { action: 0 });
+    //   setPlayerMoveToZeroAtRoundStart(true);
+    // }
 
     // emits
     if (userQuantity && isReady && sendReadyFlag) {
@@ -91,7 +89,6 @@ export default function CournotGamePage() {
       setX(data.x);
       setIndividualProductCost(data.z);
       setNumberOfFirms(data.numberOfFirms);
-      //setTotalProductionQuantity(data.totalProductionQuantity);
       setSimulatedQuantity(1);
       setMaxRounds(data.maxRounds);
     });
@@ -114,7 +111,6 @@ export default function CournotGamePage() {
         setPrevRoundNo(roundNo);
         setRoomMarketPrice(marketPrice);
         setPlayerProductionForRound(userQuantity);
-        setPlayerMoveToZeroAtRoundStart(false);
         setTotalProfit(totalProfit);
         setAllMarketPrices((prev) => [...prev, marketPrice]);
         setAllTotalProfits((prev) => [...prev, totalProfit]);
@@ -217,7 +213,6 @@ export default function CournotGamePage() {
     roundNo,
     timeRemaining,
     sendReadyFlag,
-    playerMoveToZeroAtRoundStart,
   ]);
 
   // parse the remaining seconds into minutes and seconds

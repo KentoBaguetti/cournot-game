@@ -71,6 +71,7 @@ export class CournotGame extends BaseGame {
         socket.join(tempRoomId);
       }
       const player = new Student(socket, userId, username, tempRoomId);
+      player.setUserMove(0);
 
       // set the room map
       if (!this.roomMap.has(tempRoomId)) {
@@ -90,6 +91,7 @@ export class CournotGame extends BaseGame {
         // set the room map
         this.roomMap.get(tempRoomId)?.users.push(player);
         this.roomMap.get(tempRoomId)?.userReadyMap.set(player, false);
+        this.roomMap.get(tempRoomId)?.userMoves.set(player, 0);
       }
 
       // set the player map
@@ -207,15 +209,6 @@ export class CournotGame extends BaseGame {
     }
     if (player instanceof Student) {
       roomData.userMoves.set(player as Student, Number(action));
-      // TODO: userMoves is not being set correctly
-      // console.log(
-      //   "Room Data userMoves:",
-      //   Array.from(roomData.userMoves.entries()).map(([student, move]) => ({
-      //     studentId: student.userId,
-      //     nickname: student.getNickname(),
-      //     move,
-      //   }))
-      // );
     }
   }
 
@@ -393,13 +386,9 @@ export class CournotGame extends BaseGame {
     const totalQuantity: number[] =
       this.getRoomQuantitiesAsArray(breakoutRoomId);
 
-    const firmQuantity = roomData.userMoves.get(player as Student);
+    let firmQuantity = roomData.userMoves.get(player as Student);
     if (typeof firmQuantity !== "number") {
-      console.error("Firm quantity not found");
-      console.log(
-        `Firm quantity: ${firmQuantity} and type: ${typeof firmQuantity}`
-      );
-      return 0;
+      firmQuantity = 0;
     }
     const profit: number = profitFunction(
       (this.gameConfigs as CournotGameConfigs).x,
@@ -524,8 +513,6 @@ export class CournotGame extends BaseGame {
       return;
     }
 
-    this.saveRoundData(breakoutRoomId);
-
     roomData.roundNo++;
 
     for (const user of roomData.userReadyMap.keys()) {
@@ -537,9 +524,15 @@ export class CournotGame extends BaseGame {
       const userProfit = this.calculateProfitForFirm(user.userId);
       const playerHistory = roomData.playerRoundHistory.get(user.userId) || [];
 
+      let userQuantity = roomData.userMoves.get(user);
+      if (userQuantity === undefined) {
+        userQuantity = 0;
+        roomData.userMoves.set(user, 0);
+      }
+
       this.io.to(user.getSocket().id).emit("server:userRoundEnd", {
         userProfit,
-        userQuantity: roomData.userMoves.get(user),
+        userQuantity: userQuantity,
         roundNo: roomData.roundNo - 1,
         nextRoundNo: roomData.roundNo,
         marketPrice: this.calculateMarketPriceForRoom(breakoutRoomId),
@@ -551,6 +544,8 @@ export class CournotGame extends BaseGame {
         history: playerHistory,
       });
     }
+
+    this.saveRoundData(breakoutRoomId);
 
     const maxRounds = (this.gameConfigs as CournotGameConfigs).maxRounds;
 
@@ -573,7 +568,10 @@ export class CournotGame extends BaseGame {
       });
     }
 
-    roomData.userMoves.clear();
+    for (const user of roomData.users) {
+      roomData.userMoves.set(user, 0);
+      roomData.userReadyMap.set(user, false);
+    }
   }
 
   /**
@@ -618,6 +616,10 @@ export class CournotGame extends BaseGame {
     for (let [user, quantity] of roomData.userMoves.entries()) {
       const roundData = roomData.roundHistory.get(roomData.roundNo);
       if (roundData) {
+        if (quantity === undefined) {
+          quantity = 0;
+        }
+
         if (
           quantity !== undefined &&
           (typeof quantity === "number" || typeof quantity === "string")
