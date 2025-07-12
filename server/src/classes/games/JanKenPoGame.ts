@@ -73,7 +73,7 @@ export class JanKenPoGame extends BaseGame {
           roomHistory: new Map(),
           playerRoundHistory: new Map(),
           timerActive: false,
-          timerEndTime: 0,
+          remainingTime: 0,
           timerInterval: undefined,
         });
       } else {

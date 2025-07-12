@@ -83,7 +83,7 @@ export class CournotGame extends BaseGame {
           roomHistory: new Map(),
           playerRoundHistory: new Map(),
           timerActive: false,
-          timerEndTime: 0,
+          remainingTime: 0,
           timerInterval: undefined,
         });
       } else {
@@ -686,10 +686,7 @@ export class CournotGame extends BaseGame {
 
           // If there's an active timer, send its state
           if (roomData.timerActive) {
-            const remainingTime = Math.max(
-              0,
-              Math.floor((roomData.timerEndTime - Date.now()) / 1000)
-            );
+            const remainingTime = Math.max(0, roomData.remainingTime - 1000);
 
             socket.emit("server:timerUpdate", {
               remainingTime,

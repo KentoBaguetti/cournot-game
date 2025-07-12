@@ -223,12 +223,8 @@ export class SocketManager {
 
             // Send timer updates if active
             if (roomData.timerActive) {
-              const remainingTime = Math.max(
-                0,
-                Math.floor((roomData.timerEndTime - Date.now()) / 1000)
-              );
               socket.emit("server:timerUpdate", {
-                remainingTime,
+                remainingTime: roomData.remainingTime,
                 active: roomData.timerActive,
                 roundTimer: true,
               });

@@ -34,7 +34,7 @@ export interface BreakoutRoomData {
   roomHistory: Map<number, Map<string, number | string>>; // stored info for each room roundNo : total production, market price, cost per unit, your profit
   playerRoundHistory: Map<string, PlayerRoundHistoryItem[]>; // userId : array of round history items
   timerActive: boolean;
-  timerEndTime: number;
+  remainingTime: number;
   timerInterval?: NodeJS.Timeout;
 }
 
@@ -53,8 +53,8 @@ export interface JankenPoGameConfigs extends GameConfigs {
 export interface CournotGameConfigs extends GameConfigs {
   maxPlayersPerRoom: number;
   maxRounds: number;
-  roundLength: number;
-  x: number; // TODO: idfk what this is ask kasper
+  roundLength: number; // in seconds
+  x: number; // demand intercept
   y: number; // sunk cost
   z: number; // cost per product
 }

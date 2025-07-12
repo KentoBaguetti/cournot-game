@@ -27,7 +27,7 @@ export default function CreateCournotGamePage() {
     socket?.emit("host:createGame", {
       gameType: "cournot",
       gameConfigs: {
-        roundLength: roundLength || 1,
+        roundLength: roundLength * 60 || 60, // one minute is default
         maxRounds: maxRounds || 1,
         maxPlayersPerRoom: maxPlayersPerRoom || 1,
         x: x ?? 1,

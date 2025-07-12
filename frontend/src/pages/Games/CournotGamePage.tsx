@@ -41,6 +41,7 @@ export default function CournotGamePage() {
     useState<boolean>(false);
   const [totalProfit, setTotalProfit] = useState<number>(0);
   const [maxRounds, setMaxRounds] = useState<number>(0);
+  const [gamePaused, setGamePaused] = useState<boolean>(false);
 
   // game config data
   const [x, setX] = useState<number>(0);
@@ -161,7 +162,7 @@ export default function CournotGamePage() {
       setUserQuantity(0);
     });
 
-    socket.on("server:timerUpdate", ({ remainingTime, roundTimer }) => {
+    socket.on("server:timerUpdate", ({ remainingTime, roundTimer, paused }) => {
       setTimeRemaining(remainingTime);
       const [minutes, seconds] = parseTimeRemaining(remainingTime);
       setMinutes(minutes);
@@ -171,6 +172,9 @@ export default function CournotGamePage() {
       } else {
         setIsRoundTimerFlag(false);
       }
+
+      // Add state to track if game is paused
+      setGamePaused(paused);
     });
 
     // Handle reconnection and restore previous move
@@ -213,6 +217,7 @@ export default function CournotGamePage() {
     roundNo,
     timeRemaining,
     sendReadyFlag,
+    playerMoveToZeroAtRoundStart,
   ]);
 
   // parse the remaining seconds into minutes and seconds
@@ -313,7 +318,9 @@ export default function CournotGamePage() {
                 {/* Timer */}
                 <div
                   className={`px-4 py-2 rounded-xl font-medium flex items-center space-x-2 ${
-                    timeRemaining > 30
+                    gamePaused
+                      ? "bg-gray-500 text-white"
+                      : timeRemaining > 30
                       ? "bg-green-500 text-white"
                       : timeRemaining > 10
                       ? "bg-yellow-500 text-white"
@@ -334,7 +341,11 @@ export default function CournotGamePage() {
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  {isRoundTimerFlag ? null : <span>Round Begins in:</span>}
+                  {gamePaused ? (
+                    <span>Game Paused</span>
+                  ) : isRoundTimerFlag ? null : (
+                    <span>Round Begins in:</span>
+                  )}
                   <span>{formatTime(minutes, seconds)}</span>
                 </div>
               </div>

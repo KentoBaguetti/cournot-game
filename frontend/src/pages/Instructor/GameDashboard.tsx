@@ -78,12 +78,11 @@ export default function GameDashboard() {
    *
    */
   const handlePauseGame = (): void => {
-    setGamePaused(!gamePaused);
-
     if (!socket) return;
 
-    socket.emit("game:pauseButtonClicked", { pauseState: gamePaused });
-    return;
+    const newPauseState = !gamePaused;
+    socket.emit("game:pauseButtonClicked", { pauseState: newPauseState });
+    setGamePaused(newPauseState);
   };
 
   // initial mounts

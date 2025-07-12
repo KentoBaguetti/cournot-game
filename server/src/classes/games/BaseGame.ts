@@ -326,7 +326,7 @@ export abstract class BaseGame {
 
   startRoundTimer(
     breakoutRoomId: string,
-    durationMinutes: number,
+    durationSeconds: number,
     roundTimer: boolean
   ): void {
     const roomData = this.roomMap.get(breakoutRoomId);
@@ -340,33 +340,32 @@ export abstract class BaseGame {
       clearInterval(roomData.timerInterval);
     }
 
-    // let endTime = 0;
-    // if (roundTimer) {
-    //   endTime = Date.now() + durationMinutes * 60 * 1000;
-    // } else {
-    //   endTime = Date.now() + 15 * 1000;
-    // }
+    // Set the remaining time in seconds
+    let remainingTime = 0;
+    if (roundTimer) {
+      remainingTime = durationSeconds;
+    } else {
+      remainingTime = 15;
+    }
 
     // dev timer: 10 seconds
-    const endTime = Date.now() + 10 * 1000;
+    // const remainingTime = 10;
 
-    roomData.timerEndTime = endTime;
+    roomData.remainingTime = remainingTime;
     roomData.timerActive = true;
 
-    // inital broadcast of timer
-
+    // initial broadcast of timer
     if (roundTimer) {
       this.broadcastTimerUpdate(breakoutRoomId, roundTimer);
 
       const interval = setInterval(() => {
-        const remainingTime = Math.max(
-          0,
-          Math.floor((endTime - Date.now()) / 1000)
-        );
+        if (!roomData.timerActive) return;
+
+        roomData.remainingTime = Math.max(0, roomData.remainingTime - 1);
 
         this.broadcastTimerUpdate(breakoutRoomId, roundTimer);
 
-        if (remainingTime <= 0) {
+        if (roomData.remainingTime <= 0) {
           this.endRoundTimer(breakoutRoomId);
         }
       }, 1000);
@@ -376,14 +375,13 @@ export abstract class BaseGame {
       this.intermediateRoundTimer(breakoutRoomId, false);
 
       const interval = setInterval(() => {
-        const remainingTime = Math.max(
-          0,
-          Math.floor((endTime - Date.now()) / 1000)
-        );
+        if (!roomData.timerActive) return;
+
+        roomData.remainingTime = Math.max(0, roomData.remainingTime - 1);
 
         this.intermediateRoundTimer(breakoutRoomId, false);
 
-        if (remainingTime <= 0) {
+        if (roomData.remainingTime <= 0) {
           if (roomData.timerInterval) {
             clearInterval(roomData.timerInterval);
             roomData.timerInterval = undefined;
@@ -404,16 +402,14 @@ export abstract class BaseGame {
       return;
     }
 
-    const remainingTime = Math.max(
-      0,
-      Math.floor((roomData.timerEndTime - Date.now()) / 1000)
-    );
+    const remainingTime = roomData.remainingTime;
 
     // broadcast timer update to all students in the breakout room
     this.io.to(breakoutRoomId).emit("server:timerUpdate", {
       remainingTime,
       active: roomData.timerActive,
       roundTimer,
+      paused: !roomData.timerActive,
     });
   }
 
@@ -424,16 +420,14 @@ export abstract class BaseGame {
       return;
     }
 
-    const remainingTime = Math.max(
-      0,
-      Math.floor((roomData.timerEndTime - Date.now()) / 1000)
-    );
+    const remainingTime = roomData.remainingTime;
 
     // broadcast timer update to all students in the breakout room
     this.io.to(breakoutRoomId).emit("server:timerUpdate", {
       remainingTime,
       active: roomData.timerActive,
       roundTimer,
+      paused: !roomData.timerActive,
     });
   }
 
@@ -459,13 +453,69 @@ export abstract class BaseGame {
     this.handleRoundEnd(breakoutRoomId);
   }
 
+  // TODO: flag so i can find pause/unpause methods
   /**
    * The pause and resume game functions should affect the timers of all breakout rooms
    */
 
-  pauseGame(): void {}
+  pauseGame(): void {
+    for (const breakoutRoomId of this.roomMap.keys()) {
+      const roomData = this.roomMap.get(breakoutRoomId);
+      if (roomData) {
+        roomData.timerActive = false;
 
-  resumeGame(): void {}
+        // Clear the interval to stop the timer
+        if (roomData.timerInterval) {
+          clearInterval(roomData.timerInterval);
+          roomData.timerInterval = undefined;
+        }
+
+        // Send an immediate update to clients with active=false and paused=true
+        this.io.to(breakoutRoomId).emit("server:timerUpdate", {
+          remainingTime: roomData.remainingTime,
+          active: false,
+          roundTimer: true,
+          paused: true,
+        });
+      }
+    }
+  }
+
+  resumeGame(): void {
+    for (const breakoutRoomId of this.roomMap.keys()) {
+      const roomData = this.roomMap.get(breakoutRoomId);
+      if (roomData) {
+        // Set timer as active
+        roomData.timerActive = true;
+
+        // Start a new timer interval using the existing remaining time
+        const interval = setInterval(() => {
+          if (!roomData.timerActive) return;
+
+          // Decrease remaining time by 1 second
+          roomData.remainingTime = Math.max(0, roomData.remainingTime - 1);
+
+          // Send timer update to clients
+          this.broadcastTimerUpdate(breakoutRoomId, true);
+
+          // Check if timer has expired
+          if (roomData.remainingTime <= 0) {
+            this.endRoundTimer(breakoutRoomId);
+          }
+        }, 1000);
+
+        roomData.timerInterval = interval;
+
+        // Send an immediate update to clients
+        this.io.to(breakoutRoomId).emit("server:timerUpdate", {
+          remainingTime: roomData.remainingTime,
+          active: true,
+          roundTimer: true,
+          paused: false,
+        });
+      }
+    }
+  }
 
   handleRoundEnd(breakoutRoomId: string): void {
     const roomData = this.roomMap.get(breakoutRoomId);
