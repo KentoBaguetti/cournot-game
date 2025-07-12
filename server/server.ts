@@ -674,9 +674,6 @@ io.on("connection", (socket: Socket) => {
   socket.on(
     "game:pauseButtonClicked",
     ({ pauseState }: { pauseState: boolean }) => {
-      console.log(
-        `Pause endpoint hit for room: ${socket.roomId}, desired pause state: ${pauseState}`
-      );
       if (!socket.roomId) {
         console.error(`No room id found for user: ${socket.userId}`);
         return;

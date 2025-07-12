@@ -453,24 +453,17 @@ export abstract class BaseGame {
     this.handleRoundEnd(breakoutRoomId);
   }
 
-  // TODO: flag so i can find pause/unpause methods
-  /**
-   * The pause and resume game functions should affect the timers of all breakout rooms
-   */
-
   pauseGame(): void {
     for (const breakoutRoomId of this.roomMap.keys()) {
       const roomData = this.roomMap.get(breakoutRoomId);
       if (roomData) {
         roomData.timerActive = false;
 
-        // Clear the interval to stop the timer
         if (roomData.timerInterval) {
           clearInterval(roomData.timerInterval);
           roomData.timerInterval = undefined;
         }
 
-        // Send an immediate update to clients with active=false and paused=true
         this.io.to(breakoutRoomId).emit("server:timerUpdate", {
           remainingTime: roomData.remainingTime,
           active: false,
@@ -485,20 +478,15 @@ export abstract class BaseGame {
     for (const breakoutRoomId of this.roomMap.keys()) {
       const roomData = this.roomMap.get(breakoutRoomId);
       if (roomData) {
-        // Set timer as active
         roomData.timerActive = true;
 
-        // Start a new timer interval using the existing remaining time
         const interval = setInterval(() => {
           if (!roomData.timerActive) return;
 
-          // Decrease remaining time by 1 second
           roomData.remainingTime = Math.max(0, roomData.remainingTime - 1);
 
-          // Send timer update to clients
           this.broadcastTimerUpdate(breakoutRoomId, true);
 
-          // Check if timer has expired
           if (roomData.remainingTime <= 0) {
             this.endRoundTimer(breakoutRoomId);
           }
