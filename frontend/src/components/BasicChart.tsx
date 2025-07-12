@@ -58,7 +58,7 @@ export default function BasicChart({
         pointHoverBackgroundColor: "#bfdbfe", // blue-200
         pointHoverBorderColor: "#1e40af", // blue-800
         pointHoverBorderWidth: 2,
-        tension: 0.2, // slight curve for more modern look
+        tension: 0,
         fill: true,
       },
     ],
